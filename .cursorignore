@@ -1,0 +1,44 @@
+# Cursor ignore file for MediMitra project
+# This allows the agent to access .env.local files while maintaining security
+
+# Allow access to environment files
+!.env.local
+!.env.example
+!.env.template
+
+# Still ignore other sensitive files
+.env
+.env.production
+.env.staging
+.env.development
+
+# Ignore build artifacts and dependencies
+node_modules/
+.next/
+dist/
+build/
+target/
+
+# Ignore logs and temporary files
+*.log
+*.tmp
+*.temp
+
+# Ignore OS generated files
+.DS_Store
+Thumbs.db
+
+# Ignore IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Ignore git files
+.git/
+.gitignore
+
+# Ignore package lock files (but allow package.json)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
