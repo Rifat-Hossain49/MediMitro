@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { auth } from '@/auth'
 import Providers from '@/components/Providers'
+import { UserProvider } from '@/contexts/UserContext'
 import Footer from '@/components/Footer'
 import Sidebar from '@/components/Sidebar'
 import Navigation from '@/components/Navigation'
@@ -26,16 +27,18 @@ export default async function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <Providers session={session}>
-          <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
-            <Navigation />
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex gap-6">
-              {session?.user && <Sidebar />}
-              <main className={session?.user ? "flex-1" : "w-full"}>
-                {children}
-              </main>
+          <UserProvider>
+            <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
+              <Navigation />
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex gap-6">
+                {session?.user && <Sidebar />}
+                <main className={session?.user ? "flex-1" : "w-full"}>
+                  {children}
+                </main>
+              </div>
             </div>
-          </div>
-          <Footer />
+            <Footer />
+          </UserProvider>
         </Providers>
       </body>
     </html>

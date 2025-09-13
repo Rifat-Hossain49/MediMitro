@@ -1,36 +1,21 @@
-# MediMitra Authentication Setup Guide
+# MediMitra Frontend Setup Guide
 
-## 1. Neon PostgreSQL Database Setup
+## 1. Environment Configuration
 
-### Step 1: Create Neon Account
-1. Go to [Neon Console](https://console.neon.tech/)
-2. Sign up for a free account
-3. Create a new project named "medimitra"
-
-### Step 2: Get Database URLs
-1. In your Neon project dashboard, go to "Connection Details"
-2. Copy both the **Database URL** and **Direct URL**
-3. The URLs should look like:
-   ```
-   DATABASE_URL="postgresql://username:password@ep-xxx-xxx.us-east-2.aws.neon.tech/medimitra?sslmode=require"
-   DIRECT_URL="postgresql://username:password@ep-xxx-xxx.us-east-2.aws.neon.tech/medimitra?sslmode=require"
-   ```
-
-### Step 3: Create Environment File
+### Step 1: Create Environment File
 1. Copy `.env.example` to `.env.local`:
    ```bash
    cp .env.example .env.local
    ```
 
-2. Update `.env.local` with your Neon database URLs and other credentials:
+2. Update `.env.local` with your configuration:
    ```env
    # NextAuth.js Configuration
    NEXTAUTH_URL=http://localhost:3000
    NEXTAUTH_SECRET=your-random-secret-key-here
 
-   # Neon PostgreSQL Database (Replace with your actual URLs)
-   DATABASE_URL="postgresql://username:password@ep-xxx-xxx.us-east-2.aws.neon.tech/medimitra?sslmode=require"
-   DIRECT_URL="postgresql://username:password@ep-xxx-xxx.us-east-2.aws.neon.tech/medimitra?sslmode=require"
+   # Spring Backend API URL
+   NEXT_PUBLIC_API_URL=http://localhost:8080/api
 
    # OAuth Providers (Optional - for social login)
    GOOGLE_CLIENT_ID=your-google-client-id
@@ -40,24 +25,15 @@
    GITHUB_CLIENT_SECRET=your-github-client-secret
    ```
 
-### Step 4: Generate NextAuth Secret
+### Step 2: Generate NextAuth Secret
 Run this command to generate a secure secret:
 ```bash
 openssl rand -base64 32
 ```
 Add the output to `NEXTAUTH_SECRET` in your `.env.local` file.
 
-### Step 5: Initialize Database
-```bash
-# Generate Prisma client
-npx prisma generate
-
-# Push schema to database
-npx prisma db push
-
-# (Optional) Seed with sample data
-npx prisma db seed
-```
+### Step 3: Backend Integration
+This frontend is designed to work with a Spring Boot backend using JDBC for data persistence. Ensure your Spring backend is running on the configured API URL.
 
 ## 2. OAuth Providers Setup (Optional)
 
@@ -90,10 +66,10 @@ Visit `http://localhost:3000` to see your application!
 ## 4. Authentication Features
 
 ### Available Authentication Methods:
-- ✅ **Email/Password** - Traditional registration and login
+- 🚧 **Email/Password** - To be implemented via Spring backend API
 - ✅ **Google OAuth** - Social login with Google
 - ✅ **GitHub OAuth** - Social login with GitHub
-- ✅ **Role-based Access** - Patient, Doctor, Pharmacist roles
+- 🚧 **Role-based Access** - To be implemented via Spring backend
 - ✅ **Protected Routes** - Automatic redirect for unauthenticated users
 - ✅ **Session Management** - Secure JWT sessions
 
@@ -103,14 +79,14 @@ Visit `http://localhost:3000` to see your application!
 - **Pharmacist**: Access to medication management, prescription fulfillment
 - **Admin**: Full system access (can be added later)
 
-## 5. Database Schema
+## 5. Backend Integration
 
-The application includes a comprehensive healthcare database schema with:
+The frontend communicates with a Spring Boot backend for data persistence:
 
-- **User Management**: Users, accounts, sessions
-- **Healthcare Data**: Appointments, prescriptions, medical records
-- **Provider Data**: Doctors, pharmacies, medications
-- **Emergency Services**: Emergency contacts, ambulance services
+- **User Management**: Handled by Spring Security and JDBC
+- **Healthcare Data**: Managed via Spring Data JDBC repositories
+- **API Communication**: RESTful endpoints for all operations
+- **Database Schema**: Defined in Spring backend using JDBC/SQL
 
 ## 6. Security Features
 
@@ -128,14 +104,15 @@ For production deployment:
 2. Use strong, unique `NEXTAUTH_SECRET`
 3. Configure production OAuth callback URLs
 4. Set up proper SSL certificates
-5. Configure Neon database for production scaling
+5. Update `NEXT_PUBLIC_API_URL` to your production Spring backend URL
 
 ## Troubleshooting
 
 ### Common Issues:
-1. **Database Connection**: Ensure Neon URLs are correct and database is accessible
+1. **Backend Connection**: Ensure Spring backend is running and accessible
 2. **OAuth Errors**: Check callback URLs match exactly
 3. **Build Errors**: Run `npm run build` to check for TypeScript errors
 4. **Environment Variables**: Ensure all required variables are set in `.env.local`
+5. **API Errors**: Check that Spring backend endpoints are properly configured
 
-Need help? Check the [NextAuth.js documentation](https://next-auth.js.org/) or [Neon documentation](https://neon.tech/docs/).
+Need help? Check the [NextAuth.js documentation](https://next-auth.js.org/) or [Spring Boot documentation](https://spring.io/projects/spring-boot).

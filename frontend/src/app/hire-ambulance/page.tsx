@@ -162,46 +162,104 @@ export default function HireAmbulancePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-orange-50">
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-8"
-        >
-          <div className="flex items-center justify-center mb-4">
-            <div className="p-3 bg-red-500 rounded-full">
-              <Truck className="w-8 h-8 text-white" />
+    <div className="min-h-screen bg-gray-50">
+      {/* Enhanced Hero Header */}
+      <div className="bg-gradient-to-br from-red-600 via-orange-500 to-red-700 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="py-12"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center space-x-4 mb-4">
+                  <div className="p-4 bg-white bg-opacity-20 rounded-2xl backdrop-blur-sm">
+                    <Truck className="w-10 h-10 text-white" />
+                  </div>
+                  <div>
+                    <h1 className="text-4xl font-bold">Emergency Ambulance Service</h1>
+                    <p className="text-xl text-red-100 mt-2">Professional medical transportation when every second counts</p>
+                  </div>
+                </div>
+                
+                {/* Emergency Stats */}
+                <div className="flex items-center space-x-8 mt-6">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                    <span className="text-red-100 font-medium">24/7 Available</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Clock className="w-4 h-4 text-orange-200" />
+                    <span className="text-orange-100">Avg response: 5-8 min</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Shield className="w-4 h-4 text-yellow-200" />
+                    <span className="text-yellow-100">Licensed EMTs</span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Emergency Button */}
+              <div className="hidden lg:block">
+                <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-6 text-center">
+                  <button className="bg-red-500 hover:bg-red-600 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all shadow-lg hover:shadow-xl transform hover:scale-105">
+                    🚨 CALL 911
+                  </button>
+                  <p className="text-red-200 text-sm mt-2">For life-threatening emergencies</p>
+                </div>
+              </div>
             </div>
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900">Emergency Ambulance</h1>
-          <p className="text-gray-600 mt-2">Quick, reliable, professional medical transportation</p>
-        </motion.div>
+          </motion.div>
+        </div>
+      </div>
 
-        {/* Progress Bar */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        {/* Enhanced Progress Bar */}
         <div className="mb-8">
-          <div className="flex items-center justify-between text-sm text-gray-700 mb-2">
-            <span className={step === 'location' ? 'text-red-600 font-medium' : ''}>Pickup</span>
-            <span className={step === 'destination' ? 'text-red-600 font-medium' : ''}>Destination</span>
-            <span className={step === 'ambulance' ? 'text-red-600 font-medium' : ''}>Ambulance</span>
-            <span className={step === 'details' ? 'text-red-600 font-medium' : ''}>Details</span>
-            <span className={step === 'payment' ? 'text-red-600 font-medium' : ''}>Payment</span>
-            <span className={step === 'tracking' ? 'text-red-600 font-medium' : ''}>Tracking</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
-              className="bg-red-500 h-2 rounded-full transition-all duration-500"
-              style={{ 
-                width: `${
-                  step === 'location' ? '16%' : 
-                  step === 'destination' ? '33%' : 
-                  step === 'ambulance' ? '50%' : 
-                  step === 'details' ? '66%' : 
-                  step === 'payment' ? '83%' : '100%'
-                }%` 
-              }}
-            />
+          <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-100 p-6">
+            <div className="flex items-center justify-between mb-4">
+              {[
+                { id: 'location', label: 'Pickup', icon: MapPin },
+                { id: 'destination', label: 'Destination', icon: Heart },
+                { id: 'ambulance', label: 'Ambulance', icon: Truck },
+                { id: 'details', label: 'Details', icon: User },
+                { id: 'payment', label: 'Payment', icon: CreditCard },
+                { id: 'tracking', label: 'Tracking', icon: Activity }
+              ].map((stepItem, index) => (
+                <div key={stepItem.id} className="flex flex-col items-center">
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
+                    step === stepItem.id 
+                      ? 'bg-red-500 text-white shadow-lg scale-110' 
+                      : index < ['location', 'destination', 'ambulance', 'details', 'payment', 'tracking'].indexOf(step)
+                      ? 'bg-green-500 text-white'
+                      : 'bg-gray-200 text-gray-400'
+                  }`}>
+                    <stepItem.icon className="w-5 h-5" />
+                  </div>
+                  <span className={`text-sm mt-2 font-medium ${
+                    step === stepItem.id ? 'text-red-600' : 'text-gray-500'
+                  }`}>
+                    {stepItem.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-3">
+              <div 
+                className="bg-gradient-to-r from-red-500 to-orange-500 h-3 rounded-full transition-all duration-500 shadow-sm"
+                style={{ 
+                  width: `${
+                    step === 'location' ? '16%' : 
+                    step === 'destination' ? '33%' : 
+                    step === 'ambulance' ? '50%' : 
+                    step === 'details' ? '66%' : 
+                    step === 'payment' ? '83%' : '100%'
+                  }%` 
+                }}
+              />
+            </div>
           </div>
         </div>
 
@@ -216,9 +274,14 @@ export default function HireAmbulancePage() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 20 }}
-                  className="bg-white rounded-xl shadow-lg border border-gray-100 p-6"
+                  className="bg-gradient-to-br from-white to-blue-50 rounded-2xl shadow-xl border-2 border-blue-100 p-8"
                 >
-                  <h2 className="text-xl font-semibold text-gray-900 mb-6">Pickup Location</h2>
+                  <div className="flex items-center space-x-3 mb-6">
+                    <div className="p-3 bg-blue-100 rounded-xl">
+                      <MapPin className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-900">Pickup Location</h2>
+                  </div>
                   
                   {/* Map Placeholder */}
                   <div className="h-64 bg-gradient-to-br from-blue-100 to-green-100 rounded-lg mb-6 flex items-center justify-center relative overflow-hidden">
@@ -251,16 +314,16 @@ export default function HireAmbulancePage() {
                       onClick={() => {
                         setPickupLocation('Current GPS Location - 123 Emergency St, Downtown')
                       }}
-                      className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+                      className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-4 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
                     >
-                      <NavIcon className="w-4 h-4" />
+                      <NavIcon className="w-5 h-5" />
                       Use Current Location
                     </button>
 
                     {pickupLocation && (
                       <button
                         onClick={() => setStep('destination')}
-                        className="w-full bg-red-600 text-white px-4 py-3 rounded-lg hover:bg-red-700 transition-colors font-semibold"
+                        className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-4 rounded-xl hover:from-red-600 hover:to-red-700 transition-all font-bold shadow-lg hover:shadow-xl transform hover:scale-105"
                       >
                         Confirm Pickup Location
                       </button>
@@ -276,9 +339,14 @@ export default function HireAmbulancePage() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 20 }}
-                  className="bg-white rounded-xl shadow-lg border border-gray-100 p-6"
+                  className="bg-gradient-to-br from-white to-red-50 rounded-2xl shadow-xl border-2 border-red-100 p-8"
                 >
-                  <h2 className="text-xl font-semibold text-gray-900 mb-6">Where to?</h2>
+                  <div className="flex items-center space-x-3 mb-6">
+                    <div className="p-3 bg-red-100 rounded-xl">
+                      <Heart className="w-6 h-6 text-red-600" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-900">Destination Hospital</h2>
+                  </div>
                   
                   <div className="space-y-4">
                     <div>
@@ -307,16 +375,20 @@ export default function HireAmbulancePage() {
                           'Regional Trauma Center',
                           'Children\'s Hospital'
                         ].map(hospital => (
-                          <button
+                          <motion.button
                             key={hospital}
                             onClick={() => setDestination(hospital)}
-                            className="p-3 text-left border border-gray-200 rounded-lg hover:border-red-300 hover:bg-red-50 transition-colors text-gray-900"
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="group p-4 text-left border-2 border-red-200 rounded-xl hover:border-red-400 hover:bg-red-50 transition-all bg-white shadow-md hover:shadow-lg"
                           >
-                            <div className="flex items-center gap-2">
-                              <Heart className="w-4 h-4 text-red-500" />
-                              <span className="text-sm font-medium">{hospital}</span>
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-red-100 rounded-lg group-hover:bg-red-200 transition-colors">
+                                <Heart className="w-5 h-5 text-red-600" />
+                              </div>
+                              <span className="font-semibold text-gray-900">{hospital}</span>
                             </div>
-                          </button>
+                          </motion.button>
                         ))}
                       </div>
                     </div>
@@ -348,19 +420,24 @@ export default function HireAmbulancePage() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 20 }}
-                  className="bg-white rounded-xl shadow-lg border border-gray-100 p-6"
+                  className="bg-gradient-to-br from-white to-orange-50 rounded-2xl shadow-xl border-2 border-orange-100 p-8"
                 >
-                  <h2 className="text-xl font-semibold text-gray-900 mb-6">Choose Ambulance Type</h2>
+                  <div className="flex items-center space-x-3 mb-6">
+                    <div className="p-3 bg-orange-100 rounded-xl">
+                      <Truck className="w-6 h-6 text-orange-600" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-900">Choose Ambulance Type</h2>
+                  </div>
                   
                   <div className="space-y-4">
                     {ambulanceTypes.map(ambulance => (
                       <motion.div
                         key={ambulance.id}
                         whileHover={{ scale: 1.02 }}
-                        className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                        className={`group p-6 border-2 rounded-xl cursor-pointer transition-all shadow-lg hover:shadow-xl ${
                           selectedAmbulance?.id === ambulance.id
-                            ? 'border-red-500 bg-red-50'
-                            : 'border-gray-200 hover:border-red-300'
+                            ? 'border-red-500 bg-gradient-to-r from-red-50 to-orange-50 shadow-red-200'
+                            : 'border-gray-200 hover:border-orange-300 bg-white hover:bg-orange-50'
                         }`}
                         onClick={() => setSelectedAmbulance(ambulance)}
                       >
@@ -742,16 +819,21 @@ export default function HireAmbulancePage() {
             </AnimatePresence>
           </div>
 
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
+          {/* Enhanced Sidebar */}
+          <div className="lg:col-span-1 space-y-6">
             {/* Trip Summary */}
             {(step === 'ambulance' || step === 'details' || step === 'payment') && selectedAmbulance && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 mb-6"
+                className="bg-gradient-to-br from-white to-green-50 rounded-2xl shadow-xl border-2 border-green-100 p-6"
               >
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Trip Summary</h3>
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="p-3 bg-green-100 rounded-xl">
+                    <Route className="w-6 h-6 text-green-600" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900">Trip Summary</h3>
+                </div>
                 
                 <div className="space-y-4">
                   <div className="flex items-start gap-3">
@@ -809,32 +891,87 @@ export default function HireAmbulancePage() {
               </motion.div>
             )}
 
-            {/* Emergency Contacts */}
+            {/* Enhanced Emergency Contacts */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-red-50 rounded-xl border border-red-200 p-6"
+              className="bg-gradient-to-br from-red-600 via-orange-500 to-red-700 rounded-2xl p-6 text-white shadow-2xl"
             >
-              <h3 className="text-lg font-semibold text-red-800 mb-4">Emergency Contacts</h3>
+              <div className="flex items-center space-x-3 mb-6">
+                <div className="p-3 bg-white bg-opacity-20 rounded-xl backdrop-blur-sm">
+                  <PhoneCall className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-xl font-bold">Emergency Contacts</h3>
+              </div>
+              
               <div className="space-y-3">
-                <button className="w-full flex items-center gap-2 bg-red-600 text-white px-4 py-3 rounded-lg hover:bg-red-700 transition-colors">
-                  <PhoneCall className="w-4 h-4" />
-                  Emergency: 911
+                <button className="w-full flex items-center gap-3 bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-4 rounded-xl transition-all backdrop-blur-sm border border-white border-opacity-20 font-semibold">
+                  <div className="p-2 bg-red-500 rounded-lg">
+                    <PhoneCall className="w-4 h-4 text-white" />
+                  </div>
+                  <div className="text-left">
+                    <div className="font-bold">🚨 Emergency: 911</div>
+                    <div className="text-sm text-red-100">Life-threatening emergencies</div>
+                  </div>
                 </button>
-                <button className="w-full flex items-center gap-2 bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors">
-                  <PhoneCall className="w-4 h-4" />
-                  MediMitro Support: 1-800-AMBULANCE
+                
+                <button className="w-full flex items-center gap-3 bg-white bg-opacity-10 hover:bg-opacity-20 text-white px-4 py-4 rounded-xl transition-all backdrop-blur-sm border border-white border-opacity-20">
+                  <div className="p-2 bg-blue-500 rounded-lg">
+                    <PhoneCall className="w-4 h-4 text-white" />
+                  </div>
+                  <div className="text-left">
+                    <div className="font-semibold">MediMitra Support</div>
+                    <div className="text-sm text-orange-100">1-800-AMBULANCE</div>
+                  </div>
                 </button>
-                <button className="w-full flex items-center gap-2 bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition-colors">
-                  <PhoneCall className="w-4 h-4" />
-                  Medical Helpline: 1-800-MEDHELP
+                
+                <button className="w-full flex items-center gap-3 bg-white bg-opacity-10 hover:bg-opacity-20 text-white px-4 py-4 rounded-xl transition-all backdrop-blur-sm border border-white border-opacity-20">
+                  <div className="p-2 bg-green-500 rounded-lg">
+                    <Stethoscope className="w-4 h-4 text-white" />
+                  </div>
+                  <div className="text-left">
+                    <div className="font-semibold">Medical Helpline</div>
+                    <div className="text-sm text-orange-100">1-800-MEDHELP</div>
+                  </div>
                 </button>
               </div>
               
-              <div className="mt-4 pt-4 border-t border-red-200">
-                <p className="text-sm text-red-700">
-                  <strong>Note:</strong> For life-threatening emergencies, call 911 immediately.
-                </p>
+              <div className="mt-6 pt-4 border-t border-white border-opacity-20">
+                <div className="bg-white bg-opacity-10 rounded-xl p-4 backdrop-blur-sm">
+                  <div className="flex items-start space-x-2">
+                    <AlertTriangle className="w-5 h-5 text-yellow-300 mt-0.5" />
+                    <p className="text-sm text-red-100">
+                      <strong className="text-white">Critical Note:</strong> For immediate life-threatening emergencies, call 911 first, then use our service for non-critical transport needs.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Service Features */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-gradient-to-br from-white to-blue-50 rounded-2xl shadow-xl border-2 border-blue-100 p-6"
+            >
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Why Choose MediMitra?</h3>
+              <div className="space-y-3">
+                <div className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-sm text-gray-700">Licensed EMT professionals</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <span className="text-sm text-gray-700">GPS real-time tracking</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                  <span className="text-sm text-gray-700">Insurance accepted</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                  <span className="text-sm text-gray-700">24/7 availability</span>
+                </div>
               </div>
             </motion.div>
           </div>

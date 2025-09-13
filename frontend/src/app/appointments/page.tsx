@@ -1,12 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { 
   Calendar, 
   Clock, 
   MapPin, 
   User, 
-  Plus, 
   Search,
   Filter,
   Phone,
@@ -27,170 +26,60 @@ import {
   Clock3,
   ChevronDown,
   X,
-  Eye
+  Eye,
+  Loader2
 } from 'lucide-react'
 
-// Mock data
-const hospitals = [
-  {
-    id: 1,
-    name: 'City General Hospital',
-    location: 'Downtown Medical District',
-    departments: ['Cardiology', 'Neurology', 'Oncology', 'Emergency', 'Pediatrics']
-  },
-  {
-    id: 2,
-    name: 'MediCare Center',
-    location: 'Uptown Health Complex',
-    departments: ['Dermatology', 'Orthopedics', 'General Medicine', 'ENT']
-  },
-  {
-    id: 3,
-    name: 'Wellness Hospital',
-    location: 'East Side Medical Hub',
-    departments: ['Psychiatry', 'Gastroenterology', 'Ophthalmology', 'Radiology']
+// Types
+interface Doctor {
+  id: string
+  userId: string
+  licenseNumber: string
+  specialization: string
+  experience: number
+  hospital: string
+  consultationFee: number
+  availability: string
+  rating: number
+  totalRatings: number
+  userInfo?: {
+    id: string
+    name: string
+    email: string
+    image?: string
   }
-]
+}
 
-const doctors = [
-  {
-    id: 1,
-    name: 'Dr. Sarah Johnson',
-    specialty: 'Cardiology',
-    department: 'Cardiology',
-    hospital: 'City General Hospital',
-    hospitalId: 1,
-    rating: 4.8,
-    reviewCount: 156,
-    experience: '15 years',
-    education: 'MD - Harvard Medical School',
-    languages: ['English', 'Spanish'],
-    specializations: ['Heart Surgery', 'Interventional Cardiology', 'Echocardiography'],
-    consultationFee: 150,
-    location: 'City General Hospital, Room 204',
-    image: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150&h=150&fit=crop&crop=face',
-    availableDays: ['Monday', 'Tuesday', 'Wednesday', 'Friday'],
-    shifts: [
-      { day: 'Monday', times: ['9:00 AM', '10:00 AM', '11:00 AM', '2:00 PM', '3:00 PM'] },
-      { day: 'Tuesday', times: ['9:00 AM', '10:00 AM', '2:00 PM', '3:00 PM', '4:00 PM'] },
-      { day: 'Wednesday', times: ['10:00 AM', '11:00 AM', '2:00 PM'] },
-      { day: 'Friday', times: ['9:00 AM', '10:00 AM', '11:00 AM', '2:00 PM', '3:00 PM', '4:00 PM'] }
-    ],
-    aboutText: 'Dr. Sarah Johnson is a leading cardiologist with over 15 years of experience in treating complex heart conditions. She specializes in minimally invasive cardiac procedures and has performed over 2000 successful surgeries.',
-    conditions: ['Heart Disease', 'Hypertension', 'Arrhythmia', 'Heart Failure', 'Chest Pain']
-  },
-  {
-    id: 2,
-    name: 'Dr. Michael Chen',
-    specialty: 'Dermatology',
-    department: 'Dermatology',
-    hospital: 'MediCare Center',
-    hospitalId: 2,
-    rating: 4.9,
-    reviewCount: 203,
-    experience: '12 years',
-    education: 'MD - Johns Hopkins University',
-    languages: ['English', 'Mandarin'],
-    specializations: ['Skin Cancer Treatment', 'Cosmetic Dermatology', 'Pediatric Dermatology'],
-    consultationFee: 120,
-    location: 'MediCare Center, Suite 301',
-    image: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=150&h=150&fit=crop&crop=face',
-    availableDays: ['Monday', 'Wednesday', 'Thursday', 'Saturday'],
-    shifts: [
-      { day: 'Monday', times: ['10:00 AM', '11:00 AM', '2:00 PM', '3:00 PM'] },
-      { day: 'Wednesday', times: ['9:00 AM', '10:00 AM', '11:00 AM', '4:00 PM'] },
-      { day: 'Thursday', times: ['10:00 AM', '2:00 PM', '3:00 PM', '4:00 PM'] },
-      { day: 'Saturday', times: ['9:00 AM', '10:00 AM', '11:00 AM'] }
-    ],
-    aboutText: 'Dr. Michael Chen is a board-certified dermatologist known for his expertise in both medical and cosmetic dermatology. He has published numerous research papers on innovative skin treatments.',
-    conditions: ['Acne', 'Eczema', 'Psoriasis', 'Skin Cancer', 'Rosacea', 'Hair Loss']
-  },
-  {
-    id: 3,
-    name: 'Dr. Emily Davis',
-    specialty: 'General Medicine',
-    department: 'General Medicine',
-    hospital: 'MediCare Center',
-    hospitalId: 2,
-    rating: 4.7,
-    reviewCount: 89,
-    experience: '8 years',
-    education: 'MD - Stanford University',
-    languages: ['English', 'French'],
-    specializations: ['Preventive Care', 'Chronic Disease Management', 'Health Screenings'],
-    consultationFee: 100,
-    location: 'MediCare Center, Room 105',
-    image: 'https://images.unsplash.com/photo-1594824475546-7da6ba09d5c4?w=150&h=150&fit=crop&crop=face',
-    availableDays: ['Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-    shifts: [
-      { day: 'Tuesday', times: ['9:00 AM', '10:00 AM', '11:00 AM', '2:00 PM'] },
-      { day: 'Wednesday', times: ['9:00 AM', '2:00 PM', '3:00 PM'] },
-      { day: 'Thursday', times: ['10:00 AM', '11:00 AM', '2:00 PM', '3:00 PM', '4:00 PM'] },
-      { day: 'Friday', times: ['9:00 AM', '10:00 AM', '11:00 AM'] }
-    ],
-    aboutText: 'Dr. Emily Davis is a compassionate family physician who focuses on comprehensive primary care and preventive medicine. She believes in building long-term relationships with her patients.',
-    conditions: ['Annual Checkups', 'Cold & Flu', 'Diabetes', 'High Blood Pressure', 'Vaccinations']
-  },
-  {
-    id: 4,
-    name: 'Dr. James Wilson',
-    specialty: 'Neurology',
-    department: 'Neurology',
-    hospital: 'City General Hospital',
-    hospitalId: 1,
-    rating: 4.9,
-    reviewCount: 127,
-    experience: '20 years',
-    education: 'MD, PhD - Mayo Clinic',
-    languages: ['English'],
-    specializations: ['Stroke Treatment', 'Epilepsy', 'Movement Disorders', 'Headache Medicine'],
-    consultationFee: 200,
-    location: 'City General Hospital, Neurology Wing',
-    image: 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=150&h=150&fit=crop&crop=face',
-    availableDays: ['Monday', 'Tuesday', 'Thursday', 'Friday'],
-    shifts: [
-      { day: 'Monday', times: ['10:00 AM', '11:00 AM', '2:00 PM'] },
-      { day: 'Tuesday', times: ['9:00 AM', '10:00 AM', '3:00 PM', '4:00 PM'] },
-      { day: 'Thursday', times: ['9:00 AM', '10:00 AM', '11:00 AM'] },
-      { day: 'Friday', times: ['2:00 PM', '3:00 PM', '4:00 PM'] }
-    ],
-    aboutText: 'Dr. James Wilson is a renowned neurologist with extensive experience in treating complex neurological disorders. He leads the stroke center and has pioneered several treatment protocols.',
-    conditions: ['Headaches', 'Epilepsy', 'Stroke', 'Memory Problems', 'Parkinson\'s Disease']
-  }
-]
+interface Appointment {
+  id: string
+  patientId: string
+  doctorId: string
+  dateTime: string
+  duration: number
+  type: string
+  status: string
+  notes?: string
+  symptoms?: string
+  diagnosis?: string
+  prescription?: string
+  fee: number
+  createdAt: string
+  updatedAt: string
+}
 
-const upcomingAppointments = [
-  {
-    id: 1,
-    doctor: 'Dr. Sarah Johnson',
-    specialty: 'Cardiology',
-    date: 'Dec 10, 2024',
-    time: '2:30 PM',
-    type: 'In-person',
-    status: 'Confirmed',
-    location: 'City General Hospital',
-    queueNumber: 3,
-    estimatedWaitTime: '25-30 minutes',
-    appointmentId: 'APT001'
-  },
-  {
-    id: 2,
-    doctor: 'Dr. Michael Chen',
-    specialty: 'Dermatology',
-    date: 'Dec 12, 2024',
-    time: '10:00 AM',
-    type: 'Video Call',
-    status: 'Pending',
-    location: 'Online',
-    queueNumber: 1,
-    estimatedWaitTime: '5-10 minutes',
-    appointmentId: 'APT002'
-  }
-]
+interface BookAppointmentRequest {
+  patientId: string
+  doctorId: string
+  date: string
+  time: string
+  duration: number
+  type: string
+  notes?: string
+  symptoms?: string
+}
 
 export default function AppointmentsPage() {
-  const [activeTab, setActiveTab] = useState('book') // book, manage
-  const [searchType, setSearchType] = useState('ai') // ai, manual
+  const [searchType, setSearchType] = useState('ai')
   const [isListening, setIsListening] = useState(false)
   const [aiQuery, setAiQuery] = useState('')
   const [manualFilters, setManualFilters] = useState({
@@ -198,84 +87,105 @@ export default function AppointmentsPage() {
     department: '',
     doctorName: ''
   })
-  const [selectedDoctor, setSelectedDoctor] = useState(null)
+  const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null)
   const [showBookingModal, setShowBookingModal] = useState(false)
-  const [selectedSlot, setSelectedSlot] = useState(null)
-  const [filteredDoctors, setFilteredDoctors] = useState(doctors)
+  const [selectedSlot, setSelectedSlot] = useState<{day: string, time: string} | null>(null)
+  const [filteredDoctors, setFilteredDoctors] = useState<Doctor[]>([])
   const [showFilters, setShowFilters] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [appointments, setAppointments] = useState<Appointment[]>([])
+  const [appointmentType, setAppointmentType] = useState('in-person')
+  const [appointmentNotes, setAppointmentNotes] = useState('')
+  const [appointmentSymptoms, setAppointmentSymptoms] = useState('')
+  const [selectedDate, setSelectedDate] = useState('')
+  const [selectedTime, setSelectedTime] = useState('')
+  const [bookingLoading, setBookingLoading] = useState(false)
+  const [bookingSuccess, setBookingSuccess] = useState(false)
 
-  // AI Search suggestions based on symptoms
-  const getAISuggestions = (query) => {
-    const suggestions = {
-      'chest pain': ['Cardiology'],
-      'heart': ['Cardiology'],
-      'skin': ['Dermatology'],
-      'acne': ['Dermatology'],
-      'headache': ['Neurology', 'General Medicine'],
-      'fever': ['General Medicine'],
-      'cold': ['General Medicine'],
-      'depression': ['Psychiatry'],
-      'anxiety': ['Psychiatry'],
-      'eye': ['Ophthalmology'],
-      'vision': ['Ophthalmology']
-    }
-    
-    const lowerQuery = query.toLowerCase()
-    let suggestedSpecialties = []
-    
-    for (const [symptom, specialties] of Object.entries(suggestions)) {
-      if (lowerQuery.includes(symptom)) {
-        suggestedSpecialties.push(...specialties)
+  // Fetch doctors on component mount
+  useEffect(() => {
+    fetchDoctors()
+  }, [])
+
+  const fetchDoctors = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch('http://localhost:8080/api/doctors')
+      const data = await response.json()
+      
+      if (data.success) {
+        setFilteredDoctors(data.doctors)
+      } else {
+        console.error('Failed to fetch doctors:', data.message)
       }
+    } catch (error) {
+      console.error('Error fetching doctors:', error)
+    } finally {
+      setLoading(false)
     }
-    
-    return [...new Set(suggestedSpecialties)]
   }
 
-  // Filter doctors based on AI suggestions
-  const handleAISearch = () => {
+  // AI search functionality
+  const handleAISearch = async () => {
     if (!aiQuery.trim()) {
-      setFilteredDoctors(doctors)
+      // If no query, show all doctors
+      fetchDoctors()
       return
     }
-    
-    const suggestedSpecialties = getAISuggestions(aiQuery)
-    if (suggestedSpecialties.length > 0) {
-      const filtered = doctors.filter(doctor => 
-        suggestedSpecialties.includes(doctor.specialty) ||
-        doctor.conditions.some(condition => 
-          condition.toLowerCase().includes(aiQuery.toLowerCase())
+
+    try {
+      setLoading(true)
+      const response = await fetch('http://localhost:8080/api/doctors/ai-search', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ symptoms: aiQuery }),
+      })
+
+      const data = await response.json()
+      
+      if (data.success) {
+        setFilteredDoctors(data.doctors)
+        // Show AI analysis in console for debugging
+        console.log('AI Analysis:', data.analysis)
+      } else {
+        console.error('AI search failed:', data.message)
+        // Fallback to simple search
+        const filtered = filteredDoctors.filter(doctor =>
+          doctor.userInfo?.name.toLowerCase().includes(aiQuery.toLowerCase()) ||
+          doctor.specialization.toLowerCase().includes(aiQuery.toLowerCase())
         )
+        setFilteredDoctors(filtered)
+      }
+    } catch (error) {
+      console.error('Error in AI search:', error)
+      // Fallback to simple search
+      const filtered = filteredDoctors.filter(doctor =>
+        doctor.userInfo?.name.toLowerCase().includes(aiQuery.toLowerCase()) ||
+        doctor.specialization.toLowerCase().includes(aiQuery.toLowerCase())
       )
       setFilteredDoctors(filtered)
-    } else {
-      // Fallback to general search
-      const filtered = doctors.filter(doctor =>
-        doctor.name.toLowerCase().includes(aiQuery.toLowerCase()) ||
-        doctor.specialty.toLowerCase().includes(aiQuery.toLowerCase()) ||
-        doctor.conditions.some(condition => 
-          condition.toLowerCase().includes(aiQuery.toLowerCase())
-        )
-      )
-      setFilteredDoctors(filtered)
+    } finally {
+      setLoading(false)
     }
   }
 
   // Manual search filtering
-  const handleManualSearch = () => {
-    let filtered = doctors
-
+  const applyManualFilters = () => {
+    let filtered = [...filteredDoctors]
+    
     if (manualFilters.hospital) {
-      filtered = filtered.filter(doctor => doctor.hospitalId === parseInt(manualFilters.hospital))
+      filtered = filtered.filter(doctor => doctor.hospital.toLowerCase().includes(manualFilters.hospital.toLowerCase()))
     }
     
     if (manualFilters.department) {
-      filtered = filtered.filter(doctor => doctor.department === manualFilters.department)
+      filtered = filtered.filter(doctor => doctor.specialization === manualFilters.department)
     }
     
     if (manualFilters.doctorName) {
       filtered = filtered.filter(doctor => 
-        doctor.name.toLowerCase().includes(manualFilters.doctorName.toLowerCase())
+        doctor.userInfo?.name.toLowerCase().includes(manualFilters.doctorName.toLowerCase())
       )
     }
 
@@ -288,671 +198,500 @@ export default function AppointmentsPage() {
     if (!isListening) {
       // Simulate voice input
       setTimeout(() => {
-        setAiQuery("I have been experiencing chest pain and shortness of breath")
+        setAiQuery('I have chest pain and difficulty breathing')
         setIsListening(false)
       }, 2000)
     }
   }
 
-  // Get available departments for selected hospital
-  const getAvailableDepartments = () => {
-    if (!manualFilters.hospital) return []
-    const hospital = hospitals.find(h => h.id === parseInt(manualFilters.hospital))
-    return hospital ? hospital.departments : []
+  // Book appointment
+  const handleBookAppointment = async () => {
+    if (!selectedDoctor || !selectedDate || !selectedTime) {
+      alert('Please select a doctor, date, and time')
+      return
+    }
+
+    setBookingLoading(true)
+    try {
+      const appointmentData: BookAppointmentRequest = {
+        patientId: 'user-4', // Default patient ID for demo
+        doctorId: selectedDoctor.id,
+        date: selectedDate,
+        time: selectedTime,
+        duration: 30,
+        type: appointmentType,
+        notes: appointmentNotes,
+        symptoms: appointmentSymptoms
+      }
+
+      const response = await fetch('http://localhost:8080/api/appointments/book', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(appointmentData),
+      })
+
+      const result = await response.json()
+      
+      if (result.success) {
+        setBookingSuccess(true)
+        setTimeout(() => {
+          setShowBookingModal(false)
+          setBookingSuccess(false)
+          setSelectedDoctor(null)
+          setSelectedDate('')
+          setSelectedTime('')
+          setAppointmentNotes('')
+          setAppointmentSymptoms('')
+        }, 2000)
+      } else {
+        alert('Failed to book appointment: ' + result.message)
+      }
+    } catch (error) {
+      console.error('Error booking appointment:', error)
+      alert('Failed to book appointment. Please try again.')
+    } finally {
+      setBookingLoading(false)
+    }
+  }
+
+  // Generate available time slots
+  const generateTimeSlots = () => {
+    const slots = []
+    const startHour = 9
+    const endHour = 17
+    
+    for (let hour = startHour; hour < endHour; hour++) {
+      for (let minute = 0; minute < 60; minute += 30) {
+        const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`
+        const displayTime = hour < 12 ? `${hour === 0 ? 12 : hour}:${minute.toString().padStart(2, '0')} AM` : 
+                           `${hour === 12 ? 12 : hour - 12}:${minute.toString().padStart(2, '0')} PM`
+        slots.push({ time: timeString, display: displayTime })
+      }
+    }
+    return slots
   }
 
   return (
-    <div className="min-h-screen">
-      <main className="py-2">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Appointments</h1>
-          <p className="text-gray-600">Find doctors, book appointments, and manage your healthcare</p>
-        </div>
-
-        {/* Tab Navigation */}
-        <div className="flex space-x-1 mb-8 bg-gray-100 p-1 rounded-lg w-fit">
-          <button
-            onClick={() => setActiveTab('book')}
-            className={`px-6 py-2 rounded-md font-medium transition-all ${
-              activeTab === 'book'
-                ? 'bg-white text-blue-600 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            Book Appointment
-          </button>
-          <button
-            onClick={() => setActiveTab('manage')}
-            className={`px-6 py-2 rounded-md font-medium transition-all ${
-              activeTab === 'manage'
-                ? 'bg-white text-blue-600 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            Manage Appointments
-          </button>
-        </div>
-
-        {activeTab === 'book' && (
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            {/* Search Section */}
-            <div className="lg:col-span-3">
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-semibold text-gray-900">Find Your Doctor</h2>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => setSearchType('ai')}
-                      className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                        searchType === 'ai'
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                      }`}
-                    >
-                      <Sparkles className="w-4 h-4 inline mr-2" />
-                      AI Search
-                    </button>
-                    <button
-                      onClick={() => setSearchType('manual')}
-                      className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                        searchType === 'manual'
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                      }`}
-                    >
-                      <Search className="w-4 h-4 inline mr-2" />
-                      Manual Search
-                    </button>
-                  </div>
-                </div>
-
-                {searchType === 'ai' && (
-                  <div className="space-y-4">
-                    <div className="relative">
-                      <textarea
-                        value={aiQuery}
-                        onChange={(e) => setAiQuery(e.target.value)}
-                        placeholder="Describe your symptoms or health concerns in your own words. For example: 'I have chest pain and difficulty breathing' or 'Need skin checkup for acne'"
-                        className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-gray-900 placeholder:text-gray-500"
-                        rows={3}
-                      />
-                      <button
-                        onClick={toggleVoiceInput}
-                        className={`absolute bottom-3 right-3 p-2 rounded-lg transition-all ${
-                          isListening
-                            ? 'bg-red-100 text-red-600'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                        }`}
-                      >
-                        {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-                      </button>
-                    </div>
-                    
-                    {isListening && (
-                      <div className="flex items-center space-x-2 text-red-600">
-                        <div className="w-2 h-2 bg-red-600 rounded-full animate-pulse"></div>
-                        <span className="text-sm">Listening... Speak now</span>
-                      </div>
-                    )}
-
-                    <button
-                      onClick={handleAISearch}
-                      className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
-                    >
-                      <Sparkles className="w-4 h-4" />
-                      <span>Find Doctors with AI</span>
-                    </button>
-
-                    {aiQuery && getAISuggestions(aiQuery).length > 0 && (
-                      <div className="bg-blue-50 p-4 rounded-lg">
-                        <p className="text-sm text-blue-800 mb-2">AI suggests these specialties:</p>
-                        <div className="flex flex-wrap gap-2">
-                          {getAISuggestions(aiQuery).map((specialty, index) => (
-                            <span key={index} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                              {specialty}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {searchType === 'manual' && (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Hospital</label>
-                        <select
-                          value={manualFilters.hospital}
-                          onChange={(e) => setManualFilters({...manualFilters, hospital: e.target.value, department: ''})}
-                          className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        >
-                          <option value="">All Hospitals</option>
-                          {hospitals.map(hospital => (
-                            <option key={hospital.id} value={hospital.id}>{hospital.name}</option>
-                          ))}
-                        </select>
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
-                        <select
-                          value={manualFilters.department}
-                          onChange={(e) => setManualFilters({...manualFilters, department: e.target.value})}
-                          className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        >
-                          <option value="">All Departments</option>
-                          {getAvailableDepartments().map(dept => (
-                            <option key={dept} value={dept}>{dept}</option>
-                          ))}
-                        </select>
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Doctor Name</label>
-                        <input
-                          type="text"
-                          value={manualFilters.doctorName}
-                          onChange={(e) => setManualFilters({...manualFilters, doctorName: e.target.value})}
-                          placeholder="Search by name..."
-                          className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
-                        />
-                      </div>
-                    </div>
-                    
-                    <button
-                      onClick={handleManualSearch}
-                      className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
-                    >
-                      <Search className="w-4 h-4" />
-                      <span>Search Doctors</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Results */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    Available Doctors ({filteredDoctors.length})
-                  </h3>
-                  <button
-                    onClick={() => setShowFilters(!showFilters)}
-                    className="flex items-center space-x-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-                  >
-                    <Filter className="w-4 h-4" />
-                    <span>Filters</span>
-                    <ChevronDown className={`w-4 h-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
-                  </button>
-                </div>
-
-                {showFilters && (
-                  <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                    <div className="flex flex-wrap gap-4">
-                      <label className="flex items-center space-x-2">
-                        <input type="checkbox" className="rounded" />
-                        <span className="text-sm">Available Today</span>
-                      </label>
-                      <label className="flex items-center space-x-2">
-                        <input type="checkbox" className="rounded" />
-                        <span className="text-sm">Video Consultation</span>
-                      </label>
-                      <label className="flex items-center space-x-2">
-                        <input type="checkbox" className="rounded" />
-                        <span className="text-sm">Highly Rated (4.5+)</span>
-                      </label>
-                    </div>
-                  </div>
-                )}
-
-                <div className="space-y-4">
-                  {filteredDoctors.map((doctor) => (
-                    <div key={doctor.id} className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-all">
-                      <div className="flex items-start space-x-4">
-                        <img
-                          src={doctor.image}
-                          alt={doctor.name}
-                          className="w-20 h-20 rounded-full object-cover"
-                        />
-                        <div className="flex-1">
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <h3 className="text-lg font-semibold text-gray-900">{doctor.name}</h3>
-                              <p className="text-blue-600 font-medium">{doctor.specialty}</p>
-                              <div className="flex items-center space-x-4 mt-1">
-                                <span className="text-sm text-gray-600">{doctor.experience} experience</span>
-                                <div className="flex items-center space-x-1">
-                                  <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                                  <span className="text-sm font-medium text-gray-900">{doctor.rating}</span>
-                                  <span className="text-sm text-gray-600">({doctor.reviewCount} reviews)</span>
-                                </div>
-                              </div>
-                              <div className="flex items-center space-x-2 mt-2">
-                                <Building2 className="w-4 h-4 text-gray-600" />
-                                <span className="text-sm text-gray-600">{doctor.hospital}</span>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <div className="text-lg font-semibold text-gray-900">${doctor.consultationFee}</div>
-                              <div className="text-sm text-gray-600">Consultation</div>
-                            </div>
-                          </div>
-                          
-                          <div className="mt-4">
-                            <p className="text-sm text-gray-600 mb-2">Specializations:</p>
-                            <div className="flex flex-wrap gap-2 mb-4">
-                              {doctor.specializations.slice(0, 3).map((spec, index) => (
-                                <span key={index} className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs">
-                                  {spec}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-
-                          <div className="flex items-center justify-between">
-                            <div className="flex space-x-2">
-                              <button
-                                onClick={() => setSelectedDoctor(doctor)}
-                                className="flex items-center space-x-2 px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
-                              >
-                                <Eye className="w-4 h-4" />
-                                <span>View Profile</span>
-                              </button>
-                              <button
-                                onClick={() => {
-                                  setSelectedDoctor(doctor)
-                                  setShowBookingModal(true)
-                                }}
-                                className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                              >
-                                <Calendar className="w-4 h-4" />
-                                <span>Book Appointment</span>
-                              </button>
-                            </div>
-                            <div className="flex items-center space-x-2 text-sm text-gray-600">
-                              <Clock className="w-4 h-4" />
-                              <span>Next available: Today 2:00 PM</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="py-12 text-center">
+            <div className="flex items-center justify-center mb-4">
+              <Stethoscope className="w-12 h-12 mr-4 text-white" />
+              <h1 className="text-4xl font-bold">Book Appointment</h1>
             </div>
+            <p className="text-xl text-purple-100 max-w-2xl mx-auto">
+              Find the right doctor for your needs and book appointments instantly with our AI-powered search
+            </p>
+          </div>
+        </div>
+      </div>
 
-            {/* Quick Stats Sidebar */}
-            <div className="lg:col-span-1">
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Stats</h3>
-                <div className="space-y-4">
-                  <div className="text-center p-3 bg-blue-50 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600">{hospitals.length}</div>
-                    <div className="text-sm text-gray-600">Partner Hospitals</div>
-                  </div>
-                  <div className="text-center p-3 bg-green-50 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600">{doctors.length}+</div>
-                    <div className="text-sm text-gray-600">Available Doctors</div>
-                  </div>
-                  <div className="text-center p-3 bg-purple-50 rounded-lg">
-                    <div className="text-2xl font-bold text-purple-600">24/7</div>
-                    <div className="text-sm text-gray-600">Emergency Support</div>
-                  </div>
-                </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-2">
+            {/* Search Section */}
+            <div className="bg-gradient-to-br from-white to-blue-50 rounded-2xl shadow-lg border-2 border-blue-100 p-8 mb-8">
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Find Your Perfect Doctor</h2>
+                <p className="text-gray-600">Choose your preferred search method</p>
               </div>
-
-              <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl p-6 text-white">
-                <h3 className="text-lg font-semibold mb-2">Need Help?</h3>
-                <p className="text-blue-100 text-sm mb-4">
-                  Our AI assistant can help you find the right doctor based on your symptoms.
-                </p>
-                <button className="w-full bg-white bg-opacity-20 text-white py-2 rounded-lg hover:bg-opacity-30 transition-colors">
-                  Chat with AI Assistant
+              
+              {/* Search Type Toggle */}
+              <div className="flex space-x-4 mb-6 justify-center">
+                <button
+                  onClick={() => {
+                    setSearchType('ai')
+                    setAiQuery('')
+                  }}
+                  className={`flex items-center px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
+                    searchType === 'ai' 
+                      ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg transform scale-105' 
+                      : 'bg-white text-gray-700 hover:bg-gray-50 shadow-md hover:shadow-lg border border-gray-200'
+                  }`}
+                >
+                  <Sparkles className="w-5 h-5 mr-2" />
+                  AI Smart Search
+                </button>
+                <button
+                  onClick={() => {
+                    setSearchType('manual')
+                    setManualFilters({ hospital: '', department: '', doctorName: '' })
+                    fetchDoctors() // Reset to show all doctors
+                  }}
+                  className={`flex items-center px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
+                    searchType === 'manual' 
+                      ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg transform scale-105' 
+                      : 'bg-white text-gray-700 hover:bg-gray-50 shadow-md hover:shadow-lg border border-gray-200'
+                  }`}
+                >
+                  <Search className="w-5 h-5 mr-2" />
+                  Manual Search
                 </button>
               </div>
+
+              {/* AI Search */}
+              {searchType === 'ai' && (
+                <div className="space-y-4">
+                  <div className="relative">
+                    <textarea
+                      value={aiQuery}
+                      onChange={(e) => setAiQuery(e.target.value)}
+                      placeholder="Describe your symptoms or health concerns in your own words. For example: 'I have chest pain and difficulty breathing' or 'Need skin checkup for acne'"
+                      className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none bg-white text-gray-900 placeholder:text-gray-500"
+                      rows={3}
+                    />
+                    <div className="mt-2 text-sm text-gray-600">
+                      <p className="font-medium mb-1">💡 Try these examples:</p>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          onClick={() => setAiQuery('I have chest pain and shortness of breath')}
+                          className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs hover:bg-blue-200 transition-colors"
+                        >
+                          Chest pain
+                        </button>
+                        <button
+                          onClick={() => setAiQuery('I have a skin rash that is itchy and red')}
+                          className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs hover:bg-blue-200 transition-colors"
+                        >
+                          Skin rash
+                        </button>
+                        <button
+                          onClick={() => setAiQuery('I have severe headaches and dizziness')}
+                          className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs hover:bg-blue-200 transition-colors"
+                        >
+                          Headaches
+                        </button>
+                        <button
+                          onClick={() => setAiQuery('I have back pain and joint stiffness')}
+                          className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs hover:bg-blue-200 transition-colors"
+                        >
+                          Back pain
+                        </button>
+                        <button
+                          onClick={() => setAiQuery('I feel anxious and have panic attacks')}
+                          className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs hover:bg-blue-200 transition-colors"
+                        >
+                          Anxiety
+                        </button>
+                      </div>
+                    </div>
+                    <button
+                      onClick={toggleVoiceInput}
+                      className={`absolute right-3 top-3 p-2 rounded-full transition-colors ${
+                        isListening 
+                          ? 'bg-red-100 text-red-600' 
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
+                    >
+                      {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                    </button>
+                  </div>
+                  <button
+                    onClick={handleAISearch}
+                    className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 px-8 rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-all duration-200 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105"
+                  >
+                    <Sparkles className="w-6 h-6 mr-3" />
+                    Find Doctors with AI
+                  </button>
+                </div>
+              )}
+
+              {/* Manual Search */}
+              {searchType === 'manual' && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Hospital</label>
+                      <input
+                        type="text"
+                        value={manualFilters.hospital}
+                        onChange={(e) => setManualFilters({...manualFilters, hospital: e.target.value})}
+                        placeholder="Enter hospital name"
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder:text-gray-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Department</label>
+                      <select
+                        value={manualFilters.department}
+                        onChange={(e) => setManualFilters({...manualFilters, department: e.target.value})}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900"
+                      >
+                        <option value="">Select Department</option>
+                        <option value="Cardiology">Cardiology</option>
+                        <option value="Dermatology">Dermatology</option>
+                        <option value="Neurology">Neurology</option>
+                        <option value="Orthopedics">Orthopedics</option>
+                        <option value="Pediatrics">Pediatrics</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Doctor Name</label>
+                      <input
+                        type="text"
+                        value={manualFilters.doctorName}
+                        onChange={(e) => setManualFilters({...manualFilters, doctorName: e.target.value})}
+                        placeholder="Enter doctor name"
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder:text-gray-500"
+                      />
+                    </div>
+                  </div>
+                  <button
+                    onClick={applyManualFilters}
+                    className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 px-8 rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-all duration-200 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105"
+                  >
+                    <Search className="w-6 h-6 mr-3" />
+                    Search Doctors
+                  </button>
+                </div>
+              )}
             </div>
-          </div>
-        )}
 
-        {activeTab === 'manage' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Upcoming Appointments */}
-            <div className="lg:col-span-2">
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-6">Your Appointments</h2>
-                
+            {/* Doctors List */}
+            <div className="bg-white rounded-2xl shadow-xl border-2 border-gray-100 p-8">
+              <div className="flex justify-between items-center mb-8">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    Available Doctors
+                  </h2>
+                  <p className="text-gray-600 mt-1">Found {filteredDoctors.length} doctors matching your criteria</p>
+                </div>
+              </div>
+
+              {loading ? (
+                <div className="flex justify-center items-center py-12">
+                  <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+                  <span className="ml-2 text-gray-600">Loading doctors...</span>
+                </div>
+              ) : filteredDoctors.length === 0 ? (
+                <div className="text-center py-12">
+                  <User className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No doctors found</h3>
+                  <p className="text-gray-600">Try adjusting your search criteria</p>
+                </div>
+              ) : (
                 <div className="space-y-6">
-                  {upcomingAppointments.map((appointment) => (
-                    <div key={appointment.id} className="border border-gray-200 rounded-lg p-6">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-3 mb-2">
-                            <h3 className="text-lg font-semibold text-gray-900">{appointment.doctor}</h3>
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                              appointment.status === 'Confirmed' 
-                                ? 'bg-green-100 text-green-800' 
-                                : 'bg-yellow-100 text-yellow-800'
-                            }`}>
-                              {appointment.status}
-                            </span>
+                  {filteredDoctors.map((doctor) => (
+                    <div key={doctor.id} className="group bg-gradient-to-r from-white to-blue-50 border-2 border-gray-200 hover:border-blue-300 rounded-2xl p-8 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start space-x-6">
+                          <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-blue-100 rounded-2xl flex items-center justify-center group-hover:from-purple-200 group-hover:to-blue-200 transition-colors">
+                            <User className="w-10 h-10 text-purple-600" />
                           </div>
-                          <p className="text-gray-600 mb-3">{appointment.specialty}</p>
-                          
-                          <div className="grid grid-cols-2 gap-4 mb-4">
-                            <div className="flex items-center space-x-2">
-                              <Calendar className="w-4 h-4 text-gray-600" />
-                              <span className="text-sm text-gray-600">{appointment.date}</span>
+                          <div className="flex-1">
+                            <h3 className="text-xl font-bold text-gray-900 mb-1">{doctor.userInfo?.name || 'Dr. Unknown'}</h3>
+                            <p className="text-purple-600 font-semibold text-lg mb-3">{doctor.specialization}</p>
+                            <div className="flex items-center space-x-6 mb-3">
+                              <div className="flex items-center space-x-2">
+                                <Clock className="w-4 h-4 text-gray-400" />
+                                <span className="text-sm text-gray-600 font-medium">{doctor.experience} years experience</span>
+                              </div>
+                              <div className="flex items-center space-x-1">
+                                <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                                <span className="text-sm text-gray-700 font-medium">{doctor.rating} ({doctor.totalRatings} reviews)</span>
+                              </div>
                             </div>
                             <div className="flex items-center space-x-2">
-                              <Clock className="w-4 h-4 text-gray-600" />
-                              <span className="text-sm text-gray-600">{appointment.time}</span>
+                              <Building2 className="w-4 h-4 text-gray-400" />
+                              <span className="text-sm text-gray-600 font-medium">{doctor.hospital}</span>
                             </div>
-                            <div className="flex items-center space-x-2">
-                              <MapPin className="w-4 h-4 text-gray-600" />
-                              <span className="text-sm text-gray-600">{appointment.location}</span>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <Users className="w-4 h-4 text-gray-600" />
-                              <span className="text-sm text-gray-600">Queue #{appointment.queueNumber}</span>
-                            </div>
-                          </div>
-
-                          <div className="bg-blue-50 p-3 rounded-lg">
-                            <div className="flex items-center space-x-2">
-                              <Clock3 className="w-4 h-4 text-blue-600" />
-                              <span className="text-sm font-medium text-blue-800">
-                                Estimated wait time: {appointment.estimatedWaitTime}
-                              </span>
-                            </div>
-                            <p className="text-xs text-blue-600 mt-1">
-                              You are #{appointment.queueNumber} in the queue. Arrive 15 minutes early.
-                            </p>
                           </div>
                         </div>
-                        
-                        <div className="flex flex-col space-y-2">
-                          <button className="flex items-center space-x-2 px-3 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors">
-                            <Edit3 className="w-4 h-4" />
-                            <span>Reschedule</span>
-                          </button>
-                          <button className="flex items-center space-x-2 px-3 py-2 text-red-600 border border-red-600 rounded-lg hover:bg-red-50 transition-colors">
-                            <Trash2 className="w-4 h-4" />
-                            <span>Cancel</span>
-                          </button>
+                        <div className="text-right">
+                          <div className="text-2xl font-bold text-gray-900">${doctor.consultationFee}</div>
+                          <div className="text-sm text-gray-600 font-medium">Consultation Fee</div>
                         </div>
                       </div>
-
-                      <div className="pt-4 border-t border-gray-200">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">Appointment ID: {appointment.appointmentId}</span>
-                          <div className="flex space-x-2">
-                            {appointment.type === 'Video Call' && (
-                              <button className="flex items-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
-                                <Video className="w-4 h-4" />
-                                <span>Join Call</span>
-                              </button>
-                            )}
-                            <button className="flex items-center space-x-2 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
-                              <MapPin className="w-4 h-4" />
-                              <span>Get Directions</span>
-                            </button>
-                          </div>
+                      <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                          <span className="text-sm text-green-600 font-medium">Available today at 2:00 PM</span>
                         </div>
+                        <button
+                          onClick={() => {
+                            setSelectedDoctor(doctor)
+                            setShowBookingModal(true)
+                          }}
+                          className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-all duration-200 flex items-center shadow-lg hover:shadow-xl transform hover:scale-105"
+                        >
+                          <Calendar className="w-5 h-5 mr-2" />
+                          Book Appointment
+                        </button>
                       </div>
                     </div>
                   ))}
                 </div>
-              </div>
+              )}
             </div>
+          </div>
 
-            {/* Appointment History & Stats */}
-            <div className="lg:col-span-1 space-y-6">
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Appointment Stats</h3>
+          {/* Enhanced Stats Sidebar */}
+          <div className="lg:col-span-1">
+            <div className="space-y-6">
+              {/* Quick Stats */}
+              <div className="bg-gradient-to-br from-white to-purple-50 rounded-2xl shadow-xl border-2 border-purple-100 p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-6 text-center">Healthcare Network</h3>
                 <div className="space-y-4">
-                  <div className="text-center p-3 bg-blue-50 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600">12</div>
-                    <div className="text-sm text-gray-600">This Year</div>
+                  <div className="group bg-blue-50 hover:bg-blue-100 rounded-xl p-4 transition-colors border border-blue-200">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="p-2 bg-blue-200 rounded-lg group-hover:bg-blue-300 transition-colors">
+                          <Building2 className="w-5 h-5 text-blue-700" />
+                        </div>
+                        <span className="text-sm font-semibold text-blue-900">Partner Hospitals</span>
+                      </div>
+                      <span className="text-2xl font-bold text-blue-700">3</span>
+                    </div>
                   </div>
-                  <div className="text-center p-3 bg-green-50 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600">8</div>
-                    <div className="text-sm text-gray-600">Completed</div>
+                  <div className="group bg-green-50 hover:bg-green-100 rounded-xl p-4 transition-colors border border-green-200">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="p-2 bg-green-200 rounded-lg group-hover:bg-green-300 transition-colors">
+                          <Users className="w-5 h-5 text-green-700" />
+                        </div>
+                        <span className="text-sm font-semibold text-green-900">Available Doctors</span>
+                      </div>
+                      <span className="text-2xl font-bold text-green-700">{filteredDoctors.length}+</span>
+                    </div>
                   </div>
-                  <div className="text-center p-3 bg-orange-50 rounded-lg">
-                    <div className="text-2xl font-bold text-orange-600">2</div>
-                    <div className="text-sm text-gray-600">Upcoming</div>
+                  <div className="group bg-purple-50 hover:bg-purple-100 rounded-xl p-4 transition-colors border border-purple-200">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="p-2 bg-purple-200 rounded-lg group-hover:bg-purple-300 transition-colors">
+                          <Clock className="w-5 h-5 text-purple-700" />
+                        </div>
+                        <span className="text-sm font-semibold text-purple-900">Emergency Support</span>
+                      </div>
+                      <span className="text-2xl font-bold text-purple-700">24/7</span>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-                <div className="space-y-3">
-                  <button className="w-full flex items-center space-x-3 p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                    <Plus className="w-5 h-5 text-blue-600" />
-                    <span className="font-medium">Book New Appointment</span>
-                  </button>
-                  <button className="w-full flex items-center space-x-3 p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                    <Calendar className="w-5 h-5 text-green-600" />
-                    <span className="font-medium">View Calendar</span>
-                  </button>
-                  <button className="w-full flex items-center space-x-3 p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                    <Clock className="w-5 h-5 text-purple-600" />
-                    <span className="font-medium">Appointment History</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Doctor Profile Modal */}
-        {selectedDoctor && !showBookingModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-6">
-                  <div className="flex items-start space-x-4">
-                    <img
-                      src={selectedDoctor.image}
-                      alt={selectedDoctor.name}
-                      className="w-24 h-24 rounded-full object-cover"
-                    />
-                    <div>
-                      <h2 className="text-2xl font-bold text-gray-900">{selectedDoctor.name}</h2>
-                      <p className="text-blue-600 font-semibold text-lg">{selectedDoctor.specialty}</p>
-                      <div className="flex items-center space-x-4 mt-2">
-                        <div className="flex items-center space-x-1">
-                          <Star className="w-5 h-5 text-yellow-400 fill-current" />
-                          <span className="font-semibold">{selectedDoctor.rating}</span>
-                          <span className="text-gray-600">({selectedDoctor.reviewCount} reviews)</span>
-                        </div>
-                        <span className="text-gray-600">{selectedDoctor.experience} experience</span>
-                      </div>
-                    </div>
+              {/* Quick Tips */}
+              <div className="bg-gradient-to-br from-white to-orange-50 rounded-2xl shadow-xl border-2 border-orange-100 p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-4 text-center">💡 Quick Tips</h3>
+                <div className="space-y-3 text-sm">
+                  <div className="flex items-start space-x-2">
+                    <div className="w-2 h-2 bg-orange-400 rounded-full mt-2"></div>
+                    <p className="text-gray-700">Use AI search to describe your symptoms naturally</p>
                   </div>
-                  <button
-                    onClick={() => setSelectedDoctor(null)}
-                    className="p-2 hover:bg-gray-100 rounded-lg"
-                  >
-                    <X className="w-6 h-6" />
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                  <div className="lg:col-span-2 space-y-6">
-                    <div>
-                      <h3 className="text-lg font-semibold mb-3">About</h3>
-                      <p className="text-gray-600">{selectedDoctor.aboutText}</p>
-                    </div>
-
-                    <div>
-                      <h3 className="text-lg font-semibold mb-3">Education & Experience</h3>
-                      <div className="space-y-2">
-                        <p className="text-gray-600"><strong>Education:</strong> {selectedDoctor.education}</p>
-                        <p className="text-gray-600"><strong>Experience:</strong> {selectedDoctor.experience}</p>
-                        <p className="text-gray-600"><strong>Languages:</strong> {selectedDoctor.languages.join(', ')}</p>
-                      </div>
-                    </div>
-
-                    <div>
-                      <h3 className="text-lg font-semibold mb-3">Specializations</h3>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedDoctor.specializations.map((spec, index) => (
-                          <span key={index} className="px-3 py-2 bg-blue-100 text-blue-800 rounded-lg text-sm">
-                            {spec}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div>
-                      <h3 className="text-lg font-semibold mb-3">Conditions Treated</h3>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedDoctor.conditions.map((condition, index) => (
-                          <span key={index} className="px-3 py-2 bg-green-100 text-green-800 rounded-lg text-sm">
-                            {condition}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
+                  <div className="flex items-start space-x-2">
+                    <div className="w-2 h-2 bg-orange-400 rounded-full mt-2"></div>
+                    <p className="text-gray-700">Book appointments up to 30 days in advance</p>
                   </div>
-
-                  <div className="space-y-6">
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <h4 className="font-semibold mb-2">Consultation Details</h4>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span>Consultation Fee:</span>
-                          <span className="font-semibold">${selectedDoctor.consultationFee}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Location:</span>
-                          <span className="text-right">{selectedDoctor.location}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <h4 className="font-semibold mb-3">Available Schedule</h4>
-                      <div className="space-y-2">
-                        {selectedDoctor.shifts.map((shift, index) => (
-                          <div key={index} className="flex justify-between text-sm">
-                            <span className="font-medium">{shift.day}:</span>
-                            <span className="text-gray-600">
-                              {shift.times.length > 0 ? `${shift.times.length} slots` : 'Unavailable'}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={() => setShowBookingModal(true)}
-                      className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
-                    >
-                      <Calendar className="w-5 h-5" />
-                      <span>Book Appointment</span>
-                    </button>
+                  <div className="flex items-start space-x-2">
+                    <div className="w-2 h-2 bg-orange-400 rounded-full mt-2"></div>
+                    <p className="text-gray-700">Video consultations available for follow-ups</p>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        )}
+        </div>
+      </div>
 
-        {/* Booking Modal */}
-        {showBookingModal && selectedDoctor && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold text-gray-900">Book Appointment</h2>
-                  <button
-                    onClick={() => {
-                      setShowBookingModal(false)
-                      setSelectedSlot(null)
-                    }}
-                    className="p-2 hover:bg-gray-100 rounded-lg"
-                  >
-                    <X className="w-6 h-6" />
-                  </button>
+      {/* Booking Modal */}
+      {showBookingModal && selectedDoctor && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Book Appointment</h2>
+                <button
+                  onClick={() => setShowBookingModal(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              {bookingSuccess ? (
+                <div className="text-center py-8">
+                  <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Appointment Booked!</h3>
+                  <p className="text-gray-600">Your appointment has been successfully scheduled.</p>
                 </div>
-
-                <div className="flex items-start space-x-4 mb-6 p-4 bg-gray-50 rounded-lg">
-                  <img
-                    src={selectedDoctor.image}
-                    alt={selectedDoctor.name}
-                    className="w-16 h-16 rounded-full object-cover"
-                  />
-                  <div>
-                    <h3 className="font-semibold text-lg">{selectedDoctor.name}</h3>
-                    <p className="text-blue-600">{selectedDoctor.specialty}</p>
-                    <p className="text-gray-600 text-sm">{selectedDoctor.location}</p>
-                    <p className="text-gray-900 font-semibold">Consultation Fee: ${selectedDoctor.consultationFee}</p>
-                  </div>
-                </div>
-
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-lg font-semibold mb-4">Select Date & Time</h3>
-                    <div className="space-y-4">
-                      {selectedDoctor.shifts.map((shift, index) => (
-                        <div key={index} className="border border-gray-200 rounded-lg p-4">
-                          <h4 className="font-medium mb-3">{shift.day}</h4>
-                          <div className="grid grid-cols-3 gap-2">
-                            {shift.times.map((time, timeIndex) => (
-                              <button
-                                key={timeIndex}
-                                onClick={() => setSelectedSlot({ day: shift.day, time })}
-                                className={`p-2 text-sm border rounded-lg transition-colors ${
-                                  selectedSlot?.day === shift.day && selectedSlot?.time === time
-                                    ? 'bg-blue-600 text-white border-blue-600'
-                                    : 'border-gray-300 hover:border-blue-500 hover:bg-blue-50'
-                                }`}
-                              >
-                                {time}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
+              ) : (
+                <>
+                  {/* Doctor Info */}
+                  <div className="flex items-start space-x-4 mb-6 p-4 bg-gray-50 rounded-lg">
+                    <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
+                      <User className="w-8 h-8 text-gray-500" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-lg">{selectedDoctor.userInfo?.name || 'Dr. Unknown'}</h3>
+                      <p className="text-blue-600">{selectedDoctor.specialization}</p>
+                      <p className="text-gray-600 text-sm">{selectedDoctor.hospital}</p>
+                      <p className="text-gray-900 font-semibold">Consultation Fee: ${selectedDoctor.consultationFee}</p>
                     </div>
                   </div>
 
-                  {selectedSlot && (
-                    <div className="bg-blue-50 p-4 rounded-lg">
-                      <h4 className="font-semibold text-blue-900 mb-2">Appointment Summary</h4>
-                      <div className="space-y-1 text-sm text-blue-800">
-                        <p><strong>Date:</strong> {selectedSlot.day}</p>
-                        <p><strong>Time:</strong> {selectedSlot.time}</p>
-                        <p><strong>Estimated Queue Position:</strong> #2</p>
-                        <p><strong>Estimated Wait Time:</strong> 15-20 minutes</p>
-                        <p><strong>Total Fee:</strong> ${selectedDoctor.consultationFee}</p>
-                      </div>
+                  {/* Date and Time Selection */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Select Date</label>
+                      <input
+                        type="date"
+                        value={selectedDate}
+                        onChange={(e) => setSelectedDate(e.target.value)}
+                        min={new Date().toISOString().split('T')[0]}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900"
+                      />
                     </div>
-                  )}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Select Time</label>
+                      <select
+                        value={selectedTime}
+                        onChange={(e) => setSelectedTime(e.target.value)}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900"
+                      >
+                        <option value="">Select Time</option>
+                        {generateTimeSlots().map((slot) => (
+                          <option key={slot.time} value={slot.display}>
+                            {slot.display}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
 
-                  <div>
-                    <h3 className="text-lg font-semibold mb-3">Appointment Type</h3>
+                  {/* Appointment Type */}
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-3">Appointment Type</label>
                     <div className="grid grid-cols-2 gap-4">
-                      <button className="p-4 border border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors">
+                      <button
+                        onClick={() => setAppointmentType('in-person')}
+                        className={`p-4 border rounded-lg text-left transition-colors ${
+                          appointmentType === 'in-person'
+                            ? 'border-blue-500 bg-blue-50 text-blue-700'
+                            : 'border-gray-300 hover:border-gray-400'
+                        }`}
+                      >
                         <div className="flex items-center space-x-3">
-                          <User className="w-6 h-6 text-blue-600" />
-                          <div className="text-left">
+                          <Users className="w-5 h-5" />
+                          <div>
                             <div className="font-medium">In-Person</div>
                             <div className="text-sm text-gray-600">Visit doctor's chamber</div>
                           </div>
                         </div>
                       </button>
-                      <button className="p-4 border border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors">
+                      <button
+                        onClick={() => setAppointmentType('video')}
+                        className={`p-4 border rounded-lg text-left transition-colors ${
+                          appointmentType === 'video'
+                            ? 'border-blue-500 bg-blue-50 text-blue-700'
+                            : 'border-gray-300 hover:border-gray-400'
+                        }`}
+                      >
                         <div className="flex items-center space-x-3">
-                          <Video className="w-6 h-6 text-purple-600" />
-                          <div className="text-left">
+                          <Video className="w-5 h-5" />
+                          <div>
                             <div className="font-medium">Video Call</div>
                             <div className="text-sm text-gray-600">Online consultation</div>
                           </div>
@@ -961,41 +700,59 @@ export default function AppointmentsPage() {
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Reason for Visit (Optional)
-                    </label>
-                    <textarea
-                      placeholder="Briefly describe your health concern or reason for this appointment..."
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
-                      rows={3}
-                    />
+                  {/* Additional Information */}
+                  <div className="space-y-4 mb-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Reason for Visit (Optional)</label>
+                      <textarea
+                        value={appointmentNotes}
+                        onChange={(e) => setAppointmentNotes(e.target.value)}
+                        placeholder="Briefly describe your health concern or reason for this appointment..."
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none bg-white text-gray-900 placeholder:text-gray-500"
+                        rows={3}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Symptoms (Optional)</label>
+                      <textarea
+                        value={appointmentSymptoms}
+                        onChange={(e) => setAppointmentSymptoms(e.target.value)}
+                        placeholder="Describe any symptoms you're experiencing..."
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none bg-white text-gray-900 placeholder:text-gray-500"
+                        rows={3}
+                      />
+                    </div>
                   </div>
 
+                  {/* Action Buttons */}
                   <div className="flex space-x-4">
                     <button
-                      onClick={() => {
-                        setShowBookingModal(false)
-                        setSelectedSlot(null)
-                        setSelectedDoctor(null)
-                      }}
-                      className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                      onClick={() => setShowBookingModal(false)}
+                      className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
                     >
                       Cancel
                     </button>
                     <button
-                      disabled={!selectedSlot}
-                      className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                      onClick={handleBookAppointment}
+                      disabled={bookingLoading || !selectedDate || !selectedTime}
+                      className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
                     >
-                      Confirm Booking
+                      {bookingLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Booking...
+                        </>
+                      ) : (
+                        'Book Appointment'
+                      )}
                     </button>
                   </div>
-                </div>
-              </div>
+                </>
+              )}
             </div>
           </div>
-        )}
-      </main>
+        </div>
+      )}
     </div>
   )
 }

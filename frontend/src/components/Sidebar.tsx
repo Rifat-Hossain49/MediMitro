@@ -51,7 +51,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   ]
 
   return (
-    <aside className="hidden md:flex md:w-64 md:flex-col md:gap-2 border-r border-gray-100 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60 p-4">
+    <aside className="hidden md:flex md:w-48 md:flex-col md:gap-2 border-r border-gray-100 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60 p-3">
       <nav className="flex-1 space-y-1">
         {items.map((item) => {
           const active = pathname === item.href
@@ -59,13 +59,13 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
           return (
             <motion.div
               key={item.name}
-              whileHover={{ scale: 1.02, x: 4 }}
+              whileHover={{ scale: 1.02, x: 2 }}
               whileTap={{ scale: 0.98 }}
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
             >
               <Link
                 href={item.href}
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                className={`flex items-center gap-2 px-2 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                   active 
                     ? 'text-blue-700 bg-gradient-to-r from-blue-50 to-blue-100 border-r-2 border-blue-500' 
                     : 'text-gray-700 hover:text-blue-600 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50'

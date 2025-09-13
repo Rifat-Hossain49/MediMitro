@@ -2,19 +2,8 @@ import NextAuth from "next-auth"
 import GitHub from "next-auth/providers/github"
 import Google from "next-auth/providers/google"
 import Credentials from "next-auth/providers/credentials"
-import { PrismaAdapter } from "@auth/prisma-adapter"
-import { PrismaClient } from "@prisma/client"
 import bcrypt from "bcryptjs"
 import { z } from "zod"
-
-// Singleton pattern for Prisma Client to prevent multiple instances
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined
-}
-
-const prisma = globalForPrisma.prisma ?? new PrismaClient()
-
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma
 
 // Validation schema for credentials
 const credentialsSchema = z.object({
@@ -28,7 +17,6 @@ export const {
   signIn,
   signOut,
 } = NextAuth({
-  adapter: PrismaAdapter(prisma),
   providers: [
     // Google OAuth - Essential for healthcare platforms
     Google({
@@ -50,6 +38,7 @@ export const {
     }),
     
     // Email/Password - Essential for healthcare compliance
+    // TODO: Implement with Spring JDBC backend API
     Credentials({
       name: "credentials",
       credentials: {
@@ -57,41 +46,9 @@ export const {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        try {
-          const validatedFields = credentialsSchema.safeParse(credentials)
-          
-          if (!validatedFields.success) {
-            return null
-          }
-
-          const { email, password } = validatedFields.data
-
-          // Find user in database
-          const user = await prisma.user.findUnique({
-            where: { email },
-          })
-
-          if (!user || !user.password) {
-            return null
-          }
-
-          // Verify password
-          const passwordsMatch = await bcrypt.compare(password, user.password)
-
-          if (!passwordsMatch) {
-            return null
-          }
-
-          return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            image: user.image,
-          }
-        } catch (error) {
-          console.error("Authentication error:", error)
-          return null
-        }
+        // TODO: Replace with API call to Spring backend for authentication
+        console.log("Credentials authentication not yet implemented with Spring backend")
+        return null
       },
     }),
   ],
@@ -101,6 +58,42 @@ export const {
     error: "/auth/error",
   },
   callbacks: {
+    async signIn({ user, account, profile }) {
+      // Handle OAuth sign-in (Google, GitHub)
+      if (account?.provider === "google" || account?.provider === "github") {
+        try {
+          const response = await fetch(`http://localhost:8080/api/auth/oauth-user`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email: user.email,
+              name: user.name,
+              image: user.image,
+            }),
+          })
+
+          if (response.ok) {
+            const data = await response.json()
+            if (data.success) {
+              // Update user object with database ID and role
+              user.id = data.user.id
+              user.role = data.user.role
+              return true
+            }
+          }
+          
+          console.error('Failed to save OAuth user to database')
+          return false
+        } catch (error) {
+          console.error('Error saving OAuth user:', error)
+          return false
+        }
+      }
+      
+      return true
+    },
     async jwt({ token, user, account }) {
       if (user) {
         token.id = user.id
@@ -131,31 +124,12 @@ export const {
 })
 
 // Helper function to register new users
+// TODO: Implement with Spring JDBC backend API
 export async function registerUser(email: string, password: string, name: string, role: string = "patient") {
   try {
-    // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    })
-
-    if (existingUser) {
-      throw new Error("User already exists")
-    }
-
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 12)
-
-    // Create user
-    const user = await prisma.user.create({
-      data: {
-        email,
-        password: hashedPassword,
-        name,
-        role,
-      },
-    })
-
-    return { success: true, user: { id: user.id, email: user.email, name: user.name, role: user.role } }
+    // TODO: Replace with API call to Spring backend for user registration
+    console.log("User registration not yet implemented with Spring backend")
+    return { success: false, error: "User registration not yet implemented with Spring backend" }
   } catch (error) {
     console.error("Registration error:", error)
     return { success: false, error: error instanceof Error ? error.message : "Registration failed" }

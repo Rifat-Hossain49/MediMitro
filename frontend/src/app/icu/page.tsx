@@ -302,102 +302,141 @@ export default function ICUReservationSystem() {
   )
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-8"
-        >
-          <div className="flex items-center justify-center mb-4">
-            <div className="p-3 bg-gradient-to-r from-blue-500 to-green-600 rounded-full">
-              <BedDouble className="w-8 h-8 text-white" />
+    <div className="min-h-screen bg-gray-50">
+      {/* Enhanced Hero Header */}
+      <div className="bg-gradient-to-br from-blue-600 via-teal-500 to-green-600 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="py-12"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center space-x-4 mb-4">
+                  <div className="p-4 bg-white bg-opacity-20 rounded-2xl backdrop-blur-sm">
+                    <BedDouble className="w-10 h-10 text-white" />
+                  </div>
+                  <div>
+                    <h1 className="text-4xl font-bold">ICU Bed Reservation System</h1>
+                    <p className="text-xl text-blue-100 mt-2">Real-time availability with specialized medical care</p>
+                  </div>
+                </div>
+                
+                {/* Real-time Stats */}
+                <div className="flex items-center space-x-8 mt-6">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                    <span className="text-blue-100 font-medium">Live tracking</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Monitor className="w-4 h-4 text-teal-200" />
+                    <span className="text-teal-100">24/7 monitoring</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Stethoscope className="w-4 h-4 text-green-200" />
+                    <span className="text-green-100">Specialist care</span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Live Update Card */}
+              <div className="hidden lg:block">
+                <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-6 text-center">
+                  <div className="flex items-center justify-center space-x-2 mb-2">
+                    <Timer className="w-5 h-5 text-white" />
+                    <span className="font-semibold">Last Updated</span>
+                  </div>
+                  <div className="text-sm text-blue-200 mb-3">
+                    {mounted ? lastUpdated.toLocaleTimeString() : '--:--:--'}
+                  </div>
+                  <button
+                    onClick={refreshData}
+                    disabled={isRefreshing}
+                    className="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-xl font-semibold transition-all backdrop-blur-sm border border-white border-opacity-20 disabled:opacity-50"
+                  >
+                    <RefreshCw className={`w-4 h-4 inline mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+                    Refresh
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">ICU Bed Reservation</h1>
-          <p className="text-gray-600">Real-time ICU bed availability with specialist booking</p>
-          
-          <div className="flex items-center justify-center space-x-4 mt-4">
-            <div className="flex items-center space-x-2 text-sm text-gray-600">
-              <Timer className="w-4 h-4" />
-              <span>Last updated: {mounted ? lastUpdated.toLocaleTimeString() : '--:--:--'}</span>
-            </div>
-            <button
-              onClick={refreshData}
-              disabled={isRefreshing}
-              className="flex items-center space-x-2 px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors disabled:opacity-50"
-            >
-              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-              <span>Refresh</span>
-            </button>
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
+      </div>
 
-        {/* Search */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        {/* Enhanced Search */}
+        <div className="bg-gradient-to-br from-white to-blue-50 rounded-2xl shadow-xl border-2 border-blue-100 p-8 mb-8">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="p-3 bg-blue-100 rounded-xl">
+              <Search className="w-6 h-6 text-blue-600" />
+            </div>
+            <h2 className="text-xl font-bold text-gray-900">Find ICU Beds</h2>
+          </div>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
               placeholder="Search hospitals by name or location..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
+              className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder:text-gray-500 text-lg"
             />
           </div>
         </div>
 
-        {/* Statistics */}
+        {/* Enhanced Statistics */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <motion.div
-            whileHover={{ scale: 1.02 }}
-            className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center"
+            whileHover={{ scale: 1.05 }}
+            className="group bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-xl p-6 text-white text-center transform transition-all hover:shadow-2xl"
           >
-            <div className="p-3 bg-blue-100 rounded-full w-fit mx-auto mb-4">
-              <Building className="w-6 h-6 text-blue-600" />
+            <div className="p-4 bg-white bg-opacity-20 rounded-2xl w-fit mx-auto mb-4 group-hover:bg-opacity-30 transition-all backdrop-blur-sm">
+              <Building className="w-8 h-8 text-white" />
             </div>
-            <div className="text-2xl font-bold text-blue-600 mb-2">{hospitals.length}</div>
-            <div className="text-sm text-gray-600">Hospitals</div>
+            <div className="text-3xl font-bold mb-2">{hospitals.length}</div>
+            <div className="text-blue-100 font-medium">Partner Hospitals</div>
           </motion.div>
 
           <motion.div
-            whileHover={{ scale: 1.02 }}
-            className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center"
+            whileHover={{ scale: 1.05 }}
+            className="group bg-gradient-to-br from-green-500 to-green-600 rounded-2xl shadow-xl p-6 text-white text-center transform transition-all hover:shadow-2xl"
           >
-            <div className="p-3 bg-green-100 rounded-full w-fit mx-auto mb-4">
-              <BedDouble className="w-6 h-6 text-green-600" />
+            <div className="p-4 bg-white bg-opacity-20 rounded-2xl w-fit mx-auto mb-4 group-hover:bg-opacity-30 transition-all backdrop-blur-sm">
+              <BedDouble className="w-8 h-8 text-white" />
             </div>
-            <div className="text-2xl font-bold text-green-600 mb-2">
+            <div className="text-3xl font-bold mb-2">
               {hospitals.reduce((sum, h) => sum + h.availableBeds, 0)}
             </div>
-            <div className="text-sm text-gray-600">Available Beds</div>
+            <div className="text-green-100 font-medium">Available ICU Beds</div>
           </motion.div>
 
           <motion.div
-            whileHover={{ scale: 1.02 }}
-            className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center"
+            whileHover={{ scale: 1.05 }}
+            className="group bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl shadow-xl p-6 text-white text-center transform transition-all hover:shadow-2xl"
           >
-            <div className="p-3 bg-purple-100 rounded-full w-fit mx-auto mb-4">
-              <Stethoscope className="w-6 h-6 text-purple-600" />
+            <div className="p-4 bg-white bg-opacity-20 rounded-2xl w-fit mx-auto mb-4 group-hover:bg-opacity-30 transition-all backdrop-blur-sm">
+              <Stethoscope className="w-8 h-8 text-white" />
             </div>
-            <div className="text-2xl font-bold text-purple-600 mb-2">
+            <div className="text-3xl font-bold mb-2">
               {hospitals.reduce((sum, h) => sum + h.doctors.length, 0)}
             </div>
-            <div className="text-sm text-gray-600">Specialists</div>
+            <div className="text-purple-100 font-medium">ICU Specialists</div>
           </motion.div>
 
           <motion.div
-            whileHover={{ scale: 1.02 }}
-            className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center"
+            whileHover={{ scale: 1.05 }}
+            className="group bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl shadow-xl p-6 text-white text-center transform transition-all hover:shadow-2xl"
           >
-            <div className="p-3 bg-orange-100 rounded-full w-fit mx-auto mb-4">
-              <UserCheck className="w-6 h-6 text-orange-600" />
+            <div className="p-4 bg-white bg-opacity-20 rounded-2xl w-fit mx-auto mb-4 group-hover:bg-opacity-30 transition-all backdrop-blur-sm">
+              <UserCheck className="w-8 h-8 text-white" />
             </div>
-            <div className="text-2xl font-bold text-orange-600 mb-2">
+            <div className="text-3xl font-bold mb-2">
               {hospitals.reduce((sum, h) => sum + h.nurses.length, 0)}
             </div>
-            <div className="text-sm text-gray-600">Nurses</div>
+            <div className="text-orange-100 font-medium">Critical Care Nurses</div>
           </motion.div>
         </div>
 
@@ -408,7 +447,7 @@ export default function ICUReservationSystem() {
               key={hospital.id}
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden"
+              className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-xl border-2 border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-300 hover:border-blue-200"
             >
               {/* Hospital Header */}
               <div className="p-6 border-b border-gray-200">
@@ -471,11 +510,11 @@ export default function ICUReservationSystem() {
                     {hospital.icuBeds
                       .filter(bed => bed.status === 'available')
                       .map((bed) => (
-                        <motion.div
-                          key={bed.id}
-                          whileHover={{ scale: 1.02 }}
-                          className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all"
-                        >
+                          <motion.div
+                            key={bed.id}
+                            whileHover={{ scale: 1.02 }}
+                            className="group bg-white border-2 border-gray-200 rounded-xl p-6 hover:shadow-lg transition-all hover:border-blue-300 transform hover:scale-105"
+                          >
                           <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center space-x-2">
                               {getBedTypeIcon(bed.type)}
@@ -505,11 +544,11 @@ export default function ICUReservationSystem() {
 
                           <button
                             onClick={() => handleBookBed(hospital, bed)}
-                            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
+                            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 px-4 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all flex items-center justify-center space-x-2 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
                           >
-                            <CalendarCheck className="w-4 h-4" />
-                            <span>Reserve Bed</span>
-              </button>
+                            <CalendarCheck className="w-5 h-5" />
+                            <span>Reserve ICU Bed</span>
+                          </button>
                         </motion.div>
                       ))}
                   </div>
@@ -519,31 +558,47 @@ export default function ICUReservationSystem() {
           ))}
         </div>
 
-        {/* Booking Modal */}
+        {/* Enhanced Booking Modal */}
         {showBookingModal && selectedHospital && selectedBed && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+              className="bg-white rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
             >
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold text-gray-900">Reserve ICU Bed</h2>
+              <div className="bg-gradient-to-r from-blue-600 to-teal-600 text-white p-6 rounded-t-2xl">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="p-3 bg-white bg-opacity-20 rounded-xl backdrop-blur-sm">
+                      <BedDouble className="w-8 h-8 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold">Reserve ICU Bed</h2>
+                      <p className="text-blue-100">{selectedHospital.name} • {selectedBed.bedNumber}</p>
+                    </div>
+                  </div>
                   <button
                     onClick={() => setShowBookingModal(false)}
-                    className="p-2 hover:bg-gray-100 rounded-lg"
+                    className="p-2 hover:bg-white hover:bg-opacity-20 rounded-xl transition-colors"
                   >
                     <X className="w-6 h-6" />
                   </button>
                 </div>
+              </div>
+
+              <div className="p-8">
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   {/* Left Column - Booking Form */}
                   <div className="space-y-6">
                     {/* Patient Information */}
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Patient Information</h3>
+                    <div className="bg-gradient-to-br from-blue-50 to-white rounded-2xl shadow-lg border-2 border-blue-100 p-6">
+                      <div className="flex items-center space-x-3 mb-6">
+                        <div className="p-2 bg-blue-100 rounded-lg">
+                          <User className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-900">Patient Information</h3>
+                      </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">Patient Name</label>
@@ -704,8 +759,13 @@ export default function ICUReservationSystem() {
                   {/* Right Column - Summary */}
                   <div className="space-y-6">
                     {/* Booking Summary */}
-                    <div className="bg-blue-50 rounded-lg p-4">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Booking Summary</h3>
+                    <div className="bg-gradient-to-br from-green-50 to-white rounded-2xl shadow-lg border-2 border-green-100 p-6">
+                      <div className="flex items-center space-x-3 mb-6">
+                        <div className="p-2 bg-green-100 rounded-lg">
+                          <CalendarCheck className="w-5 h-5 text-green-600" />
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-900">Booking Summary</h3>
+                      </div>
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
                           <span className="text-gray-600">Hospital:</span>
@@ -748,23 +808,23 @@ export default function ICUReservationSystem() {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                       <button
-                        className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2 font-semibold"
+                        className="w-full bg-gradient-to-r from-blue-600 to-teal-600 text-white py-4 px-6 rounded-xl hover:from-blue-700 hover:to-teal-700 transition-all flex items-center justify-center space-x-3 font-bold text-lg shadow-lg hover:shadow-xl transform hover:scale-105"
                         onClick={() => {
                           alert('ICU bed reservation confirmed!')
                           setShowBookingModal(false)
                         }}
                       >
-                        <CreditCard className="w-5 h-5" />
+                        <CreditCard className="w-6 h-6" />
                         <span>Confirm Reservation - ${calculateTotalCost()}</span>
                       </button>
                       
                       <button
                         onClick={() => setShowBookingModal(false)}
-                        className="w-full border border-gray-300 text-gray-700 py-3 px-6 rounded-lg hover:bg-gray-50 transition-colors"
+                        className="w-full border-2 border-gray-300 text-gray-700 py-3 px-6 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all font-semibold"
                       >
-                        Cancel
+                        Cancel Booking
                       </button>
                     </div>
                   </div>

@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
 import { Menu, X, Heart, Calendar, FileText, Users, AlertCircle, User, LogOut } from 'lucide-react'
+import { useUser } from '@/contexts/UserContext'
 import Sidebar from './Sidebar'
 
 const Navigation = () => {
@@ -12,6 +13,7 @@ const Navigation = () => {
   const [showUserMenu, setShowUserMenu] = useState(false)
   const pathname = usePathname()
   const { data: session, status } = useSession()
+  const { user } = useUser()
 
   const isActive = (href: string) => pathname === href
 
@@ -39,7 +41,7 @@ const Navigation = () => {
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
               </div>
               <div className="flex flex-col">
-                <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">MediMitra</span>
+                <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">MediMitro</span>
                 <span className="text-xs text-gray-500 -mt-1">Health Companion</span>
               </div>
             </Link>
@@ -82,7 +84,7 @@ const Navigation = () => {
                       <User className="w-4 h-4 text-white" />
                     </div>
                     <span className="hidden sm:block text-sm font-medium text-gray-700">
-                      {session.user?.name || session.user?.email}
+                      {user?.name || session.user?.name || session.user?.email}
                     </span>
                   </button>
                   
@@ -154,7 +156,7 @@ const Navigation = () => {
               <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-green-500 rounded-lg flex items-center justify-center">
                 <Heart className="w-5 h-5 text-white" />
               </div>
-              <span className="font-semibold">MediMitra</span>
+              <span className="font-semibold">MediMitro</span>
             </div>
             <button onClick={() => setDrawerOpen(false)} aria-label="Close menu" className="p-1 rounded-md hover:bg-gray-100">
               <X className="w-5 h-5" />
