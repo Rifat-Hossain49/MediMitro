@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
+import {
   BedDouble,
   CalendarCheck,
   MapPin,
@@ -110,133 +110,392 @@ export default function ICUReservationSystem() {
     setMounted(true)
   }, [])
 
-  // Mock data
+  // Real Bangladesh hospital data
   useEffect(() => {
-    const mockHospitals: Hospital[] = [
+    const bangladeshHospitals: Hospital[] = [
       {
         id: '1',
-        name: 'City General Hospital',
-        address: '123 Medical Center Drive, Downtown',
-        phone: '+1 (555) 123-4567',
-        distance: 2.3,
-        rating: 4.7,
-        totalBeds: 24,
-        availableBeds: 8,
-        facilities: ['24/7 Emergency', 'Advanced Monitoring', 'Ventilator Support', 'Cardiac Care'],
+        name: 'Dhaka Medical College Hospital',
+        address: 'Bakshibazar, Dhaka 1000, Bangladesh',
+        phone: '+880 2-7319002',
+        distance: 2.1,
+        rating: 4.6,
+        totalBeds: 32,
+        availableBeds: 12,
+        facilities: ['24/7 Emergency', 'Advanced ICU', 'Ventilator Support', 'Cardiac Care', 'Neurosurgery'],
         icuBeds: [
           {
             id: 'bed1',
-            bedNumber: 'ICU-101',
+            bedNumber: 'ICU-A101',
             type: 'general',
             status: 'available',
-            pricePerDay: 1200,
+            pricePerDay: 8000,
             facilities: ['Ventilator', 'Cardiac Monitor', 'Defibrillator', 'IV Pump']
           },
           {
             id: 'bed2',
-            bedNumber: 'ICU-102',
+            bedNumber: 'ICU-A102',
             type: 'cardiac',
             status: 'available',
-            pricePerDay: 1500,
+            pricePerDay: 12000,
             facilities: ['Advanced Cardiac Monitor', 'ECMO', 'Balloon Pump', 'Ventilator']
           },
           {
             id: 'bed3',
-            bedNumber: 'ICU-103',
+            bedNumber: 'ICU-A103',
             type: 'neuro',
             status: 'available',
-            pricePerDay: 1400,
+            pricePerDay: 10000,
             facilities: ['Neuro Monitor', 'ICP Monitor', 'Ventilator', 'EEG']
+          },
+          {
+            id: 'bed4',
+            bedNumber: 'ICU-A104',
+            type: 'general',
+            status: 'available',
+            pricePerDay: 8000,
+            facilities: ['Ventilator', 'Monitor', 'IV Pump', 'Dialysis Support']
           }
         ],
         doctors: [
           {
             id: 'doc1',
-            name: 'Dr. Sarah Johnson',
+            name: 'Prof. Dr. Mohammad Shahidullah',
             specialty: 'Critical Care Medicine',
-            experience: 12,
-            rating: 4.9,
+            experience: 25,
+            rating: 4.8,
             availability: 'available'
           },
           {
             id: 'doc2',
-            name: 'Dr. Michael Chen',
+            name: 'Dr. Rashida Begum',
             specialty: 'Cardiothoracic Surgery',
-            experience: 15,
-            rating: 4.8,
+            experience: 18,
+            rating: 4.7,
             availability: 'available'
-          }
-        ],
-        nurses: [
-          {
-            id: 'nurse1',
-            name: 'Jennifer Martinez',
-            experience: 8,
-            specialty: 'Critical Care',
-            shift: 'day',
-            rating: 4.8
           },
           {
-            id: 'nurse2',
-            name: 'Robert Wilson',
-            experience: 6,
-            specialty: 'Cardiac Care',
-            shift: 'night',
-            rating: 4.6
-          }
-        ]
-      },
-      {
-        id: '2',
-        name: 'Mercy Medical Center',
-        address: '456 Healthcare Boulevard, Midtown',
-        phone: '+1 (555) 234-5678',
-        distance: 4.1,
-        rating: 4.5,
-        totalBeds: 18,
-        availableBeds: 3,
-        facilities: ['Emergency Care', 'Advanced ICU', 'Surgical Services', 'Radiology'],
-        icuBeds: [
-          {
-            id: 'bed4',
-            bedNumber: 'ICU-201',
-            type: 'general',
-            status: 'available',
-            pricePerDay: 1100,
-            facilities: ['Ventilator', 'Monitor', 'IV Pump']
-          },
-          {
-            id: 'bed5',
-            bedNumber: 'ICU-202',
-            type: 'pediatric',
-            status: 'available',
-            pricePerDay: 1300,
-            facilities: ['Pediatric Ventilator', 'Specialized Monitor', 'Warmer']
-          }
-        ],
-        doctors: [
-          {
-            id: 'doc4',
-            name: 'Dr. David Park',
-            specialty: 'Pulmonology',
-            experience: 14,
+            id: 'doc3',
+            name: 'Dr. Aminul Islam',
+            specialty: 'Neurosurgery',
+            experience: 20,
             rating: 4.6,
             availability: 'available'
           }
         ],
         nurses: [
           {
-            id: 'nurse4',
-            name: 'Amanda Davis',
-            experience: 7,
-            specialty: 'Pediatric Care',
+            id: 'nurse1',
+            name: 'Fatima Khatun',
+            experience: 12,
+            specialty: 'Critical Care',
             shift: 'day',
             rating: 4.7
+          },
+          {
+            id: 'nurse2',
+            name: 'Shahana Begum',
+            experience: 9,
+            specialty: 'Cardiac Care',
+            shift: 'night',
+            rating: 4.5
+          },
+          {
+            id: 'nurse3',
+            name: 'Nasreen Akter',
+            experience: 15,
+            specialty: 'ICU Nursing',
+            shift: 'both',
+            rating: 4.8
+          }
+        ]
+      },
+      {
+        id: '2',
+        name: 'Bangabandhu Sheikh Mujib Medical University Hospital',
+        address: 'Shahbag, Dhaka 1000, Bangladesh',
+        phone: '+880 2-9661064',
+        distance: 3.2,
+        rating: 4.8,
+        totalBeds: 28,
+        availableBeds: 8,
+        facilities: ['24/7 Emergency', 'Advanced ICU', 'Cardiac Surgery', 'Neurosurgery', 'Transplant Unit'],
+        icuBeds: [
+          {
+            id: 'bed5',
+            bedNumber: 'BSMMU-ICU-201',
+            type: 'cardiac',
+            status: 'available',
+            pricePerDay: 15000,
+            facilities: ['Advanced Cardiac Monitor', 'ECMO', 'IABP', 'Ventilator', 'Dialysis']
+          },
+          {
+            id: 'bed6',
+            bedNumber: 'BSMMU-ICU-202',
+            type: 'neuro',
+            status: 'available',
+            pricePerDay: 13000,
+            facilities: ['Neuro Monitor', 'ICP Monitor', 'Ventilator', 'EEG', 'CT Scanner Access']
+          },
+          {
+            id: 'bed7',
+            bedNumber: 'BSMMU-ICU-203',
+            type: 'general',
+            status: 'available',
+            pricePerDay: 10000,
+            facilities: ['Ventilator', 'Monitor', 'IV Pump', 'CRRT']
+          }
+        ],
+        doctors: [
+          {
+            id: 'doc4',
+            name: 'Prof. Dr. Kanak Kanti Barua',
+            specialty: 'Cardiac Surgery',
+            experience: 30,
+            rating: 4.9,
+            availability: 'available'
+          },
+          {
+            id: 'doc5',
+            name: 'Prof. Dr. Quazi Deen Mohammad',
+            specialty: 'Neurology',
+            experience: 28,
+            rating: 4.8,
+            availability: 'available'
+          }
+        ],
+        nurses: [
+          {
+            id: 'nurse4',
+            name: 'Ruma Akter',
+            experience: 14,
+            specialty: 'Cardiac ICU',
+            shift: 'day',
+            rating: 4.8
+          },
+          {
+            id: 'nurse5',
+            name: 'Salma Begum',
+            experience: 11,
+            specialty: 'Neuro ICU',
+            shift: 'night',
+            rating: 4.6
+          }
+        ]
+      },
+      {
+        id: '3',
+        name: 'Square Hospitals Limited',
+        address: '18/F, Bir Uttam Qazi Nuruzzaman Sarak, West Panthapath, Dhaka 1205',
+        phone: '+880 2-8159457',
+        distance: 4.5,
+        rating: 4.7,
+        totalBeds: 20,
+        availableBeds: 6,
+        facilities: ['24/7 Emergency', 'Premium ICU', 'Cardiac Care', 'Advanced Diagnostics', 'International Standards'],
+        icuBeds: [
+          {
+            id: 'bed8',
+            bedNumber: 'SQ-ICU-301',
+            type: 'general',
+            status: 'available',
+            pricePerDay: 18000,
+            facilities: ['Premium Ventilator', 'Advanced Monitor', 'Defibrillator', 'IV Pump']
+          },
+          {
+            id: 'bed9',
+            bedNumber: 'SQ-ICU-302',
+            type: 'cardiac',
+            status: 'available',
+            pricePerDay: 25000,
+            facilities: ['State-of-art Cardiac Monitor', 'ECMO', 'IABP', 'Premium Ventilator']
+          }
+        ],
+        doctors: [
+          {
+            id: 'doc6',
+            name: 'Dr. A.K.M. Manzurul Alam',
+            specialty: 'Critical Care Medicine',
+            experience: 22,
+            rating: 4.8,
+            availability: 'available'
+          },
+          {
+            id: 'doc7',
+            name: 'Dr. Masuda Begum',
+            specialty: 'Cardiology',
+            experience: 19,
+            rating: 4.7,
+            availability: 'available'
+          }
+        ],
+        nurses: [
+          {
+            id: 'nurse6',
+            name: 'Rashida Khatun',
+            experience: 13,
+            specialty: 'Critical Care',
+            shift: 'day',
+            rating: 4.9
+          },
+          {
+            id: 'nurse7',
+            name: 'Hosne Ara',
+            experience: 10,
+            specialty: 'Cardiac Care',
+            shift: 'night',
+            rating: 4.7
+          }
+        ]
+      },
+      {
+        id: '4',
+        name: 'United Hospital Limited',
+        address: 'Plot 15, Road 71, Gulshan 2, Dhaka 1212, Bangladesh',
+        phone: '+880 2-8836444',
+        distance: 6.8,
+        rating: 4.8,
+        totalBeds: 24,
+        availableBeds: 5,
+        facilities: ['24/7 Emergency', 'Premium ICU', 'Cardiac Surgery', 'Neurosurgery', 'JCI Accredited'],
+        icuBeds: [
+          {
+            id: 'bed10',
+            bedNumber: 'UH-ICU-401',
+            type: 'general',
+            status: 'available',
+            pricePerDay: 20000,
+            facilities: ['Premium Ventilator', 'Advanced Monitor', 'Defibrillator', 'CRRT']
+          },
+          {
+            id: 'bed11',
+            bedNumber: 'UH-ICU-402',
+            type: 'cardiac',
+            status: 'available',
+            pricePerDay: 28000,
+            facilities: ['Advanced Cardiac Monitor', 'ECMO', 'IABP', 'Premium Ventilator', 'Dialysis']
+          },
+          {
+            id: 'bed12',
+            bedNumber: 'UH-ICU-403',
+            type: 'pediatric',
+            status: 'available',
+            pricePerDay: 22000,
+            facilities: ['Pediatric Ventilator', 'Specialized Monitor', 'Warmer', 'ECMO']
+          }
+        ],
+        doctors: [
+          {
+            id: 'doc8',
+            name: 'Prof. Dr. Samanta Lal Sen',
+            specialty: 'Cardiac Surgery',
+            experience: 35,
+            rating: 4.9,
+            availability: 'available'
+          },
+          {
+            id: 'doc9',
+            name: 'Dr. Dipti Rani Das',
+            specialty: 'Pediatric ICU',
+            experience: 16,
+            rating: 4.7,
+            availability: 'available'
+          }
+        ],
+        nurses: [
+          {
+            id: 'nurse8',
+            name: 'Shirin Akter',
+            experience: 16,
+            specialty: 'Cardiac ICU',
+            shift: 'day',
+            rating: 4.8
+          },
+          {
+            id: 'nurse9',
+            name: 'Mahmuda Khatun',
+            experience: 12,
+            specialty: 'Pediatric ICU',
+            shift: 'both',
+            rating: 4.7
+          }
+        ]
+      },
+      {
+        id: '5',
+        name: 'Apollo Hospitals Dhaka',
+        address: 'Plot 81, Block E, Bashundhara R/A, Dhaka 1229, Bangladesh',
+        phone: '+880 2-8401661',
+        distance: 8.2,
+        rating: 4.9,
+        totalBeds: 30,
+        availableBeds: 7,
+        facilities: ['24/7 Emergency', 'Premium ICU', 'Cardiac Surgery', 'Neurosurgery', 'Transplant', 'International Standards'],
+        icuBeds: [
+          {
+            id: 'bed13',
+            bedNumber: 'APL-ICU-501',
+            type: 'general',
+            status: 'available',
+            pricePerDay: 22000,
+            facilities: ['Premium Ventilator', 'Advanced Monitor', 'Defibrillator', 'CRRT', 'ECMO']
+          },
+          {
+            id: 'bed14',
+            bedNumber: 'APL-ICU-502',
+            type: 'cardiac',
+            status: 'available',
+            pricePerDay: 30000,
+            facilities: ['State-of-art Cardiac Monitor', 'ECMO', 'IABP', 'Premium Ventilator', 'Dialysis']
+          },
+          {
+            id: 'bed15',
+            bedNumber: 'APL-ICU-503',
+            type: 'neuro',
+            status: 'available',
+            pricePerDay: 25000,
+            facilities: ['Advanced Neuro Monitor', 'ICP Monitor', 'Premium Ventilator', 'EEG', 'MRI Access']
+          }
+        ],
+        doctors: [
+          {
+            id: 'doc10',
+            name: 'Prof. Dr. Afiqul Islam',
+            specialty: 'Cardiac Surgery',
+            experience: 32,
+            rating: 4.9,
+            availability: 'available'
+          },
+          {
+            id: 'doc11',
+            name: 'Dr. Badrul Alam Mondal',
+            specialty: 'Neurosurgery',
+            experience: 24,
+            rating: 4.8,
+            availability: 'available'
+          }
+        ],
+        nurses: [
+          {
+            id: 'nurse10',
+            name: 'Taslima Begum',
+            experience: 18,
+            specialty: 'Critical Care',
+            shift: 'day',
+            rating: 4.9
+          },
+          {
+            id: 'nurse11',
+            name: 'Rehana Parvin',
+            experience: 14,
+            specialty: 'Cardiac ICU',
+            shift: 'night',
+            rating: 4.8
           }
         ]
       }
     ]
-    setHospitals(mockHospitals)
+    setHospitals(bangladeshHospitals)
   }, [])
 
   // Real-time updates simulation
@@ -273,7 +532,7 @@ export default function ICUReservationSystem() {
   const calculateTotalCost = () => {
     if (!selectedBed) return 0
     const bedCost = selectedBed.pricePerDay * bookingDetails.expectedDays
-    const nurseCost = bookingDetails.selectedNurses.length * 200 * bookingDetails.expectedDays
+    const nurseCost = bookingDetails.selectedNurses.length * 2000 * bookingDetails.expectedDays
     return bedCost + nurseCost
   }
 
@@ -296,7 +555,7 @@ export default function ICUReservationSystem() {
     }
   }
 
-  const filteredHospitals = hospitals.filter(hospital => 
+  const filteredHospitals = hospitals.filter(hospital =>
     hospital.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     hospital.address.toLowerCase().includes(searchTerm.toLowerCase())
   )
@@ -322,7 +581,7 @@ export default function ICUReservationSystem() {
                     <p className="text-xl text-blue-100 mt-2">Real-time availability with specialized medical care</p>
                   </div>
                 </div>
-                
+
                 {/* Real-time Stats */}
                 <div className="flex items-center space-x-8 mt-6">
                   <div className="flex items-center space-x-2">
@@ -339,7 +598,7 @@ export default function ICUReservationSystem() {
                   </div>
                 </div>
               </div>
-              
+
               {/* Live Update Card */}
               <div className="hidden lg:block">
                 <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-6 text-center">
@@ -473,7 +732,7 @@ export default function ICUReservationSystem() {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="text-right">
                     <div className="text-lg font-bold text-green-600">{hospital.availableBeds}</div>
                     <div className="text-xs text-gray-600">Available Beds</div>
@@ -499,7 +758,7 @@ export default function ICUReservationSystem() {
                   <BedDouble className="w-5 h-5" />
                   <span>Available ICU Beds</span>
                 </h4>
-                
+
                 {hospital.icuBeds.filter(bed => bed.status === 'available').length === 0 ? (
                   <div className="text-center py-8 text-gray-500">
                     <BedDouble className="w-12 h-12 mx-auto mb-3 text-gray-300" />
@@ -510,11 +769,11 @@ export default function ICUReservationSystem() {
                     {hospital.icuBeds
                       .filter(bed => bed.status === 'available')
                       .map((bed) => (
-                          <motion.div
-                            key={bed.id}
-                            whileHover={{ scale: 1.02 }}
-                            className="group bg-white border-2 border-gray-200 rounded-xl p-6 hover:shadow-lg transition-all hover:border-blue-300 transform hover:scale-105"
-                          >
+                        <motion.div
+                          key={bed.id}
+                          whileHover={{ scale: 1.02 }}
+                          className="group bg-white border-2 border-gray-200 rounded-xl p-6 hover:shadow-lg transition-all hover:border-blue-300 transform hover:scale-105"
+                        >
                           <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center space-x-2">
                               {getBedTypeIcon(bed.type)}
@@ -524,10 +783,10 @@ export default function ICUReservationSystem() {
                               {bed.type.toUpperCase()}
                             </span>
                           </div>
-                          
+
                           <div className="space-y-2 mb-4">
                             <div className="text-lg font-bold text-green-600">
-                              ${bed.pricePerDay}/day
+                              ৳{bed.pricePerDay.toLocaleString()}/day
                             </div>
                           </div>
 
@@ -553,7 +812,7 @@ export default function ICUReservationSystem() {
                       ))}
                   </div>
                 )}
-            </div>
+              </div>
             </motion.div>
           ))}
         </div>
@@ -661,9 +920,9 @@ export default function ICUReservationSystem() {
                           </label>
                           <div className="flex items-center space-x-4">
                             <button
-                              onClick={() => setBookingDetails(prev => ({ 
-                                ...prev, 
-                                expectedDays: Math.max(1, prev.expectedDays - 1) 
+                              onClick={() => setBookingDetails(prev => ({
+                                ...prev,
+                                expectedDays: Math.max(1, prev.expectedDays - 1)
                               }))}
                               className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                             >
@@ -671,9 +930,9 @@ export default function ICUReservationSystem() {
                             </button>
                             <span className="flex-1 text-center font-medium">{bookingDetails.expectedDays} days</span>
                             <button
-                              onClick={() => setBookingDetails(prev => ({ 
-                                ...prev, 
-                                expectedDays: prev.expectedDays + 1 
+                              onClick={() => setBookingDetails(prev => ({
+                                ...prev,
+                                expectedDays: prev.expectedDays + 1
                               }))}
                               className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                             >
@@ -692,11 +951,10 @@ export default function ICUReservationSystem() {
                           <motion.div
                             key={doctor.id}
                             whileHover={{ scale: 1.02 }}
-                            className={`p-3 border rounded-lg cursor-pointer transition-all ${
-                              bookingDetails.selectedDoctor?.id === doctor.id
+                            className={`p-3 border rounded-lg cursor-pointer transition-all ${bookingDetails.selectedDoctor?.id === doctor.id
                                 ? 'border-blue-500 bg-blue-50'
                                 : 'border-gray-200 hover:border-gray-300'
-                            }`}
+                              }`}
                             onClick={() => setBookingDetails(prev => ({ ...prev, selectedDoctor: doctor }))}
                           >
                             <div className="flex items-center justify-between">
@@ -711,11 +969,10 @@ export default function ICUReservationSystem() {
                                   </div>
                                 </div>
                               </div>
-                              <span className={`px-2 py-1 text-xs rounded-full ${
-                                doctor.availability === 'available' 
+                              <span className={`px-2 py-1 text-xs rounded-full ${doctor.availability === 'available'
                                   ? 'bg-green-100 text-green-800'
                                   : 'bg-yellow-100 text-yellow-800'
-                              }`}>
+                                }`}>
                                 {doctor.availability}
                               </span>
                             </div>
@@ -732,11 +989,10 @@ export default function ICUReservationSystem() {
                           <motion.div
                             key={nurse.id}
                             whileHover={{ scale: 1.02 }}
-                            className={`p-3 border rounded-lg cursor-pointer transition-all ${
-                              bookingDetails.selectedNurses.some(n => n.id === nurse.id)
+                            className={`p-3 border rounded-lg cursor-pointer transition-all ${bookingDetails.selectedNurses.some(n => n.id === nurse.id)
                                 ? 'border-blue-500 bg-blue-50'
                                 : 'border-gray-200 hover:border-gray-300'
-                            }`}
+                              }`}
                             onClick={() => handleNurseSelection(nurse)}
                           >
                             <div className="flex items-center justify-between">
@@ -748,7 +1004,7 @@ export default function ICUReservationSystem() {
                                   <span className="text-xs text-gray-500">{nurse.shift} shift</span>
                                 </div>
                               </div>
-                              <div className="text-sm text-gray-600">+$200/day</div>
+                              <div className="text-sm text-gray-600">+৳2,000/day</div>
                             </div>
                           </motion.div>
                         ))}
@@ -781,7 +1037,7 @@ export default function ICUReservationSystem() {
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="text-gray-600">Daily Rate:</span>
-                          <span className="font-semibold">${selectedBed.pricePerDay}</span>
+                          <span className="font-semibold">৳{selectedBed.pricePerDay.toLocaleString()}</span>
                         </div>
                       </div>
                     </div>
@@ -792,17 +1048,17 @@ export default function ICUReservationSystem() {
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
                           <span className="text-gray-600">ICU Bed ({bookingDetails.expectedDays} days):</span>
-                          <span className="font-semibold">${selectedBed.pricePerDay * bookingDetails.expectedDays}</span>
+                          <span className="font-semibold">৳{(selectedBed.pricePerDay * bookingDetails.expectedDays).toLocaleString()}</span>
                         </div>
                         {bookingDetails.selectedNurses.length > 0 && (
                           <div className="flex items-center justify-between">
                             <span className="text-gray-600">Nurses ({bookingDetails.selectedNurses.length} × {bookingDetails.expectedDays} days):</span>
-                            <span className="font-semibold">${bookingDetails.selectedNurses.length * 200 * bookingDetails.expectedDays}</span>
+                            <span className="font-semibold">৳{(bookingDetails.selectedNurses.length * 2000 * bookingDetails.expectedDays).toLocaleString()}</span>
                           </div>
                         )}
                         <div className="border-t border-yellow-200 pt-3 flex items-center justify-between">
                           <span className="text-lg font-semibold text-gray-900">Total Cost:</span>
-                          <span className="text-xl font-bold text-green-600">${calculateTotalCost()}</span>
+                          <span className="text-xl font-bold text-green-600">৳{calculateTotalCost().toLocaleString()}</span>
                         </div>
                       </div>
                     </div>
@@ -817,9 +1073,9 @@ export default function ICUReservationSystem() {
                         }}
                       >
                         <CreditCard className="w-6 h-6" />
-                        <span>Confirm Reservation - ${calculateTotalCost()}</span>
+                        <span>Confirm Reservation - ৳{calculateTotalCost().toLocaleString()}</span>
                       </button>
-                      
+
                       <button
                         onClick={() => setShowBookingModal(false)}
                         className="w-full border-2 border-gray-300 text-gray-700 py-3 px-6 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all font-semibold"

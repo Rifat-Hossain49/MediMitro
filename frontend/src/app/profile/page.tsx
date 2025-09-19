@@ -4,10 +4,10 @@ import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useUser } from '@/contexts/UserContext'
 import { profileService, ProfileStats } from '@/lib/profileService'
-import { 
-  User, 
-  Calendar, 
-  Edit, 
+import {
+  User,
+  Calendar,
+  Edit,
   X,
   Shield,
   Heart,
@@ -87,13 +87,6 @@ export default function ProfilePage() {
     emergencyContacts: []
   })
 
-  const [notifications, setNotifications] = useState({
-    emailNotifications: true,
-    smsNotifications: false,
-    appointmentReminders: true,
-    medicationReminders: true,
-    healthTips: true
-  })
 
   // Load user data when user changes
   useEffect(() => {
@@ -102,7 +95,7 @@ export default function ProfilePage() {
       const nameParts = user.name?.split(' ') || ['', '']
       const firstName = nameParts[0] || ''
       const lastName = nameParts.slice(1).join(' ') || ''
-      
+
       // Parse address
       const addressParts = user.address?.split(', ') || ['', '', '']
       const address = addressParts[0] || ''
@@ -141,7 +134,7 @@ export default function ProfilePage() {
         console.error('Failed to load profile stats:', error)
       }
     }
-    
+
     if (user) {
       loadStats()
     }
@@ -151,15 +144,13 @@ export default function ProfilePage() {
     { id: 'overview', name: 'Overview', icon: User, color: 'blue' },
     { id: 'personal', name: 'Personal Info', icon: UserCheck, color: 'green' },
     { id: 'medical', name: 'Medical Info', icon: Stethoscope, color: 'red' },
-    { id: 'security', name: 'Security', icon: Shield, color: 'orange' },
-    { id: 'notifications', name: 'Notifications', icon: Bell, color: 'indigo' },
-    { id: 'preferences', name: 'Preferences', icon: Settings, color: 'gray' }
+    { id: 'security', name: 'Security', icon: Shield, color: 'orange' }
   ]
 
   // Auto-save function with debouncing
   const autoSave = useCallback(async (updates: any) => {
     if (!autoSaveEnabled || !user) return
-    
+
     try {
       setSaveStatus('saving')
       await profileService.autoSaveProfile(updates, 1500)
@@ -173,12 +164,12 @@ export default function ProfilePage() {
 
   const handleSave = async (section: string) => {
     if (!user) return
-    
+
     try {
       setSaveStatus('saving')
-      
+
       let updates: any = {}
-      
+
       if (section === 'personal') {
         updates = {
           name: `${personalInfo.firstName} ${personalInfo.lastName}`.trim(),
@@ -207,11 +198,11 @@ export default function ProfilePage() {
       setSaveStatus('saved')
       setEditingSection(null)
       setTimeout(() => setSaveStatus('idle'), 2000)
-      
+
       // Refresh stats after update
       const stats = await profileService.getProfileStats()
       setProfileStats(stats)
-      
+
     } catch (error) {
       console.error('Save failed:', error)
       setSaveStatus('idle')
@@ -249,6 +240,34 @@ export default function ProfilePage() {
     }
   }
 
+  const handleProfilePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    try {
+      setSaveStatus('saving')
+
+      // Create a FormData object to upload the file
+      const formData = new FormData()
+      formData.append('profilePhoto', file)
+
+      // For now, we'll simulate the upload and show a success message
+      // In a real implementation, you would upload to your storage service (Appwrite, etc.)
+      console.log('Uploading profile photo:', file.name)
+
+      // Simulate upload delay
+      await new Promise(resolve => setTimeout(resolve, 2000))
+
+      setSaveStatus('saved')
+      setTimeout(() => setSaveStatus('idle'), 2000)
+
+    } catch (error) {
+      console.error('Profile photo upload failed:', error)
+      setSaveStatus('idle')
+      // Show error to user (you could add a toast notification here)
+    }
+  }
+
   // Show loading state
   if (userLoading) {
     return (
@@ -272,13 +291,13 @@ export default function ProfilePage() {
         >
           {/* Background Gradient */}
           <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-3xl blur-3xl opacity-20"></div>
-          
+
           {/* Header Content */}
           <div className="relative bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-3xl p-8 text-white shadow-2xl">
             <div className="flex flex-col lg:flex-row items-center justify-between">
               <div className="text-center lg:text-left mb-6 lg:mb-0">
                 <div className="flex items-center justify-center lg:justify-start mb-4">
-                  <motion.div 
+                  <motion.div
                     whileHover={{ rotate: 360, scale: 1.1 }}
                     transition={{ duration: 0.5 }}
                     className="p-4 bg-white/20 backdrop-blur-sm rounded-2xl mr-4"
@@ -295,29 +314,29 @@ export default function ProfilePage() {
                   </div>
                 </div>
               </div>
-              
+
               {/* Quick Stats */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
-                  { 
-                    label: 'Profile Complete', 
-                    value: profileStats ? `${profileStats.profileCompletion}%` : '...', 
-                    icon: UserCheck 
+                  {
+                    label: 'Profile Complete',
+                    value: profileStats ? `${profileStats.profileCompletion}%` : '...',
+                    icon: UserCheck
                   },
-                  { 
-                    label: 'Active Since', 
-                    value: user ? new Date(user.createdAt).getFullYear().toString() : '...', 
-                    icon: Calendar 
+                  {
+                    label: 'Active Since',
+                    value: user ? new Date(user.createdAt).getFullYear().toString() : '...',
+                    icon: Calendar
                   },
-                  { 
-                    label: 'Last Update', 
-                    value: user ? profileService.formatDate(user.updatedAt) : '...', 
-                    icon: Settings 
+                  {
+                    label: 'Last Update',
+                    value: user ? profileService.formatDate(user.updatedAt) : '...',
+                    icon: Settings
                   },
-                  { 
-                    label: 'Security', 
-                    value: user?.emailVerified ? 'High' : 'Medium', 
-                    icon: Shield 
+                  {
+                    label: 'Security',
+                    value: user?.emailVerified ? 'High' : 'Medium',
+                    icon: Shield
                   }
                 ].map((stat, index) => (
                   <motion.div
@@ -342,32 +361,40 @@ export default function ProfilePage() {
           {/* Enhanced Sidebar Navigation */}
           <div className="lg:col-span-1 space-y-6">
             {/* Profile Card */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               className="relative"
             >
               {/* Background Gradient */}
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-2xl blur-2xl opacity-20"></div>
-              
+
               <div className={`relative rounded-2xl shadow-xl border backdrop-blur-sm ${isDarkMode ? 'bg-gray-800/80 border-gray-700' : 'bg-white/80 border-gray-100'}`}>
                 <div className="p-6">
                   <div className="text-center mb-6">
                     <div className="relative inline-block mb-4">
-                      <motion.div 
+                      <motion.div
                         whileHover={{ scale: 1.05, rotate: 5 }}
                         transition={{ duration: 0.3 }}
                         className="w-28 h-28 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg"
                       >
                         <User className="w-14 h-14 text-white" />
                       </motion.div>
-                      <motion.button 
+                      <motion.button
                         whileHover={{ scale: 1.2 }}
                         whileTap={{ scale: 0.9 }}
+                        onClick={() => document.getElementById('profile-photo-upload')?.click()}
                         className="absolute bottom-0 right-0 p-3 rounded-full shadow-lg border-2 bg-gradient-to-r from-blue-500 to-purple-600 border-white hover:from-blue-600 hover:to-purple-700 transition-all"
                       >
                         <Camera className="w-4 h-4 text-white" />
                       </motion.button>
+                      <input
+                        id="profile-photo-upload"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleProfilePhotoUpload}
+                      />
                     </div>
                     <h2 className={`text-xl font-bold mb-1 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                       {user?.name || 'Loading...'}
@@ -375,8 +402,8 @@ export default function ProfilePage() {
                     <p className={`text-sm mb-4 font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                       Patient ID: #{user?.id || '...'}
                     </p>
-                    
-                    <motion.div 
+
+                    <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       transition={{ delay: 0.3 }}
@@ -393,7 +420,7 @@ export default function ProfilePage() {
             </motion.div>
 
             {/* Navigation Menu */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 }}
@@ -413,13 +440,12 @@ export default function ProfilePage() {
                       whileHover={{ scale: 1.02, x: 4 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => setActiveSection(section.id)}
-                      className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left font-medium transition-all duration-200 ${
-                        activeSection === section.id
+                      className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left font-medium transition-all duration-200 ${activeSection === section.id
                           ? `bg-gradient-to-r from-${section.color}-100 to-${section.color}-50 text-${section.color}-700 border-2 border-${section.color}-200 shadow-lg`
                           : isDarkMode
-                          ? 'text-gray-300 hover:bg-gray-700/50 hover:text-white'
-                          : 'text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 hover:text-blue-600'
-                      }`}
+                            ? 'text-gray-300 hover:bg-gray-700/50 hover:text-white'
+                            : 'text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 hover:text-blue-600'
+                        }`}
                     >
                       <motion.div
                         whileHover={{ rotate: 10 }}
@@ -429,7 +455,7 @@ export default function ProfilePage() {
                       </motion.div>
                       <span>{section.name}</span>
                       {editingSection === section.id && (
-                        <motion.div 
+                        <motion.div
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
                           className="ml-auto"
@@ -443,48 +469,6 @@ export default function ProfilePage() {
               </div>
             </motion.div>
 
-            {/* Enhanced Quick Actions */}
-            <motion.div 
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className={`rounded-2xl shadow-xl border backdrop-blur-sm ${isDarkMode ? 'bg-gray-800/80 border-gray-700' : 'bg-white/80 border-gray-100'}`}
-            >
-              <div className="p-6">
-                <h3 className={`text-lg font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                  Quick Actions
-                </h3>
-                <div className="space-y-3">
-                  <motion.button 
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => setIsDarkMode(!isDarkMode)}
-                    className={`w-full flex items-center space-x-3 p-3 rounded-xl text-sm font-medium transition-all ${
-                      isDarkMode 
-                        ? 'bg-gradient-to-r from-yellow-100 to-orange-100 text-orange-700 hover:from-yellow-200 hover:to-orange-200' 
-                        : 'bg-gradient-to-r from-indigo-100 to-purple-100 text-purple-700 hover:from-indigo-200 hover:to-purple-200'
-                    }`}
-                  >
-                    <motion.div
-                      whileHover={{ rotate: 180 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-                    </motion.div>
-                    <span>{isDarkMode ? 'Light Mode' : 'Dark Mode'}</span>
-                  </motion.button>
-                  
-                  <motion.button 
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="w-full flex items-center space-x-3 p-3 rounded-xl text-sm font-medium bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 hover:from-green-200 hover:to-emerald-200 transition-all"
-                  >
-                    <Settings className="w-5 h-5" />
-                    <span>Export Data</span>
-                  </motion.button>
-                </div>
-              </div>
-            </motion.div>
           </div>
 
           {/* Main Content */}
@@ -513,7 +497,7 @@ export default function ProfilePage() {
                           </p>
                         </div>
                         <div className="text-center">
-                          <motion.div 
+                          <motion.div
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
                             transition={{ delay: 0.3, type: "spring" }}
@@ -545,10 +529,10 @@ export default function ProfilePage() {
                           </motion.div>
                         </div>
                       </div>
-                      
+
                       <div className="space-y-3">
                         <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-                          <motion.div 
+                          <motion.div
                             initial={{ width: 0 }}
                             animate={{ width: profileStats ? `${profileStats.profileCompletion}%` : '0%' }}
                             transition={{ delay: 0.5, duration: 1 }}
@@ -570,27 +554,27 @@ export default function ProfilePage() {
                   {/* Enhanced Quick Stats */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {[
-                      { 
-                        icon: Calendar, 
-                        value: profileStats ? profileStats.totalAppointments.toString() : '...', 
+                      {
+                        icon: Calendar,
+                        value: profileStats ? profileStats.totalAppointments.toString() : '...',
                         label: 'Total Appointments',
                         gradient: 'from-blue-500 to-cyan-500',
                         bgGradient: 'from-blue-100 to-cyan-100',
                         change: '+2 this month',
                         trend: 'up'
                       },
-                      { 
-                        icon: Pill, 
-                        value: profileStats ? profileStats.activeMedications.toString() : '...', 
+                      {
+                        icon: Pill,
+                        value: profileStats ? profileStats.activeMedications.toString() : '...',
                         label: 'Active Medications',
                         gradient: 'from-green-500 to-emerald-500',
                         bgGradient: 'from-green-100 to-emerald-100',
                         change: '1 updated',
                         trend: 'neutral'
                       },
-                      { 
-                        icon: FileText, 
-                        value: profileStats ? profileStats.healthRecords.toString() : '...', 
+                      {
+                        icon: FileText,
+                        value: profileStats ? profileStats.healthRecords.toString() : '...',
                         label: 'Health Records',
                         gradient: 'from-purple-500 to-pink-500',
                         bgGradient: 'from-purple-100 to-pink-100',
@@ -608,14 +592,14 @@ export default function ProfilePage() {
                       >
                         <div className={`absolute inset-0 bg-gradient-to-br ${stat.gradient} rounded-2xl blur-xl opacity-20 group-hover:opacity-30 transition-opacity`}></div>
                         <div className={`relative rounded-2xl shadow-xl border backdrop-blur-sm p-6 text-center ${isDarkMode ? 'bg-gray-800/80 border-gray-700' : 'bg-white/80 border-gray-100'}`}>
-                          <motion.div 
+                          <motion.div
                             whileHover={{ rotate: 360, scale: 1.1 }}
                             transition={{ duration: 0.5 }}
                             className={`p-4 bg-gradient-to-br ${stat.bgGradient} rounded-2xl w-fit mx-auto mb-4 shadow-lg`}
                           >
                             <stat.icon className={`w-8 h-8 bg-gradient-to-r ${stat.gradient} bg-clip-text text-transparent`} style={{ WebkitTextFillColor: 'transparent', backgroundImage: `linear-gradient(to right, var(--tw-gradient-stops))` }} />
                           </motion.div>
-                          <motion.div 
+                          <motion.div
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
                             transition={{ delay: 0.3 + index * 0.1, type: "spring" }}
@@ -626,10 +610,9 @@ export default function ProfilePage() {
                           <div className={`text-sm font-medium mb-3 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                             {stat.label}
                           </div>
-                          <div className={`text-xs flex items-center justify-center space-x-1 ${
-                            stat.trend === 'up' ? 'text-green-600' : 
-                            stat.trend === 'down' ? 'text-red-600' : 'text-gray-500'
-                          }`}>
+                          <div className={`text-xs flex items-center justify-center space-x-1 ${stat.trend === 'up' ? 'text-green-600' :
+                              stat.trend === 'down' ? 'text-red-600' : 'text-gray-500'
+                            }`}>
                             {stat.trend === 'up' && <motion.div initial={{ y: 5 }} animate={{ y: 0 }} transition={{ repeat: Infinity, repeatType: "reverse", duration: 1 }}>↗</motion.div>}
                             {stat.trend === 'down' && <motion.div initial={{ y: -5 }} animate={{ y: 0 }} transition={{ repeat: Infinity, repeatType: "reverse", duration: 1 }}>↘</motion.div>}
                             <span>{stat.change}</span>
@@ -641,7 +624,7 @@ export default function ProfilePage() {
 
                   {/* Health Insights */}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <motion.div 
+                    <motion.div
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.4 }}
@@ -663,7 +646,7 @@ export default function ProfilePage() {
                       </div>
                     </motion.div>
 
-                    <motion.div 
+                    <motion.div
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.5 }}
@@ -673,7 +656,7 @@ export default function ProfilePage() {
                       <div className={`relative rounded-2xl shadow-xl border backdrop-blur-sm p-6 ${isDarkMode ? 'bg-gray-800/80 border-gray-700' : 'bg-white/80 border-gray-100'}`}>
                         <h4 className={`text-lg font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Quick Actions</h4>
                         <div className="space-y-3">
-                          <motion.button 
+                          <motion.button
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                             className="w-full flex items-center space-x-3 p-3 bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700 rounded-xl hover:from-purple-200 hover:to-indigo-200 transition-all"
@@ -681,7 +664,7 @@ export default function ProfilePage() {
                             <Plus className="w-5 h-5" />
                             <span className="font-medium">Add Health Data</span>
                           </motion.button>
-                          <motion.button 
+                          <motion.button
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                             className="w-full flex items-center space-x-3 p-3 bg-gradient-to-r from-orange-100 to-yellow-100 text-orange-700 rounded-xl hover:from-orange-200 hover:to-yellow-200 transition-all"
@@ -731,11 +714,10 @@ export default function ProfilePage() {
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
                           onClick={() => setEditingSection(editingSection === 'personal' ? null : 'personal')}
-                          className={`flex items-center space-x-2 px-6 py-3 rounded-xl font-semibold transition-all shadow-lg ${
-                            editingSection === 'personal'
+                          className={`flex items-center space-x-2 px-6 py-3 rounded-xl font-semibold transition-all shadow-lg ${editingSection === 'personal'
                               ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white hover:from-red-600 hover:to-pink-600'
                               : 'bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600'
-                          }`}
+                            }`}
                         >
                           {editingSection === 'personal' ? (
                             <>
@@ -752,187 +734,180 @@ export default function ProfilePage() {
                       </div>
                     </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                        First Name
-                      </label>
-                      <input
-                        type="text"
-                        value={personalInfo.firstName}
-                        onChange={(e) => {
-                          const newValue = e.target.value
-                          setPersonalInfo(prev => ({ ...prev, firstName: newValue }))
-                          if (editingSection === 'personal') {
-                            autoSave({ name: `${newValue} ${personalInfo.lastName}`.trim() })
-                          }
-                        }}
-                        disabled={editingSection !== 'personal'}
-                        className={`w-full px-3 py-2 border rounded-lg transition-colors ${
-                          editingSection === 'personal'
-                            ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500'
-                            : isDarkMode
-                            ? 'border-gray-600 bg-gray-700 text-gray-300'
-                            : 'border-gray-300 bg-gray-50 text-gray-700'
-                        }`}
-                      />
-                    </div>
-
-                    <div>
-                      <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                        Last Name
-                      </label>
-                      <input
-                        type="text"
-                        value={personalInfo.lastName}
-                        onChange={(e) => setPersonalInfo(prev => ({ ...prev, lastName: e.target.value }))}
-                        disabled={editingSection !== 'personal'}
-                        className={`w-full px-3 py-2 border rounded-lg transition-colors ${
-                          editingSection === 'personal'
-                            ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500'
-                            : isDarkMode
-                            ? 'border-gray-600 bg-gray-700 text-gray-300'
-                            : 'border-gray-300 bg-gray-50 text-gray-700'
-                        }`}
-                      />
-                    </div>
-
-                    <div>
-                      <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                        Email
-                      </label>
-                      <div className="relative">
-                        <Mail className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`} />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                          First Name
+                        </label>
                         <input
-                          type="email"
-                          value={personalInfo.email}
-                          onChange={(e) => setPersonalInfo(prev => ({ ...prev, email: e.target.value }))}
+                          type="text"
+                          value={personalInfo.firstName}
+                          onChange={(e) => {
+                            const newValue = e.target.value
+                            setPersonalInfo(prev => ({ ...prev, firstName: newValue }))
+                            if (editingSection === 'personal') {
+                              autoSave({ name: `${newValue} ${personalInfo.lastName}`.trim() })
+                            }
+                          }}
                           disabled={editingSection !== 'personal'}
-                          className={`w-full pl-10 pr-3 py-2 border rounded-lg transition-colors ${
-                            editingSection === 'personal'
+                          className={`w-full px-3 py-2 border rounded-lg transition-colors ${editingSection === 'personal'
                               ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500'
                               : isDarkMode
-                              ? 'border-gray-600 bg-gray-700 text-gray-300'
-                              : 'border-gray-300 bg-gray-50 text-gray-700'
-                          }`}
+                                ? 'border-gray-600 bg-gray-700 text-gray-300'
+                                : 'border-gray-300 bg-gray-50 text-gray-700'
+                            }`}
+                        />
+                      </div>
+
+                      <div>
+                        <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                          Last Name
+                        </label>
+                        <input
+                          type="text"
+                          value={personalInfo.lastName}
+                          onChange={(e) => setPersonalInfo(prev => ({ ...prev, lastName: e.target.value }))}
+                          disabled={editingSection !== 'personal'}
+                          className={`w-full px-3 py-2 border rounded-lg transition-colors ${editingSection === 'personal'
+                              ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500'
+                              : isDarkMode
+                                ? 'border-gray-600 bg-gray-700 text-gray-300'
+                                : 'border-gray-300 bg-gray-50 text-gray-700'
+                            }`}
+                        />
+                      </div>
+
+                      <div>
+                        <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                          Email
+                        </label>
+                        <div className="relative">
+                          <Mail className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`} />
+                          <input
+                            type="email"
+                            value={personalInfo.email}
+                            onChange={(e) => setPersonalInfo(prev => ({ ...prev, email: e.target.value }))}
+                            disabled={editingSection !== 'personal'}
+                            className={`w-full pl-10 pr-3 py-2 border rounded-lg transition-colors ${editingSection === 'personal'
+                                ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500'
+                                : isDarkMode
+                                  ? 'border-gray-600 bg-gray-700 text-gray-300'
+                                  : 'border-gray-300 bg-gray-50 text-gray-700'
+                              }`}
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                          Phone
+                        </label>
+                        <div className="relative">
+                          <Phone className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`} />
+                          <input
+                            type="tel"
+                            value={personalInfo.phone}
+                            onChange={(e) => setPersonalInfo(prev => ({ ...prev, phone: e.target.value }))}
+                            disabled={editingSection !== 'personal'}
+                            className={`w-full pl-10 pr-3 py-2 border rounded-lg transition-colors ${editingSection === 'personal'
+                                ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500'
+                                : isDarkMode
+                                  ? 'border-gray-600 bg-gray-700 text-gray-300'
+                                  : 'border-gray-300 bg-gray-50 text-gray-700'
+                              }`}
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                          Date of Birth
+                        </label>
+                        <input
+                          type="date"
+                          value={personalInfo.dateOfBirth}
+                          onChange={(e) => setPersonalInfo(prev => ({ ...prev, dateOfBirth: e.target.value }))}
+                          disabled={editingSection !== 'personal'}
+                          className={`w-full px-3 py-2 border rounded-lg transition-colors ${editingSection === 'personal'
+                              ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500'
+                              : isDarkMode
+                                ? 'border-gray-600 bg-gray-700 text-gray-300'
+                                : 'border-gray-300 bg-gray-50 text-gray-700'
+                            }`}
+                        />
+                      </div>
+
+                      <div>
+                        <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                          Gender
+                        </label>
+                        <select
+                          value={personalInfo.gender}
+                          onChange={(e) => setPersonalInfo(prev => ({ ...prev, gender: e.target.value }))}
+                          disabled={editingSection !== 'personal'}
+                          className={`w-full px-3 py-2 border rounded-lg transition-colors ${editingSection === 'personal'
+                              ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500'
+                              : isDarkMode
+                                ? 'border-gray-600 bg-gray-700 text-gray-300'
+                                : 'border-gray-300 bg-gray-50 text-gray-700'
+                            }`}
+                        >
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+
+                      <div className="md:col-span-2">
+                        <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                          Address
+                        </label>
+                        <input
+                          type="text"
+                          value={personalInfo.address}
+                          onChange={(e) => setPersonalInfo(prev => ({ ...prev, address: e.target.value }))}
+                          disabled={editingSection !== 'personal'}
+                          className={`w-full px-3 py-2 border rounded-lg transition-colors ${editingSection === 'personal'
+                              ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500'
+                              : isDarkMode
+                                ? 'border-gray-600 bg-gray-700 text-gray-300'
+                                : 'border-gray-300 bg-gray-50 text-gray-700'
+                            }`}
                         />
                       </div>
                     </div>
 
-                    <div>
-                      <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                        Phone
-                      </label>
-                      <div className="relative">
-                        <Phone className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`} />
-                        <input
-                          type="tel"
-                          value={personalInfo.phone}
-                          onChange={(e) => setPersonalInfo(prev => ({ ...prev, phone: e.target.value }))}
-                          disabled={editingSection !== 'personal'}
-                          className={`w-full pl-10 pr-3 py-2 border rounded-lg transition-colors ${
-                            editingSection === 'personal'
-                              ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500'
-                              : isDarkMode
-                              ? 'border-gray-600 bg-gray-700 text-gray-300'
-                              : 'border-gray-300 bg-gray-50 text-gray-700'
-                          }`}
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                        Date of Birth
-                      </label>
-                      <input
-                        type="date"
-                        value={personalInfo.dateOfBirth}
-                        onChange={(e) => setPersonalInfo(prev => ({ ...prev, dateOfBirth: e.target.value }))}
-                        disabled={editingSection !== 'personal'}
-                        className={`w-full px-3 py-2 border rounded-lg transition-colors ${
-                          editingSection === 'personal'
-                            ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500'
-                            : isDarkMode
-                            ? 'border-gray-600 bg-gray-700 text-gray-300'
-                            : 'border-gray-300 bg-gray-50 text-gray-700'
-                        }`}
-                      />
-                    </div>
-
-                    <div>
-                      <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                        Gender
-                      </label>
-                      <select
-                        value={personalInfo.gender}
-                        onChange={(e) => setPersonalInfo(prev => ({ ...prev, gender: e.target.value }))}
-                        disabled={editingSection !== 'personal'}
-                        className={`w-full px-3 py-2 border rounded-lg transition-colors ${
-                          editingSection === 'personal'
-                            ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500'
-                            : isDarkMode
-                            ? 'border-gray-600 bg-gray-700 text-gray-300'
-                            : 'border-gray-300 bg-gray-50 text-gray-700'
-                        }`}
+                    {editingSection === 'personal' && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex justify-end space-x-3 pt-6 border-t border-gray-200 mt-6"
                       >
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="Other">Other</option>
-                      </select>
-                    </div>
-
-                    <div className="md:col-span-2">
-                      <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                        Address
-                      </label>
-                      <input
-                        type="text"
-                        value={personalInfo.address}
-                        onChange={(e) => setPersonalInfo(prev => ({ ...prev, address: e.target.value }))}
-                        disabled={editingSection !== 'personal'}
-                        className={`w-full px-3 py-2 border rounded-lg transition-colors ${
-                          editingSection === 'personal'
-                            ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500'
-                            : isDarkMode
-                            ? 'border-gray-600 bg-gray-700 text-gray-300'
-                            : 'border-gray-300 bg-gray-50 text-gray-700'
-                        }`}
-                      />
-                    </div>
-                  </div>
-
-                  {editingSection === 'personal' && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="flex justify-end space-x-3 pt-6 border-t border-gray-200 mt-6"
-                    >
-                      <button
-                        onClick={() => setEditingSection(null)}
-                        className="px-6 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        onClick={() => handleSave('personal')}
-                        disabled={saveStatus === 'saving'}
-                        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center space-x-2"
-                      >
-                        {saveStatus === 'saving' ? (
-                          <>
-                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                            <span>Saving...</span>
-                          </>
-                        ) : (
-                          <>
-                            <Save className="w-4 h-4" />
-                            <span>Save Changes</span>
-                          </>
-                        )}
-                      </button>
-                    </motion.div>
-                  )}
+                        <button
+                          onClick={() => setEditingSection(null)}
+                          className="px-6 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={() => handleSave('personal')}
+                          disabled={saveStatus === 'saving'}
+                          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center space-x-2"
+                        >
+                          {saveStatus === 'saving' ? (
+                            <>
+                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                              <span>Saving...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Save className="w-4 h-4" />
+                              <span>Save Changes</span>
+                            </>
+                          )}
+                        </button>
+                      </motion.div>
+                    )}
                   </div>
                 </motion.div>
               )}
@@ -954,11 +929,10 @@ export default function ProfilePage() {
                       </h3>
                       <button
                         onClick={() => setEditingSection(editingSection === 'medical' ? null : 'medical')}
-                        className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
-                          editingSection === 'medical'
+                        className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${editingSection === 'medical'
                             ? 'bg-red-100 text-red-700 hover:bg-red-200'
                             : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                        }`}
+                          }`}
                       >
                         {editingSection === 'medical' ? <X className="w-4 h-4" /> : <Edit className="w-4 h-4" />}
                         <span>{editingSection === 'medical' ? 'Cancel' : 'Edit'}</span>
@@ -975,13 +949,12 @@ export default function ProfilePage() {
                           value={medicalInfo.height}
                           onChange={(e) => setMedicalInfo(prev => ({ ...prev, height: e.target.value }))}
                           disabled={editingSection !== 'medical'}
-                          className={`w-full px-3 py-2 border rounded-lg transition-colors ${
-                            editingSection === 'medical'
+                          className={`w-full px-3 py-2 border rounded-lg transition-colors ${editingSection === 'medical'
                               ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500'
                               : isDarkMode
-                              ? 'border-gray-600 bg-gray-700 text-gray-300'
-                              : 'border-gray-300 bg-gray-50 text-gray-700'
-                          }`}
+                                ? 'border-gray-600 bg-gray-700 text-gray-300'
+                                : 'border-gray-300 bg-gray-50 text-gray-700'
+                            }`}
                         />
                       </div>
 
@@ -994,13 +967,12 @@ export default function ProfilePage() {
                           value={medicalInfo.weight}
                           onChange={(e) => setMedicalInfo(prev => ({ ...prev, weight: e.target.value }))}
                           disabled={editingSection !== 'medical'}
-                          className={`w-full px-3 py-2 border rounded-lg transition-colors ${
-                            editingSection === 'medical'
+                          className={`w-full px-3 py-2 border rounded-lg transition-colors ${editingSection === 'medical'
                               ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500'
                               : isDarkMode
-                              ? 'border-gray-600 bg-gray-700 text-gray-300'
-                              : 'border-gray-300 bg-gray-50 text-gray-700'
-                          }`}
+                                ? 'border-gray-600 bg-gray-700 text-gray-300'
+                                : 'border-gray-300 bg-gray-50 text-gray-700'
+                            }`}
                         />
                       </div>
 
@@ -1012,13 +984,12 @@ export default function ProfilePage() {
                           value={medicalInfo.bloodType}
                           onChange={(e) => setMedicalInfo(prev => ({ ...prev, bloodType: e.target.value }))}
                           disabled={editingSection !== 'medical'}
-                          className={`w-full px-3 py-2 border rounded-lg transition-colors ${
-                            editingSection === 'medical'
+                          className={`w-full px-3 py-2 border rounded-lg transition-colors ${editingSection === 'medical'
                               ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500'
                               : isDarkMode
-                              ? 'border-gray-600 bg-gray-700 text-gray-300'
-                              : 'border-gray-300 bg-gray-50 text-gray-700'
-                          }`}
+                                ? 'border-gray-600 bg-gray-700 text-gray-300'
+                                : 'border-gray-300 bg-gray-50 text-gray-700'
+                            }`}
                         >
                           <option value="O+">O+</option>
                           <option value="O-">O-</option>
@@ -1063,11 +1034,10 @@ export default function ProfilePage() {
                       </h3>
                       <button
                         onClick={() => setEditingSection(editingSection === 'allergies' ? null : 'allergies')}
-                        className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
-                          editingSection === 'allergies'
+                        className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${editingSection === 'allergies'
                             ? 'bg-red-100 text-red-700 hover:bg-red-200'
                             : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                        }`}
+                          }`}
                       >
                         {editingSection === 'allergies' ? <X className="w-4 h-4" /> : <Edit className="w-4 h-4" />}
                         <span>{editingSection === 'allergies' ? 'Cancel' : 'Edit'}</span>
@@ -1154,11 +1124,10 @@ export default function ProfilePage() {
                       </h3>
                       <button
                         onClick={() => setEditingSection(editingSection === 'emergency' ? null : 'emergency')}
-                        className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
-                          editingSection === 'emergency'
+                        className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${editingSection === 'emergency'
                             ? 'bg-red-100 text-red-700 hover:bg-red-200'
                             : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                        }`}
+                          }`}
                       >
                         {editingSection === 'emergency' ? <X className="w-4 h-4" /> : <Edit className="w-4 h-4" />}
                         <span>{editingSection === 'emergency' ? 'Cancel' : 'Edit'}</span>
@@ -1187,13 +1156,12 @@ export default function ProfilePage() {
                                   setMedicalInfo(prev => ({ ...prev, emergencyContacts: newContacts }))
                                 }}
                                 disabled={editingSection !== 'emergency'}
-                                className={`w-full px-3 py-2 border rounded-lg transition-colors ${
-                                  editingSection === 'emergency'
+                                className={`w-full px-3 py-2 border rounded-lg transition-colors ${editingSection === 'emergency'
                                     ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500'
                                     : isDarkMode
-                                    ? 'border-gray-600 bg-gray-600 text-gray-300'
-                                    : 'border-gray-300 bg-white text-gray-700'
-                                }`}
+                                      ? 'border-gray-600 bg-gray-600 text-gray-300'
+                                      : 'border-gray-300 bg-white text-gray-700'
+                                  }`}
                               />
                             </div>
                             <div>
@@ -1209,13 +1177,12 @@ export default function ProfilePage() {
                                   setMedicalInfo(prev => ({ ...prev, emergencyContacts: newContacts }))
                                 }}
                                 disabled={editingSection !== 'emergency'}
-                                className={`w-full px-3 py-2 border rounded-lg transition-colors ${
-                                  editingSection === 'emergency'
+                                className={`w-full px-3 py-2 border rounded-lg transition-colors ${editingSection === 'emergency'
                                     ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500'
                                     : isDarkMode
-                                    ? 'border-gray-600 bg-gray-600 text-gray-300'
-                                    : 'border-gray-300 bg-white text-gray-700'
-                                }`}
+                                      ? 'border-gray-600 bg-gray-600 text-gray-300'
+                                      : 'border-gray-300 bg-white text-gray-700'
+                                  }`}
                               />
                             </div>
                             <div className="flex space-x-2">
@@ -1232,13 +1199,12 @@ export default function ProfilePage() {
                                     setMedicalInfo(prev => ({ ...prev, emergencyContacts: newContacts }))
                                   }}
                                   disabled={editingSection !== 'emergency'}
-                                  className={`w-full px-3 py-2 border rounded-lg transition-colors ${
-                                    editingSection === 'emergency'
+                                  className={`w-full px-3 py-2 border rounded-lg transition-colors ${editingSection === 'emergency'
                                       ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500'
                                       : isDarkMode
-                                      ? 'border-gray-600 bg-gray-600 text-gray-300'
-                                      : 'border-gray-300 bg-white text-gray-700'
-                                  }`}
+                                        ? 'border-gray-600 bg-gray-600 text-gray-300'
+                                        : 'border-gray-300 bg-white text-gray-700'
+                                    }`}
                                 />
                               </div>
                               {editingSection === 'emergency' && (
@@ -1302,7 +1268,7 @@ export default function ProfilePage() {
                   <h3 className={`text-lg font-semibold mb-6 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                     Security Settings
                   </h3>
-                  
+
                   <div className="space-y-4">
                     <div>
                       <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
@@ -1351,164 +1317,9 @@ export default function ProfilePage() {
                     </button>
                   </div>
 
-                  <div className="mt-8 pt-6 border-t border-gray-200">
-                    <h4 className={`font-medium mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                      Two-Factor Authentication
-                    </h4>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                          Add an extra layer of security to your account
-                        </p>
-                      </div>
-                      <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                        Enable 2FA
-                      </button>
-                    </div>
-                  </div>
                 </motion.div>
               )}
 
-              {/* Notifications Section */}
-              {activeSection === 'notifications' && (
-                <motion.div
-                  key="notifications"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  className={`rounded-xl shadow-lg border p-6 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'}`}
-                >
-                  <h3 className={`text-lg font-semibold mb-6 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                    Notification Preferences
-                  </h3>
-                  
-                  <div className="space-y-6">
-                    {[
-                      { key: 'emailNotifications', label: 'Email Notifications', description: 'Receive notifications via email' },
-                      { key: 'smsNotifications', label: 'SMS Notifications', description: 'Receive text message notifications' },
-                      { key: 'appointmentReminders', label: 'Appointment Reminders', description: 'Reminders before scheduled appointments' },
-                      { key: 'medicationReminders', label: 'Medication Reminders', description: 'Alerts for medication schedules' },
-                      { key: 'healthTips', label: 'Health Tips', description: 'Daily health tips and wellness advice' }
-                    ].map((setting) => (
-                      <div key={setting.key} className="flex items-center justify-between">
-                        <div>
-                          <h4 className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                            {setting.label}
-                          </h4>
-                          <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                            {setting.description}
-                          </p>
-                        </div>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={notifications[setting.key]}
-                            onChange={(e) => setNotifications(prev => ({
-                              ...prev,
-                              [setting.key]: e.target.checked
-                            }))}
-                            className="sr-only peer"
-                          />
-                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="flex justify-end pt-6 border-t border-gray-200 mt-6">
-                    <button
-                      onClick={() => handleSave('notifications')}
-                      className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
-                    >
-                      <Save className="w-4 h-4" />
-                      <span>Save Preferences</span>
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-
-              {/* Preferences Section */}
-              {activeSection === 'preferences' && (
-                <motion.div
-                  key="preferences"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  className={`rounded-xl shadow-lg border p-6 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'}`}
-                >
-                  <h3 className={`text-lg font-semibold mb-6 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                    Display & Privacy Preferences
-                  </h3>
-                  
-                  <div className="space-y-6">
-                    <div>
-                      <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                        Language
-                      </label>
-                      <select className={`w-full px-3 py-2 border rounded-lg transition-colors ${isDarkMode ? 'border-gray-600 bg-gray-700 text-gray-300' : 'border-gray-300 bg-white text-gray-700'}`}>
-                        <option value="en">English</option>
-                        <option value="es">Spanish</option>
-                        <option value="fr">French</option>
-                        <option value="de">German</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                        Timezone
-                      </label>
-                      <select className={`w-full px-3 py-2 border rounded-lg transition-colors ${isDarkMode ? 'border-gray-600 bg-gray-700 text-gray-300' : 'border-gray-300 bg-white text-gray-700'}`}>
-                        <option value="EST">Eastern Time (EST)</option>
-                        <option value="CST">Central Time (CST)</option>
-                        <option value="MST">Mountain Time (MST)</option>
-                        <option value="PST">Pacific Time (PST)</option>
-                      </select>
-                    </div>
-
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                            Profile Visibility
-                          </h4>
-                          <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                            Allow healthcare providers to view your profile
-                          </p>
-                        </div>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input type="checkbox" defaultChecked className="sr-only peer" />
-                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                        </label>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                            Data Analytics
-                          </h4>
-                          <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                            Help improve our services with anonymous usage data
-                          </p>
-                        </div>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input type="checkbox" defaultChecked className="sr-only peer" />
-                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-end pt-6 border-t border-gray-200 mt-6">
-                    <button
-                      onClick={() => handleSave('preferences')}
-                      className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
-                    >
-                      <Save className="w-4 h-4" />
-                      <span>Save Preferences</span>
-                    </button>
-                  </div>
-                </motion.div>
-              )}
             </AnimatePresence>
           </div>
         </div>
