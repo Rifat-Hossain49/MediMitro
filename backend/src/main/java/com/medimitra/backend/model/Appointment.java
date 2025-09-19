@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Entity
 @Table(name = "appointments")
@@ -42,6 +43,10 @@ public class Appointment {
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    // Transient field for patient information (not stored in database)
+    @Transient
+    private Map<String, Object> patientInfo;
 
     // Default constructor
     public Appointment() {
@@ -205,6 +210,14 @@ public class Appointment {
 
     public boolean isEmergency() {
         return "emergency".equals(this.type);
+    }
+
+    public Map<String, Object> getPatientInfo() {
+        return patientInfo;
+    }
+
+    public void setPatientInfo(Map<String, Object> patientInfo) {
+        this.patientInfo = patientInfo;
     }
 
     @Override

@@ -243,5 +243,25 @@ public class AppointmentRepository {
         Long count = jdbcTemplate.queryForObject(sql, Long.class, doctorId);
         return count != null ? count : 0;
     }
+
+    public List<Appointment> findTodayAppointmentsByDoctorId(String doctorId) {
+        String sql = """
+            SELECT * FROM appointments 
+            WHERE doctor_id = ? 
+            AND DATE(date_time) = CURRENT_DATE 
+            ORDER BY date_time ASC
+            """;
+        return jdbcTemplate.query(sql, appointmentRowMapper, doctorId);
+    }
+
+    public boolean isAppointmentConfirmed(String appointmentId) {
+        String sql = "SELECT status FROM appointments WHERE id = ?";
+        try {
+            String status = jdbcTemplate.queryForObject(sql, String.class, appointmentId);
+            return "confirmed".equalsIgnoreCase(status) || "scheduled".equalsIgnoreCase(status);
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }
 

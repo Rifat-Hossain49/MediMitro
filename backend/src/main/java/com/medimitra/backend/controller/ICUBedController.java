@@ -24,6 +24,51 @@ public class ICUBedController {
   @Autowired
   private ICUBedRepository icuBedRepository;
 
+  @GetMapping
+  public ResponseEntity<?> getAllBeds() {
+    try {
+      List<ICUBed> beds = icuBedRepository.findAll();
+      
+      Map<String, Object> response = new HashMap<>();
+      response.put("success", true);
+      response.put("beds", beds);
+      response.put("totalBeds", beds.size());
+      
+      return ResponseEntity.ok(response);
+      
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(Map.of("success", false, "message", "Failed to fetch ICU beds: " + e.getMessage()));
+    }
+  }
+
+  @PostMapping
+  public ResponseEntity<?> createBed(@Valid @RequestBody CreateBedRequest request) {
+    try {
+      ICUBed bed = new ICUBed();
+      bed.setBedNumber(request.getBedNumber());
+      bed.setHospital(request.getHospital());
+      bed.setHospitalAddress(request.getHospitalAddress());
+      bed.setIcuType(request.getIcuType());
+      bed.setDailyRate(request.getDailyRate());
+      bed.setEquipment(request.getEquipment());
+      bed.setStatus("available");
+      
+      ICUBed savedBed = icuBedRepository.save(bed);
+      
+      Map<String, Object> response = new HashMap<>();
+      response.put("success", true);
+      response.put("message", "ICU bed created successfully");
+      response.put("bed", createBedResponse(savedBed));
+      
+      return ResponseEntity.ok(response);
+      
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(Map.of("success", false, "message", "Failed to create ICU bed: " + e.getMessage()));
+    }
+  }
+
   @GetMapping("/available")
   public ResponseEntity<?> getAvailableBeds(@RequestParam(required = false) String icuType,
       @RequestParam(required = false) String hospital) {
@@ -282,6 +327,64 @@ public class ICUBedController {
   }
 
   // DTOs for request bodies
+  public static class CreateBedRequest {
+    private String bedNumber;
+    private String hospital;
+    private String hospitalAddress;
+    private String icuType;
+    private BigDecimal dailyRate;
+    private String equipment;
+
+    // Getters and setters
+    public String getBedNumber() {
+      return bedNumber;
+    }
+
+    public void setBedNumber(String bedNumber) {
+      this.bedNumber = bedNumber;
+    }
+
+    public String getHospital() {
+      return hospital;
+    }
+
+    public void setHospital(String hospital) {
+      this.hospital = hospital;
+    }
+
+    public String getHospitalAddress() {
+      return hospitalAddress;
+    }
+
+    public void setHospitalAddress(String hospitalAddress) {
+      this.hospitalAddress = hospitalAddress;
+    }
+
+    public String getIcuType() {
+      return icuType;
+    }
+
+    public void setIcuType(String icuType) {
+      this.icuType = icuType;
+    }
+
+    public BigDecimal getDailyRate() {
+      return dailyRate;
+    }
+
+    public void setDailyRate(BigDecimal dailyRate) {
+      this.dailyRate = dailyRate;
+    }
+
+    public String getEquipment() {
+      return equipment;
+    }
+
+    public void setEquipment(String equipment) {
+      this.equipment = equipment;
+    }
+  }
+
   public static class ReserveBedRequest {
     private String bedId;
     private String patientId;

@@ -58,9 +58,41 @@ CREATE TABLE doctors (
     availability TEXT, -- JSON string of available time slots
     rating DECIMAL(3,2) DEFAULT 0.00 CHECK (rating >= 0 AND rating <= 5),
     total_ratings INTEGER DEFAULT 0 CHECK (total_ratings >= 0),
+    -- Enhanced credentials
+    medical_degree VARCHAR(255) NOT NULL,
+    university VARCHAR(255) NOT NULL,
+    graduation_year INTEGER NOT NULL,
+    board_certification VARCHAR(255),
+    additional_qualifications TEXT, -- JSON array of additional certifications
+    languages TEXT, -- JSON array of spoken languages
+    bio TEXT,
+    profile_picture_url TEXT,
+    -- Verification status
+    is_verified BOOLEAN DEFAULT FALSE,
+    verification_documents TEXT, -- JSON array of document URLs
+    verification_status VARCHAR(20) DEFAULT 'pending' CHECK (verification_status IN ('pending', 'approved', 'rejected')),
+    rejection_reason TEXT,
+    verified_at TIMESTAMP,
+    verified_by VARCHAR(255), -- Admin who verified
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (verified_by) REFERENCES users(id) ON DELETE SET NULL
+);
+
+-- Doctor availability slots table
+CREATE TABLE doctor_availability_slots (
+    id VARCHAR(255) PRIMARY KEY,
+    doctor_id VARCHAR(255) NOT NULL,
+    day_of_week VARCHAR(10) NOT NULL CHECK (day_of_week IN ('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday')),
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    slot_duration INTEGER DEFAULT 30 CHECK (slot_duration > 0), -- in minutes
+    is_available BOOLEAN DEFAULT TRUE,
+    max_patients_per_slot INTEGER DEFAULT 1 CHECK (max_patients_per_slot > 0),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE
 );
 
 -- Appointments table - Medical appointments
@@ -68,6 +100,7 @@ CREATE TABLE appointments (
     id VARCHAR(255) PRIMARY KEY,
     patient_id VARCHAR(255) NOT NULL,
     doctor_id VARCHAR(255) NOT NULL,
+    availability_slot_id VARCHAR(255), -- Reference to doctor_availability_slots
     date_time TIMESTAMP NOT NULL,
     duration INTEGER NOT NULL CHECK (duration > 0), -- in minutes
     type VARCHAR(20) NOT NULL CHECK (type IN ('online', 'in-person', 'emergency')),
@@ -77,10 +110,52 @@ CREATE TABLE appointments (
     diagnosis TEXT, -- Doctor's diagnosis
     prescription TEXT, -- Prescription details
     fee DECIMAL(10,2) NOT NULL CHECK (fee >= 0),
+    meeting_link TEXT, -- For online appointments
+    meeting_id VARCHAR(255), -- Unique meeting identifier
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (patient_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE
+    FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE,
+    FOREIGN KEY (availability_slot_id) REFERENCES doctor_availability_slots(id) ON DELETE SET NULL
+);
+
+-- Doctor-patient messages table
+CREATE TABLE doctor_patient_messages (
+    id VARCHAR(255) PRIMARY KEY,
+    doctor_id VARCHAR(255) NOT NULL,
+    patient_id VARCHAR(255) NOT NULL,
+    appointment_id VARCHAR(255), -- Optional reference to appointment
+    sender_type VARCHAR(10) NOT NULL CHECK (sender_type IN ('doctor', 'patient')),
+    message TEXT NOT NULL,
+    message_type VARCHAR(20) DEFAULT 'text' CHECK (message_type IN ('text', 'image', 'file', 'prescription')),
+    attachment_url TEXT,
+    is_read BOOLEAN DEFAULT FALSE,
+    read_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE,
+    FOREIGN KEY (patient_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (appointment_id) REFERENCES appointments(id) ON DELETE SET NULL
+);
+
+-- Video meetings table
+CREATE TABLE video_meetings (
+    id VARCHAR(255) PRIMARY KEY,
+    doctor_id VARCHAR(255) NOT NULL,
+    patient_id VARCHAR(255) NOT NULL,
+    appointment_id VARCHAR(255), -- Optional reference to appointment
+    meeting_title VARCHAR(255) NOT NULL,
+    meeting_description TEXT,
+    meeting_link TEXT NOT NULL,
+    meeting_id VARCHAR(255) UNIQUE NOT NULL, -- Unique meeting identifier
+    scheduled_time TIMESTAMP NOT NULL,
+    duration_minutes INTEGER DEFAULT 60,
+    status VARCHAR(20) DEFAULT 'scheduled' CHECK (status IN ('scheduled', 'ongoing', 'completed', 'cancelled')),
+    recording_url TEXT, -- If meeting was recorded
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE,
+    FOREIGN KEY (patient_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (appointment_id) REFERENCES appointments(id) ON DELETE SET NULL
 );
 
 -- Prescriptions table - Medical prescriptions
@@ -425,6 +500,22 @@ CREATE TABLE icu_beds (
     FOREIGN KEY (assigned_patient_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
+-- Medication Database table - General medication information
+CREATE TABLE medications (
+    id VARCHAR(255) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    generic_name VARCHAR(255),
+    manufacturer VARCHAR(255) NOT NULL,
+    description TEXT,
+    side_effects TEXT,
+    dosage_form VARCHAR(100) NOT NULL,
+    strength VARCHAR(100) NOT NULL,
+    category VARCHAR(100) NOT NULL,
+    requires_prescription BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Ambulance Bookings table - Emergency ambulance service
 CREATE TABLE ambulance_bookings (
     id VARCHAR(255) PRIMARY KEY,
@@ -468,6 +559,12 @@ CREATE INDEX idx_ambulance_bookings_emergency_type ON ambulance_bookings(emergen
 CREATE INDEX idx_ambulance_bookings_priority ON ambulance_bookings(priority);
 CREATE INDEX idx_ambulance_bookings_status ON ambulance_bookings(status);
 CREATE INDEX idx_ambulance_bookings_request_time ON ambulance_bookings(request_time);
+
+-- Medication table indexes
+CREATE INDEX idx_medications_name ON medications(name);
+CREATE INDEX idx_medications_generic_name ON medications(generic_name);
+CREATE INDEX idx_medications_category ON medications(category);
+CREATE INDEX idx_medications_requires_prescription ON medications(requires_prescription);
 
 -- Note: Automatic timestamp updates will be handled by the application layer
 -- This avoids complex PostgreSQL function syntax issues

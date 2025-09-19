@@ -12,6 +12,7 @@ import {
   Video,
   CheckCircle,
   XCircle,
+  X,
   Mic,
   MicOff,
   Sparkles,
@@ -25,7 +26,6 @@ import {
   Trash2,
   Clock3,
   ChevronDown,
-  X,
   Eye,
   Loader2
 } from 'lucide-react'
@@ -42,6 +42,9 @@ interface Doctor {
   availability: string
   rating: number
   totalRatings: number
+  // Optional AI enrichment fields
+  aiConfidence?: number // 0.0 - 1.0
+  aiReason?: string
   userInfo?: {
     id: string
     name: string
@@ -101,10 +104,13 @@ export default function AppointmentsPage() {
   const [selectedTime, setSelectedTime] = useState('')
   const [bookingLoading, setBookingLoading] = useState(false)
   const [bookingSuccess, setBookingSuccess] = useState(false)
+  const [patientAdvice, setPatientAdvice] = useState<any>(null)
+  const [userAppointments, setUserAppointments] = useState<any[]>([])
 
-  // Fetch doctors on component mount
+  // Fetch doctors and user appointments on component mount
   useEffect(() => {
     fetchDoctors()
+    fetchUserAppointments()
   }, [])
 
   const fetchDoctors = async () => {
@@ -236,10 +242,62 @@ export default function AppointmentsPage() {
     }
   }
 
+  const fetchUserAppointments = async () => {
+    try {
+      // First try to get user ID from profile
+      let userId = null
+      try {
+        const response = await fetch('/api/profile')
+        const data = await response.json()
+        
+        if (data.success && data.user?.id) {
+          userId = data.user.id
+        }
+      } catch (profileError) {
+        console.warn('Profile fetch failed:', profileError)
+        // For now, skip appointment fetch if profile fails
+        setUserAppointments([])
+        return
+      }
+
+      if (userId && userId !== 'temp-id') {
+        // Fetch user's appointments
+        try {
+          const appointmentsResponse = await fetch(`http://localhost:8080/api/appointments/patient/${userId}`)
+          const appointmentsData = await appointmentsResponse.json()
+          
+          if (appointmentsData.success) {
+            setUserAppointments(appointmentsData.appointments || [])
+          } else {
+            console.warn('Failed to fetch appointments:', appointmentsData.message)
+            setUserAppointments([])
+          }
+        } catch (appointmentError) {
+          console.warn('Appointment fetch failed:', appointmentError)
+          setUserAppointments([])
+        }
+      } else {
+        console.warn('No valid user ID available, skipping appointment fetch')
+        setUserAppointments([])
+      }
+    } catch (error) {
+      console.error('Error fetching user appointments:', error)
+      setUserAppointments([])
+    }
+  }
+
+  const isDoctorBooked = (doctorId: string) => {
+    return userAppointments.some(appointment => 
+      appointment.doctorId === doctorId && 
+      appointment.status === 'scheduled'
+    )
+  }
+
   // AI search functionality
   const handleAISearch = async () => {
     if (!aiQuery.trim()) {
       // If no query, show all doctors
+      setPatientAdvice(null)
       fetchDoctors()
       return
     }
@@ -261,8 +319,21 @@ export default function AppointmentsPage() {
           const data = await response.json()
 
           if (data.success && data.doctors && data.doctors.length > 0) {
-            setFilteredDoctors(data.doctors)
+            // If multiple doctors are returned, show only those with aiConfidence > 0.5
+            let doctors = data.doctors as Doctor[]
+            if (doctors.length > 1) {
+              const confident = doctors.filter(d =>
+                typeof (d as any).aiConfidence === 'number' ? (d as any).aiConfidence >= 0.5 : true
+              )
+              // Only apply the filter if it leaves at least one doctor; otherwise, keep original list
+              if (confident.length > 0) {
+                doctors = confident
+              }
+            }
+            setFilteredDoctors(doctors)
+            setPatientAdvice(data.patientAdvice || null)
             console.log('✅ AI Analysis successful:', data.analysis)
+            console.log('✅ Patient advice received:', data.patientAdvice)
             return // Success, exit early
           } else {
             console.warn('⚠️ AI search returned no doctors:', data.message)
@@ -298,10 +369,10 @@ export default function AppointmentsPage() {
 
     // Define symptom-to-specialization mapping (simplified version of backend logic)
     const symptomMapping: { [key: string]: string[] } = {
-      'chest pain': ['Cardiology', 'Emergency Medicine'],
-      'heart': ['Cardiology'],
-      'breathing': ['Cardiology', 'Pulmonology'],
-      'shortness of breath': ['Cardiology', 'Pulmonology'],
+      'chest pain': ['Cardiology', 'Cardiothoracic Surgery', 'Emergency Medicine', 'Critical Care Medicine'],
+      'heart': ['Cardiology', 'Cardiothoracic Surgery'],
+      'breathing': ['Cardiology', 'Cardiothoracic Surgery', 'Pulmonology'],
+      'shortness of breath': ['Cardiology', 'Cardiothoracic Surgery', 'Pulmonology'],
       'skin': ['Dermatology'],
       'rash': ['Dermatology'],
       'acne': ['Dermatology'],
@@ -408,6 +479,41 @@ export default function AppointmentsPage() {
     }
   }
 
+  // Cancel appointment
+  const handleCancelAppointment = async (doctorId: string) => {
+    try {
+      // Find the appointment to cancel
+      const appointment = userAppointments.find(apt => 
+        apt.doctorId === doctorId && apt.status === 'scheduled'
+      )
+      
+      if (!appointment) {
+        alert('No appointment found to cancel')
+        return
+      }
+
+      const response = await fetch(`http://localhost:8080/api/appointments/${appointment.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const result = await response.json()
+      
+      if (result.success) {
+        alert('Appointment cancelled successfully!')
+        // Refresh appointments
+        await fetchUserAppointments()
+      } else {
+        alert('Failed to cancel appointment: ' + result.message)
+      }
+    } catch (error) {
+      console.error('Error cancelling appointment:', error)
+      alert('Failed to cancel appointment. Please try again.')
+    }
+  }
+
   // Book appointment
   const handleBookAppointment = async () => {
     if (!selectedDoctor || !selectedDate || !selectedTime) {
@@ -417,8 +523,17 @@ export default function AppointmentsPage() {
 
     setBookingLoading(true)
     try {
+      // Get the actual user ID from the profile
+      const profileResponse = await fetch('/api/profile')
+      const profileData = await profileResponse.json()
+      
+      if (!profileData.success || !profileData.user?.id) {
+        alert('Unable to get user information. Please try logging in again.')
+        return
+      }
+
       const appointmentData: BookAppointmentRequest = {
-        patientId: 'user-4', // Default patient ID for demo
+        patientId: profileData.user.id, // Use actual user ID
         doctorId: selectedDoctor.id,
         date: selectedDate,
         time: selectedTime,
@@ -440,6 +555,8 @@ export default function AppointmentsPage() {
 
       if (result.success) {
         setBookingSuccess(true)
+        // Refresh user appointments to show the new booking
+        fetchUserAppointments()
         setTimeout(() => {
           setShowBookingModal(false)
           setBookingSuccess(false)
@@ -495,6 +612,67 @@ export default function AppointmentsPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* My Appointments Section */}
+        {userAppointments.length > 0 && (
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">My Appointments</h2>
+              <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
+                {userAppointments.length} appointment{userAppointments.length !== 1 ? 's' : ''}
+              </span>
+            </div>
+            <div className="space-y-4">
+              {userAppointments.map((appointment) => (
+                <div key={appointment.id} className="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                        <User className="w-6 h-6 text-purple-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900">Dr. Haji Biryani</h3>
+                        <p className="text-sm text-gray-600">Cardiothoracic Surgery</p>
+                        <div className="flex items-center space-x-4 mt-1">
+                          <span className="text-sm text-gray-500">
+                            {new Date(appointment.dateTime).toLocaleDateString('en-US', {
+                              weekday: 'long',
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric'
+                            })}
+                          </span>
+                          <span className="text-sm text-gray-500">
+                            {new Date(appointment.dateTime).toLocaleTimeString('en-US', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              hour12: true
+                            })}
+                          </span>
+                          <span className="text-sm text-gray-500">
+                            {appointment.type === 'online' ? 'Video Call' : 'In-Person'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                        appointment.status === 'scheduled' 
+                          ? 'bg-blue-100 text-blue-800'
+                          : appointment.status === 'confirmed'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
+                      </span>
+                      <p className="text-sm text-gray-600 mt-1">${appointment.fee}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2">
@@ -511,6 +689,7 @@ export default function AppointmentsPage() {
                   onClick={() => {
                     setSearchType('ai')
                     setAiQuery('')
+                    setPatientAdvice(null)
                   }}
                   className={`flex items-center px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${searchType === 'ai'
                       ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg transform scale-105'
@@ -524,6 +703,7 @@ export default function AppointmentsPage() {
                   onClick={() => {
                     setSearchType('manual')
                     setManualFilters({ hospital: '', department: '', doctorName: '' })
+                    setPatientAdvice(null)
                     fetchDoctors() // Reset to show all doctors
                   }}
                   className={`flex items-center px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${searchType === 'manual'
@@ -653,6 +833,59 @@ export default function AppointmentsPage() {
               )}
             </div>
 
+            {/* Patient Advice Section */}
+            {patientAdvice && (
+              <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-2xl shadow-lg border-2 border-green-200 p-6 mb-8">
+                <div className="flex items-start space-x-4">
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center">
+                      <Sparkles className="w-6 h-6 text-white" />
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-3">
+                      <h3 className="text-xl font-bold text-gray-900">AI Health Advice</h3>
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        patientAdvice.urgency === 'high' 
+                          ? 'bg-red-100 text-red-700' 
+                          : patientAdvice.urgency === 'medium'
+                          ? 'bg-yellow-100 text-yellow-700'
+                          : 'bg-green-100 text-green-700'
+                      }`}>
+                        {patientAdvice.urgency?.toUpperCase() || 'LOW'} PRIORITY
+                      </span>
+                    </div>
+                    
+                    <div className="bg-white rounded-lg p-4 mb-4 border border-green-200">
+                      <p className="text-gray-800 leading-relaxed">{patientAdvice.briefAdvice}</p>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {patientAdvice.monitoring && (
+                        <div className="bg-white rounded-lg p-4 border border-blue-200">
+                          <h4 className="font-semibold text-blue-900 mb-2 flex items-center">
+                            <Eye className="w-4 h-4 mr-2" />
+                            Monitor For
+                          </h4>
+                          <p className="text-sm text-gray-700">{patientAdvice.monitoring}</p>
+                        </div>
+                      )}
+                      
+                      {patientAdvice.immediateSteps && (
+                        <div className="bg-white rounded-lg p-4 border border-orange-200">
+                          <h4 className="font-semibold text-orange-900 mb-2 flex items-center">
+                            <Clock3 className="w-4 h-4 mr-2" />
+                            Immediate Steps
+                          </h4>
+                          <p className="text-sm text-gray-700">{patientAdvice.immediateSteps}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Doctors List */}
             <div className="bg-white rounded-2xl shadow-xl border-2 border-gray-100 p-8">
               <div className="flex justify-between items-center mb-8">
@@ -706,6 +939,12 @@ export default function AppointmentsPage() {
                         <div className="text-right">
                           <div className="text-2xl font-bold text-gray-900">${doctor.consultationFee}</div>
                           <div className="text-sm text-gray-600 font-medium">Consultation Fee</div>
+                          {isDoctorBooked(doctor.id) && (
+                            <div className="mt-2 flex items-center justify-end space-x-1">
+                              <CheckCircle className="w-4 h-4 text-green-500" />
+                              <span className="text-xs text-green-600 font-medium">Booked</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                       <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
@@ -713,16 +952,26 @@ export default function AppointmentsPage() {
                           <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
                           <span className="text-sm text-green-600 font-medium">Available today at 2:00 PM</span>
                         </div>
-                        <button
-                          onClick={() => {
-                            setSelectedDoctor(doctor)
-                            setShowBookingModal(true)
-                          }}
-                          className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-all duration-200 flex items-center shadow-lg hover:shadow-xl transform hover:scale-105"
-                        >
-                          <Calendar className="w-5 h-5 mr-2" />
-                          Book Appointment
-                        </button>
+                        {isDoctorBooked(doctor.id) ? (
+                          <button
+                            onClick={() => handleCancelAppointment(doctor.id)}
+                            className="bg-gradient-to-r from-red-600 to-red-700 text-white px-8 py-3 rounded-xl font-semibold hover:from-red-700 hover:to-red-800 transition-all duration-200 flex items-center shadow-lg hover:shadow-xl transform hover:scale-105"
+                          >
+                            <X className="w-5 h-5 mr-2" />
+                            Cancel Appointment
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              setSelectedDoctor(doctor)
+                              setShowBookingModal(true)
+                            }}
+                            className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-all duration-200 flex items-center shadow-lg hover:shadow-xl transform hover:scale-105"
+                          >
+                            <Calendar className="w-5 h-5 mr-2" />
+                            Book Appointment
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -882,8 +1131,8 @@ export default function AppointmentsPage() {
                         </div>
                       </button>
                       <button
-                        onClick={() => setAppointmentType('video')}
-                        className={`p-4 border rounded-lg text-left transition-colors ${appointmentType === 'video'
+                        onClick={() => setAppointmentType('online')}
+                        className={`p-4 border rounded-lg text-left transition-colors ${appointmentType === 'online'
                             ? 'border-blue-500 bg-blue-50 text-blue-700'
                             : 'border-gray-300 hover:border-gray-400'
                           }`}

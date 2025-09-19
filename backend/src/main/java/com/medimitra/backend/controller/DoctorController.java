@@ -30,7 +30,8 @@ public class DoctorController {
     @GetMapping
     public ResponseEntity<?> getAllDoctors() {
         try {
-            List<Doctor> doctors = doctorRepository.findAll();
+            // Only return verified doctors for appointment booking
+            List<Doctor> doctors = doctorRepository.findVerifiedDoctors();
             
             // Enrich doctors with user information
             for (Doctor doctor : doctors) {
@@ -90,7 +91,7 @@ public class DoctorController {
     @GetMapping("/specialization/{specialization}")
     public ResponseEntity<?> getDoctorsBySpecialization(@PathVariable String specialization) {
         try {
-            List<Doctor> doctors = doctorRepository.findBySpecialization(specialization);
+            List<Doctor> doctors = doctorRepository.findVerifiedDoctorsBySpecialization(specialization);
             
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
@@ -111,13 +112,13 @@ public class DoctorController {
             List<Doctor> doctors;
             
             if (specialization != null && !specialization.isEmpty()) {
-                doctors = doctorRepository.findBySpecialization(specialization);
+                doctors = doctorRepository.findVerifiedDoctorsBySpecialization(specialization);
             } else if (hospital != null && !hospital.isEmpty()) {
-                doctors = doctorRepository.findByHospital(hospital);
+                doctors = doctorRepository.findVerifiedDoctorsByHospital(hospital);
             } else if (name != null && !name.isEmpty()) {
-                doctors = doctorRepository.findByNameContaining(name);
+                doctors = doctorRepository.findVerifiedDoctorsByName(name);
             } else {
-                doctors = doctorRepository.findAll();
+                doctors = doctorRepository.findVerifiedDoctors();
             }
             
             // Enrich doctors with user information

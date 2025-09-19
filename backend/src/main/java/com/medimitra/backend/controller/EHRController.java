@@ -490,10 +490,171 @@ public class EHRController {
                 """;
             
             List<Map<String, Object>> results = jdbcTemplate.queryForList(sql, patientId);
-            return ResponseEntity.ok(results);
+            return ResponseEntity.ok(Map.of("success", true, "medications", results));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", "Failed to get medications: " + e.getMessage()));
+                .body(Map.of("success", false, "error", "Failed to get medications: " + e.getMessage()));
+        }
+    }
+
+    @PostMapping("/medications/test")
+    public ResponseEntity<?> addTestMedication(@RequestBody Map<String, Object> medicationData) {
+        try {
+            String id = "med_" + System.currentTimeMillis();
+            String patientId = (String) medicationData.get("patientId");
+            String medicationName = (String) medicationData.get("medicationName");
+            String dosage = (String) medicationData.get("dosage");
+            String frequency = (String) medicationData.get("frequency");
+            String route = (String) medicationData.getOrDefault("route", "oral");
+            String startDate = (String) medicationData.get("startDate");
+            String endDate = (String) medicationData.get("endDate");
+            String status = (String) medicationData.getOrDefault("status", "active");
+            String prescribedBy = (String) medicationData.get("prescribedBy");
+            String reason = (String) medicationData.get("reason");
+            String notes = (String) medicationData.get("notes");
+
+            // Convert string dates to java.sql.Date, handle nulls
+            java.sql.Date startDateSql = null;
+            java.sql.Date endDateSql = null;
+            
+            if (startDate != null && !startDate.trim().isEmpty()) {
+                startDateSql = java.sql.Date.valueOf(startDate);
+            }
+            if (endDate != null && !endDate.trim().isEmpty()) {
+                endDateSql = java.sql.Date.valueOf(endDate);
+            }
+
+            // Create patient if it doesn't exist (for testing)
+            String createPatientSql = """
+                INSERT INTO users (id, email, password, name, role, email_verified, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT (id) DO NOTHING
+                """;
+            
+            jdbcTemplate.update(createPatientSql, patientId, 
+                patientId + "@test.com", "test123", "Test Patient", "patient", 
+                true, LocalDateTime.now(), LocalDateTime.now());
+
+            String sql = """
+                INSERT INTO ehr_medications (id, patient_id, medication_name, dosage, frequency, route, 
+                start_date, end_date, status, prescribed_by, reason, notes)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """;
+
+            int rowsAffected = jdbcTemplate.update(sql, id, patientId, medicationName, dosage, frequency, 
+                route, startDateSql, endDateSql, status, prescribedBy, reason, notes);
+
+            if (rowsAffected > 0) {
+                return ResponseEntity.ok(Map.of("success", true, "message", "Test medication added successfully", "id", id));
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("success", false, "error", "Failed to add test medication"));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("success", false, "error", "Failed to add test medication: " + e.getMessage()));
+        }
+    }
+
+    @PostMapping("/medications")
+    public ResponseEntity<?> addMedication(@RequestBody Map<String, Object> medicationData) {
+        try {
+            String id = "med_" + System.currentTimeMillis();
+            String patientId = (String) medicationData.get("patientId");
+            String medicationName = (String) medicationData.get("medicationName");
+            String dosage = (String) medicationData.get("dosage");
+            String frequency = (String) medicationData.get("frequency");
+            String route = (String) medicationData.getOrDefault("route", "oral");
+            String startDate = (String) medicationData.get("startDate");
+            String endDate = (String) medicationData.get("endDate");
+            String status = (String) medicationData.getOrDefault("status", "active");
+            String prescribedBy = (String) medicationData.get("prescribedBy");
+            String reason = (String) medicationData.get("reason");
+            String notes = (String) medicationData.get("notes");
+
+            // Convert string dates to java.sql.Date, handle nulls
+            java.sql.Date startDateSql = null;
+            java.sql.Date endDateSql = null;
+            
+            if (startDate != null && !startDate.trim().isEmpty()) {
+                startDateSql = java.sql.Date.valueOf(startDate);
+            }
+            if (endDate != null && !endDate.trim().isEmpty()) {
+                endDateSql = java.sql.Date.valueOf(endDate);
+            }
+
+            String sql = """
+                INSERT INTO ehr_medications (id, patient_id, medication_name, dosage, frequency, route, 
+                start_date, end_date, status, prescribed_by, reason, notes)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """;
+
+            int rowsAffected = jdbcTemplate.update(sql, id, patientId, medicationName, dosage, frequency, 
+                route, startDateSql, endDateSql, status, prescribedBy, reason, notes);
+
+            if (rowsAffected > 0) {
+                return ResponseEntity.ok(Map.of("success", true, "message", "Medication added successfully", "id", id));
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("success", false, "error", "Failed to add medication"));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("success", false, "error", "Failed to add medication: " + e.getMessage()));
+        }
+    }
+
+    @PutMapping("/medications/{medicationId}")
+    public ResponseEntity<?> updateMedication(@PathVariable String medicationId, @RequestBody Map<String, Object> medicationData) {
+        try {
+            String medicationName = (String) medicationData.get("medicationName");
+            String dosage = (String) medicationData.get("dosage");
+            String frequency = (String) medicationData.get("frequency");
+            String route = (String) medicationData.get("route");
+            String startDate = (String) medicationData.get("startDate");
+            String endDate = (String) medicationData.get("endDate");
+            String status = (String) medicationData.get("status");
+            String reason = (String) medicationData.get("reason");
+            String notes = (String) medicationData.get("notes");
+
+            String sql = """
+                UPDATE ehr_medications 
+                SET medication_name = ?, dosage = ?, frequency = ?, route = ?, 
+                    start_date = ?, end_date = ?, status = ?, reason = ?, notes = ?, 
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+                """;
+
+            int rowsAffected = jdbcTemplate.update(sql, medicationName, dosage, frequency, route, 
+                startDate, endDate, status, reason, notes, medicationId);
+
+            if (rowsAffected > 0) {
+                return ResponseEntity.ok(Map.of("success", true, "message", "Medication updated successfully"));
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("success", false, "error", "Medication not found"));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("success", false, "error", "Failed to update medication: " + e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/medications/{medicationId}")
+    public ResponseEntity<?> deleteMedication(@PathVariable String medicationId) {
+        try {
+            String sql = "DELETE FROM ehr_medications WHERE id = ?";
+            int rowsAffected = jdbcTemplate.update(sql, medicationId);
+
+            if (rowsAffected > 0) {
+                return ResponseEntity.ok(Map.of("success", true, "message", "Medication deleted successfully"));
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("success", false, "error", "Medication not found"));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("success", false, "error", "Failed to delete medication: " + e.getMessage()));
         }
     }
 

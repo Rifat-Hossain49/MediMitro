@@ -142,6 +142,16 @@ public class UserRepository {
         jdbcTemplate.update(sql, id);
     }
 
+    public Optional<String> findUserIdByEmail(String email) {
+        try {
+            String sql = "SELECT id FROM users WHERE email = ?";
+            String userId = jdbcTemplate.queryForObject(sql, String.class, email);
+            return Optional.ofNullable(userId);
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
     public long count() {
         String sql = "SELECT COUNT(*) FROM users";
         Long count = jdbcTemplate.queryForObject(sql, Long.class);

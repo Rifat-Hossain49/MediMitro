@@ -52,14 +52,15 @@ server:
 
 # CORS Configuration
 cors:
-  allowed-origins: "http://localhost:3000,http://localhost:3001"
+  allowed-origins: "http://localhost:3000,http://localhost:3001,http://localhost:3002"
+  allowed-origin-patterns: "*"
   allowed-methods: "GET,POST,PUT,DELETE,OPTIONS"
   allowed-headers: "*"
   allow-credentials: true
 # OpenRouter AI Configuration
 openrouter:
   api:
-    key: ${OPENROUTER_API_KEY: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}
+    key: ${OPENROUTER_API_KEY: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}
     url: ${OPENROUTER_API_URL:https://openrouter.ai/api/v1/chat/completions}
   allowed-methods: GET,POST,PUT,DELETE,OPTIONS
   allowed-headers: "*"
@@ -68,8 +69,8 @@ openrouter:
 # Appwrite Configuration for File Storage
 appwrite:
   endpoint: ${APPWRITE_ENDPOINT:https://cloud.appwrite.io/v1}
-  project: ${APPWRITE_PROJECT_ID:your-project-id}
-  api-key: ${APPWRITE_API_KEY:your-api-key}
+  project: ${APPWRITE_PROJECT_ID:68c307fe002f136b2920}
+  api-key: ${APPWRITE_API_KEY:standard_ad2113f7b35914997ec2b8e0caf1a1b2f26347ddc5faacff1027aed2663761ab3458461af166b04dc8903e5acd52b3f12f2e89c65a6dcc59c9e7d8daaa65932379cde39b127b4cf33a08d715a25077540aca41db257766ef32fde68b3d7e6474ea7b022b2968830ac4a92f68919ad8937ad41afb6e784911d93ef56752bdd0f8}
   bucket-id: ${APPWRITE_BUCKET_ID:medimitra-files}
 
 # Logging Configuration

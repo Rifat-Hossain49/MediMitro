@@ -11,6 +11,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 // import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -26,8 +28,8 @@ public class SecurityConfig {
 
     // Removed JwtAuthenticationFilter since using NextAuth.js
 
-    @Value("${cors.allowed-origins}")
-    private String allowedOrigins;
+    @Value("${cors.allowed-origin-patterns}")
+    private String allowedOriginPatterns;
 
     @Value("${cors.allowed-methods}")
     private String allowedMethods;
@@ -71,8 +73,8 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         
-        // Set allowed origins
-        configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
+        // Set allowed origin patterns
+        configuration.setAllowedOriginPatterns(Arrays.asList(allowedOriginPatterns.split(",")));
         
         // Set allowed methods
         configuration.setAllowedMethods(Arrays.asList(allowedMethods.split(",")));

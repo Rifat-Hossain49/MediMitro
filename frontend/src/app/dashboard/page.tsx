@@ -1,6 +1,7 @@
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import Image from 'next/image'
+import DashboardAppointments from '@/components/DashboardAppointments'
 import {
   Calendar,
   Heart,
@@ -26,6 +27,11 @@ export default async function Dashboard() {
   const session = await auth()
   if (!session?.user) {
     redirect('/')
+  }
+  
+  // Redirect admin users to admin dashboard
+  if (session?.user?.role === 'admin') {
+    redirect('/admin/dashboard')
   }
 
   const displayName = session.user.name?.split(' ')[0] || 'there'
@@ -73,8 +79,7 @@ export default async function Dashboard() {
     },
   ]
 
-  // Remove hardcoded appointments data
-  const upcomingAppointments = [] as any[]
+  // Appointments will be fetched by DashboardAppointments component
 
   const quickActions = [
     {
@@ -238,83 +243,7 @@ export default async function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Upcoming Appointments */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-2xl shadow-xl border border-blue-200 p-6 md:p-8">
-              <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-                <div>
-                  <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">Upcoming Appointments</h2>
-                  <p className="text-gray-600">Your scheduled medical consultations</p>
-                </div>
-                <a
-                  href="/appointments"
-                  className="group flex items-center justify-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 md:px-6 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 whitespace-nowrap"
-                >
-                  <Plus className="w-4 h-4 md:w-5 md:h-5" />
-                  <span>Book New</span>
-                  <ArrowRight className="w-3 h-3 md:w-4 md:h-4 opacity-0 group-hover:opacity-100 transform translate-x-1 group-hover:translate-x-0 transition-all" />
-                </a>
-              </div>
-
-              <div className="space-y-6">
-                {upcomingAppointments.length > 0 ? (
-                  upcomingAppointments.map((appointment, index) => (
-                    <div key={index} className="group bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-blue-200 transform hover:scale-102">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-6">
-                          <div className="relative w-16 h-16 rounded-2xl overflow-hidden ring-4 ring-blue-100 group-hover:ring-blue-200 transition-all">
-                            <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
-                              <Users className="w-8 h-8 text-white" />
-                            </div>
-                          </div>
-                          <div>
-                            <h3 className="text-lg font-bold text-gray-900 mb-1">{appointment.doctor}</h3>
-                            <p className="text-blue-600 font-semibold mb-2">{appointment.specialty}</p>
-                            <div className="flex items-center space-x-4">
-                              <div className="flex items-center space-x-2">
-                                <Calendar className="w-4 h-4 text-gray-400" />
-                                <span className="text-sm text-gray-600 font-medium">{appointment.date}</span>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <Clock className="w-4 h-4 text-gray-400" />
-                                <span className="text-sm text-gray-600 font-medium">{appointment.time}</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <span className={`px-4 py-2 rounded-xl text-sm font-semibold ${appointment.status === 'Confirmed'
-                            ? 'bg-green-100 text-green-800 border border-green-200'
-                            : 'bg-yellow-100 text-yellow-800 border border-yellow-200'
-                            }`}>
-                            {appointment.status}
-                          </span>
-                          {appointment.status === 'Confirmed' && (
-                            <div className="flex items-center space-x-1 mt-2 text-green-600">
-                              <CheckCircle className="w-4 h-4" />
-                              <span className="text-xs font-medium">Ready</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-12">
-                    <div className="w-20 h-20 bg-blue-100 rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg">
-                      <Calendar className="w-10 h-10 text-blue-600" strokeWidth={2} />
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">No upcoming appointments</h3>
-                    <p className="text-gray-700 mb-6 font-medium">Schedule your next appointment with a specialist.</p>
-                    <a
-                      href="/appointments"
-                      className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-xl font-bold transition-all duration-200 shadow-lg hover:shadow-xl"
-                    >
-                      <Calendar className="w-5 h-5" strokeWidth={2} />
-                      <span>Book Appointment</span>
-                    </a>
-                  </div>
-                )}
-              </div>
-            </div>
+            <DashboardAppointments />
           </div>
 
           {/* Enhanced Activity & Insights */}

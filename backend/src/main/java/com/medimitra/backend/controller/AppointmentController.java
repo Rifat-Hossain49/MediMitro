@@ -2,9 +2,12 @@ package com.medimitra.backend.controller;
 
 import com.medimitra.backend.model.Appointment;
 import com.medimitra.backend.model.Doctor;
+import com.medimitra.backend.model.DoctorPatientMessage;
 import com.medimitra.backend.repository.AppointmentRepository;
 import com.medimitra.backend.repository.DoctorRepository;
+import com.medimitra.backend.repository.DoctorPatientMessageRepository;
 import com.medimitra.backend.repository.UserRepository;
+import org.springframework.jdbc.core.JdbcTemplate;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/appointments")
@@ -33,6 +37,12 @@ public class AppointmentController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private DoctorPatientMessageRepository messageRepository;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @PostMapping("/book")
     public ResponseEntity<?> bookAppointment(@Valid @RequestBody BookAppointmentRequest request) {
@@ -99,6 +109,25 @@ public class AppointmentController {
 
             // Save appointment
             Appointment savedAppointment = appointmentRepository.save(appointment);
+
+            // Create initial conversation for messaging
+            try {
+                DoctorPatientMessage initialMessage = new DoctorPatientMessage();
+                initialMessage.setId(UUID.randomUUID().toString());
+                initialMessage.setDoctorId(request.getDoctorId());
+                initialMessage.setPatientId(request.getPatientId());
+                initialMessage.setAppointmentId(savedAppointment.getId());
+                initialMessage.setSenderType("system");
+                initialMessage.setMessage("Appointment confirmed! You can now communicate with your doctor through this chat.");
+                initialMessage.setMessageType("text");
+                initialMessage.setIsRead(false);
+                initialMessage.setCreatedAt(LocalDateTime.now());
+                
+                messageRepository.save(initialMessage);
+            } catch (Exception e) {
+                // Log error but don't fail the appointment booking
+                System.err.println("Failed to create initial conversation: " + e.getMessage());
+            }
 
             // Return response
             Map<String, Object> response = new HashMap<>();
@@ -190,6 +219,27 @@ public class AppointmentController {
             }
 
             Appointment updatedAppointment = appointmentRepository.save(appointment);
+
+            // If appointment is completed, create a conversation for messaging
+            if ("completed".equals(request.getStatus())) {
+                try {
+                    DoctorPatientMessage initialMessage = new DoctorPatientMessage();
+                    initialMessage.setId(UUID.randomUUID().toString());
+                    initialMessage.setDoctorId(appointment.getDoctorId());
+                    initialMessage.setPatientId(appointment.getPatientId());
+                    initialMessage.setAppointmentId(appointment.getId());
+                    initialMessage.setSenderType("system");
+                    initialMessage.setMessage("Appointment completed! You can now communicate with your doctor through this chat for follow-up questions or concerns.");
+                    initialMessage.setMessageType("text");
+                    initialMessage.setIsRead(false);
+                    initialMessage.setCreatedAt(LocalDateTime.now());
+                    
+                    messageRepository.save(initialMessage);
+                } catch (Exception e) {
+                    // Log error but don't fail the appointment update
+                    System.err.println("Failed to create conversation for completed appointment: " + e.getMessage());
+                }
+            }
 
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
@@ -329,6 +379,106 @@ public class AppointmentController {
         public void setStatus(String status) { this.status = status; }
 
         public String getNotes() { return notes; }
-        public void setNotes(String notes) { this.notes = notes; }
+        public void setNotes(String notes) { this.notes = notes;         }
+    }
+
+    // Simple messaging endpoints for completed appointments
+    @GetMapping("/messaging/conversations")
+    public ResponseEntity<?> getConversations() {
+        try {
+            // Get conversations from the messaging repository
+            List<Map<String, Object>> conversations = messageRepository.findConversationsByUser("system");
+            
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "conversations", conversations
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("success", false, "message", "Failed to fetch conversations: " + e.getMessage()));
+        }
+    }
+
+    @GetMapping("/messaging/conversation/{doctorId}/{patientId}")
+    public ResponseEntity<?> getMessages(@PathVariable String doctorId, @PathVariable String patientId) {
+        try {
+            List<DoctorPatientMessage> messages = messageRepository.findMessagesBetweenDoctorAndPatient(doctorId, patientId);
+            
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "messages", messages
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("success", false, "message", "Failed to fetch messages: " + e.getMessage()));
+        }
+    }
+
+    @PostMapping("/messaging/send")
+    public ResponseEntity<?> sendMessage(@RequestBody Map<String, Object> messageData) {
+        try {
+            String doctorId = (String) messageData.get("doctorId");
+            String patientId = (String) messageData.get("patientId");
+            String message = (String) messageData.get("message");
+            String appointmentId = (String) messageData.get("appointmentId");
+            String senderType = (String) messageData.get("senderType");
+            String attachmentUrl = (String) messageData.get("attachmentUrl");
+            String messageType = (String) messageData.get("messageType");
+            
+            DoctorPatientMessage newMessage = new DoctorPatientMessage();
+            newMessage.setId(UUID.randomUUID().toString());
+            newMessage.setDoctorId(doctorId);
+            newMessage.setPatientId(patientId);
+            newMessage.setAppointmentId(appointmentId);
+            newMessage.setSenderType(senderType);
+            newMessage.setMessage(message);
+            newMessage.setMessageType(messageType != null ? messageType : "text");
+            newMessage.setAttachmentUrl(attachmentUrl);
+            newMessage.setIsRead(false);
+            newMessage.setCreatedAt(LocalDateTime.now());
+            
+            messageRepository.save(newMessage);
+            
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Message sent successfully",
+                "messageId", newMessage.getId()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("success", false, "message", "Failed to send message: " + e.getMessage()));
+        }
+    }
+
+    // Create messaging table if it doesn't exist
+    @PostMapping("/messaging/create-table")
+    public ResponseEntity<?> createMessagingTable() {
+        try {
+            String createTableSql = """
+                CREATE TABLE IF NOT EXISTS doctor_patient_messages (
+                    id VARCHAR(255) PRIMARY KEY,
+                    doctor_id VARCHAR(255) NOT NULL,
+                    patient_id VARCHAR(255) NOT NULL,
+                    appointment_id VARCHAR(255),
+                    sender_type VARCHAR(10) NOT NULL CHECK (sender_type IN ('doctor', 'patient', 'system')),
+                    message TEXT NOT NULL,
+                    message_type VARCHAR(20) DEFAULT 'text' CHECK (message_type IN ('text', 'image', 'file', 'prescription')),
+                    attachment_url TEXT,
+                    is_read BOOLEAN DEFAULT FALSE,
+                    read_at TIMESTAMP,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+                """;
+            
+            jdbcTemplate.execute(createTableSql);
+            
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Messaging table created successfully"
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("success", false, "message", "Failed to create table: " + e.getMessage()));
+        }
     }
 }

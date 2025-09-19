@@ -39,12 +39,12 @@ public class AIDoctorSearchService {
 
     private void initializeSymptomMapping() {
         // Cardiovascular symptoms
-        symptomToSpecialization.put("chest pain", Arrays.asList("Cardiology", "Emergency Medicine"));
-        symptomToSpecialization.put("heart palpitations", Arrays.asList("Cardiology"));
-        symptomToSpecialization.put("shortness of breath", Arrays.asList("Cardiology", "Pulmonology", "Emergency Medicine"));
+        symptomToSpecialization.put("chest pain", Arrays.asList("Cardiology", "Cardiothoracic Surgery", "Emergency Medicine", "Critical Care Medicine"));
+        symptomToSpecialization.put("heart palpitations", Arrays.asList("Cardiology", "Cardiothoracic Surgery"));
+        symptomToSpecialization.put("shortness of breath", Arrays.asList("Cardiology", "Cardiothoracic Surgery", "Pulmonology", "Emergency Medicine", "Critical Care Medicine"));
         symptomToSpecialization.put("high blood pressure", Arrays.asList("Cardiology", "Internal Medicine"));
-        symptomToSpecialization.put("irregular heartbeat", Arrays.asList("Cardiology"));
-        symptomToSpecialization.put("chest tightness", Arrays.asList("Cardiology", "Pulmonology"));
+        symptomToSpecialization.put("irregular heartbeat", Arrays.asList("Cardiology", "Cardiothoracic Surgery"));
+        symptomToSpecialization.put("chest tightness", Arrays.asList("Cardiology", "Cardiothoracic Surgery", "Pulmonology"));
         
         // Dermatological symptoms
         symptomToSpecialization.put("skin rash", Arrays.asList("Dermatology"));
@@ -131,6 +131,8 @@ public class AIDoctorSearchService {
     private void initializeSpecializationPriority() {
         specializationPriority.put("Emergency Medicine", 10);
         specializationPriority.put("Cardiology", 9);
+        specializationPriority.put("Cardiothoracic Surgery", 9);
+        specializationPriority.put("Critical Care Medicine", 8);
         specializationPriority.put("Neurology", 8);
         specializationPriority.put("Oncology", 8);
         specializationPriority.put("Infectious Disease", 7);

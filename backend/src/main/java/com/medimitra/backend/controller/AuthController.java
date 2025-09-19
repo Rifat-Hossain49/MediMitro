@@ -79,27 +79,50 @@ public class AuthController {
             User user = userOptional.get();
 
             // Check password
-            if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            System.out.println("Debug: Checking password for user: " + user.getEmail());
+            System.out.println("Debug: Stored password hash: " + user.getPassword());
+            System.out.println("Debug: Input password: " + request.getPassword());
+            
+            boolean passwordMatches = passwordEncoder.matches(request.getPassword(), user.getPassword());
+            System.out.println("Debug: Password matches: " + passwordMatches);
+            
+            if (!passwordMatches) {
                 return ResponseEntity.badRequest()
                     .body(Map.of("success", false, "message", "Invalid email or password"));
             }
 
             // Update last login
-            userRepository.updateLastLogin(user.getId());
+            try {
+                userRepository.updateLastLogin(user.getId());
+                System.out.println("Debug: Last login updated successfully for user: " + user.getEmail());
+            } catch (Exception e) {
+                System.out.println("Debug: Error updating last login: " + e.getMessage());
+                e.printStackTrace();
+            }
 
             // Return user data for NextAuth.js (no JWT token)
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("message", "Credentials verified");
-            response.put("user", Map.of(
-                "id", user.getId(),
-                "email", user.getEmail(),
-                "name", user.getName(),
-                "role", user.getRole(),
-                "image", user.getImage()
-            ));
+            try {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", true);
+                response.put("message", "Credentials verified");
+                
+                Map<String, Object> userData = new HashMap<>();
+                userData.put("id", user.getId() != null ? user.getId() : "");
+                userData.put("email", user.getEmail() != null ? user.getEmail() : "");
+                userData.put("name", user.getName() != null ? user.getName() : "");
+                userData.put("role", user.getRole() != null ? user.getRole() : "");
+                userData.put("image", user.getImage() != null ? user.getImage() : "");
+                
+                response.put("user", userData);
 
-            return ResponseEntity.ok(response);
+                System.out.println("Debug: Returning successful response for user: " + user.getEmail());
+                return ResponseEntity.ok(response);
+            } catch (Exception e) {
+                System.out.println("Debug: Error building response: " + e.getMessage());
+                e.printStackTrace();
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "message", "Response building failed: " + e.getMessage()));
+            }
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

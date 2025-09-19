@@ -23,6 +23,7 @@ import {
 } from 'lucide-react'
 import type { Medication, DoseLog } from '@/lib/meds/types'
 import { profileService } from '@/lib/profileService'
+import { medicationService, type PatientMedication } from '@/lib/meds/medicationService'
 
 const MEDS_KEY = 'mm_meds_v1'
 const LOG_KEY = 'mm_meds_log_v1'
@@ -41,7 +42,8 @@ export default function ClientScheduler() {
   const [remindersEnabled, setRemindersEnabled] = useState<boolean>(true)
   const [activeTab, setActiveTab] = useState('schedule') // schedule, add
   const [showAddModal, setShowAddModal] = useState(false)
-  const [userProfile, setUserProfile] = useState({ email: '', phone: '' })
+  const [userProfile, setUserProfile] = useState({ email: '', phone: '', id: '' })
+  const [loading, setLoading] = useState(false)
   const intervalRef = useRef<number | null>(null)
   const alarmAudioRef = useRef<HTMLAudioElement | null>(null)
   const alarmTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -65,8 +67,94 @@ export default function ClientScheduler() {
     }
   })
 
+  // Convert backend medication to frontend format
+  const convertBackendToFrontend = (backendMed: any): Medication => {
+    console.log('🔄 Converting backend medication:', backendMed)
+    
+    // Parse frequency to determine times per day and times
+    const frequency = (backendMed.frequency || '').toLowerCase()
+    let timesPerDay = 1
+    let times = ['08:00']
+    
+    if (frequency.includes('twice') || frequency.includes('2x')) {
+      timesPerDay = 2
+      times = ['08:00', '20:00']
+    } else if (frequency.includes('three') || frequency.includes('3x')) {
+      timesPerDay = 3
+      times = ['08:00', '14:00', '20:00']
+    } else if (frequency.includes('four') || frequency.includes('4x')) {
+      timesPerDay = 4
+      times = ['08:00', '12:00', '16:00', '20:00']
+    }
+
+    const converted = {
+      id: backendMed.id,
+      name: backendMed.medication_name || backendMed.medicationName || '',
+      dose: backendMed.dosage || '',
+      timesPerDay,
+      times,
+      startDate: backendMed.start_date || backendMed.startDate || '',
+      notes: backendMed.notes || '',
+      category: 'prescription' as const,
+      priority: 'medium' as const,
+      notifications: {
+        browser: true,
+        email: false,
+        sms: false,
+        alarm: false,
+        reminderMinutes: 15
+      },
+      endDate: backendMed.end_date || backendMed.endDate,
+      doctorName: backendMed.prescribed_by_name || backendMed.prescribedByName
+    }
+    
+    console.log('✅ Converted to frontend format:', converted)
+    return converted
+  }
+
+  // Convert frontend medication to backend format
+  const convertFrontendToBackend = (frontendMed: Medication): MedicationRequest => {
+    const frequency = `${frontendMed.timesPerDay} times daily (${frontendMed.times.join(', ')})`
+    
+    return {
+      patientId: userProfile.id,
+      medicationName: frontendMed.name,
+      dosage: frontendMed.dose,
+      frequency,
+      route: 'oral',
+      startDate: frontendMed.startDate,
+      endDate: frontendMed.endDate,
+      status: 'active',
+      reason: frontendMed.notes,
+      notes: frontendMed.notes
+    }
+  }
+
+  // Load medications from backend
+  const loadMedications = async () => {
+    if (!userProfile.id) return
+    
+    try {
+      setLoading(true)
+      console.log('🔄 Loading medications for user:', userProfile.id)
+      const backendMeds = await medicationService.getMedications(userProfile.id)
+      console.log('📦 Backend medications received:', backendMeds)
+      const frontendMeds = backendMeds.map(convertBackendToFrontend)
+      console.log('🎯 Frontend medications after conversion:', frontendMeds)
+      setMeds(frontendMeds)
+    } catch (error) {
+      console.error('Failed to load medications:', error)
+      // Fallback to localStorage
+      try { 
+        const raw = localStorage.getItem(MEDS_KEY)
+        if (raw) setMeds(JSON.parse(raw))
+      } catch { }
+    } finally {
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
-    try { const raw = localStorage.getItem(MEDS_KEY); if (raw) setMeds(JSON.parse(raw)) } catch { }
     try { const raw = localStorage.getItem(LOG_KEY); if (raw) setLog(JSON.parse(raw)) } catch { }
     try { const rawN = localStorage.getItem(NOTIFY_KEY); if (rawN) setNotifyLog(JSON.parse(rawN)) } catch { }
     try { const rawE = localStorage.getItem(ENABLE_KEY); if (rawE) setRemindersEnabled(JSON.parse(rawE)) } catch { }
@@ -78,18 +166,26 @@ export default function ClientScheduler() {
       try {
         const profile = await profileService.getUserProfile()
         setUserProfile({
+          id: profile.id || '',
           email: profile.email || '',
           phone: profile.phoneNumber || ''
         })
       } catch (error) {
         console.error('Failed to load user profile for notifications:', error)
         // Fallback to empty profile
-        setUserProfile({ email: '', phone: '' })
+        setUserProfile({ id: '', email: '', phone: '' })
       }
     }
 
     loadUserProfile()
   }, [])
+
+  // Load medications when user profile is loaded
+  useEffect(() => {
+    if (userProfile.id) {
+      loadMedications()
+    }
+  }, [userProfile.id])
 
   useEffect(() => { try { localStorage.setItem(MEDS_KEY, JSON.stringify(meds)) } catch { } }, [meds])
   useEffect(() => { try { localStorage.setItem(LOG_KEY, JSON.stringify(log)) } catch { } }, [log])
@@ -276,43 +372,83 @@ export default function ClientScheduler() {
     }
   }
 
-  const addMedication = () => {
-    const id = `m_${Date.now()}`
-    const newMed: Medication = {
-      id,
-      name: form.name,
-      dose: form.dose,
-      timesPerDay: form.timesPerDay,
-      times: form.times.slice(0, form.timesPerDay),
-      startDate: form.startDate,
-      notes: form.notes,
-      category: form.category,
-      priority: form.priority,
-      notifications: form.notifications
+  const addMedication = async () => {
+    if (!userProfile.id) {
+      alert('Please log in to add medications')
+      return
     }
-    setMeds((prev) => [...prev, newMed])
-    setForm({
-      name: '',
-      dose: '',
-      timesPerDay: 2,
-      times: ['08:00', '20:00'],
-      startDate: nowLocalISODate(),
-      notes: '',
-      category: 'prescription',
-      priority: 'medium',
-      notifications: {
-        browser: true,
-        email: false,
-        sms: false,
-        alarm: false,
-        reminderMinutes: 15
+
+    try {
+      setLoading(true)
+      
+      const frontendMed: Medication = {
+        id: `m_${Date.now()}`,
+        name: form.name,
+        dose: form.dose,
+        timesPerDay: form.timesPerDay,
+        times: form.times.slice(0, form.timesPerDay),
+        startDate: form.startDate,
+        notes: form.notes,
+        category: form.category,
+        priority: form.priority,
+        notifications: form.notifications
       }
-    })
-    setShowAddModal(false)
+
+      const backendMed = convertFrontendToBackend(frontendMed)
+      const result = await medicationService.addMedication(backendMed)
+
+      if (result.success) {
+        // Update the frontend medication with the backend ID
+        frontendMed.id = result.id || frontendMed.id
+        setMeds((prev) => [...prev, frontendMed])
+        
+        setForm({
+          name: '',
+          dose: '',
+          timesPerDay: 2,
+          times: ['08:00', '20:00'],
+          startDate: nowLocalISODate(),
+          notes: '',
+          category: 'prescription',
+          priority: 'medium',
+          notifications: {
+            browser: true,
+            email: false,
+            sms: false,
+            alarm: false,
+            reminderMinutes: 15
+          }
+        })
+        setShowAddModal(false)
+        alert('Medication added successfully!')
+      } else {
+        alert('Failed to add medication: ' + (result.message || 'Unknown error'))
+      }
+    } catch (error) {
+      console.error('Error adding medication:', error)
+      alert('Failed to add medication. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const deleteMedication = (id: string) => {
-    setMeds((prev) => prev.filter(m => m.id !== id))
+  const deleteMedication = async (id: string) => {
+    try {
+      setLoading(true)
+      const result = await medicationService.deleteMedication(id)
+      
+      if (result.success) {
+        setMeds((prev) => prev.filter(m => m.id !== id))
+        alert('Medication deleted successfully!')
+      } else {
+        alert('Failed to delete medication: ' + (result.message || 'Unknown error'))
+      }
+    } catch (error) {
+      console.error('Error deleting medication:', error)
+      alert('Failed to delete medication. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const getCategoryIcon = (category: string) => {
@@ -486,7 +622,17 @@ export default function ClientScheduler() {
                     </div>
 
                     <div className="space-y-6">
-                      {meds.length === 0 && (
+                      {loading && (
+                        <div className="text-center py-12">
+                          <div className="p-4 bg-blue-100 rounded-full w-fit mx-auto mb-4">
+                            <Pill className="w-12 h-12 text-blue-600 animate-pulse" />
+                          </div>
+                          <h3 className="text-xl font-semibold text-gray-700 mb-2">Loading medications...</h3>
+                          <p className="text-gray-500">Please wait while we fetch your medication data</p>
+                        </div>
+                      )}
+                      
+                      {!loading && meds.length === 0 && (
                         <div className="text-center py-12">
                           <div className="p-4 bg-gray-100 rounded-full w-fit mx-auto mb-4">
                             <Pill className="w-12 h-12 text-gray-400" />
@@ -503,7 +649,7 @@ export default function ClientScheduler() {
                         </div>
                       )}
 
-                      {meds.map((medication) => {
+                      {!loading && meds.map((medication) => {
                         const CategoryIcon = getCategoryIcon(medication.category || 'prescription')
                         const categoryColor = getCategoryColor(medication.category || 'prescription')
                         const priorityColor = getPriorityColor(medication.priority || 'medium')
@@ -859,9 +1005,17 @@ export default function ClientScheduler() {
                         </button>
                         <button
                           type="submit"
-                          className="flex-1 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 font-medium transition-all shadow-lg"
+                          disabled={loading}
+                          className="flex-1 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 font-medium transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                         >
-                          Add Medication
+                          {loading ? (
+                            <>
+                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                              Adding...
+                            </>
+                          ) : (
+                            'Add Medication'
+                          )}
                         </button>
                       </div>
                     </form>

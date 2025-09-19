@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
-import { Menu, X, Heart, Calendar, FileText, Users, AlertCircle, User, LogOut } from 'lucide-react'
+import { Menu, X, Heart, Calendar, FileText, Users, AlertCircle, User, LogOut, MessageCircle } from 'lucide-react'
 import { useUser } from '@/contexts/UserContext'
 import Sidebar from './Sidebar'
 
@@ -57,6 +57,9 @@ const Navigation = () => {
               </Link>
               <Link href="/appointments" className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-purple-600 text-white text-sm hover:bg-purple-700 whitespace-nowrap">
                 <Users className="w-4 h-4" /> Find Doctors
+              </Link>
+              <Link href="/messaging" className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-600 text-white text-sm hover:bg-indigo-700 whitespace-nowrap">
+                <MessageCircle className="w-4 h-4" /> Messages
               </Link>
               <Link href="/hire-ambulance" className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-600 text-white text-sm hover:bg-red-700 whitespace-nowrap animate-pulse">
                 <AlertCircle className="w-4 h-4" /> Emergency

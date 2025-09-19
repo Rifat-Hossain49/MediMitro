@@ -51,9 +51,15 @@ interface ICUBed {
   id: string
   bedNumber: string
   type: 'general' | 'cardiac' | 'neuro' | 'pediatric'
-  status: 'available' | 'occupied' | 'maintenance'
+  status: 'available' | 'occupied' | 'maintenance' | 'reserved'
   pricePerDay: number
   facilities: string[]
+  reservationInfo?: {
+    patientName: string
+    startTime: string
+    endTime: string
+    isReservedByCurrentUser?: boolean
+  }
 }
 
 interface Hospital {
@@ -103,16 +109,90 @@ export default function ICUReservationSystem() {
   const [searchTerm, setSearchTerm] = useState('')
   const [lastUpdated, setLastUpdated] = useState(new Date())
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [isReserving, setIsReserving] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [isLoadingBeds, setIsLoadingBeds] = useState(true)
 
   // Set mounted flag for client-side rendering
   useEffect(() => {
     setMounted(true)
+    fetchICUBeds()
   }, [])
 
-  // Real Bangladesh hospital data
+  // Fetch ICU beds from backend
+  const fetchICUBeds = async () => {
+    setIsLoadingBeds(true)
+    try {
+      const response = await fetch('http://localhost:8080/api/icu-beds')
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success && data.beds) {
+          // Convert backend data to frontend format
+          const backendBeds = data.beds
+          const hospitalMap = new Map()
+          
+          // Group beds by hospital
+          backendBeds.forEach((bed: any) => {
+            if (!hospitalMap.has(bed.hospital)) {
+              hospitalMap.set(bed.hospital, {
+                id: bed.hospital.toLowerCase().replace(/\s+/g, '-'),
+                name: bed.hospital,
+                address: bed.hospitalAddress || 'Address not available',
+                phone: '+880-XXXX-XXXX',
+                distance: Math.random() * 10 + 1,
+                rating: 4.5 + Math.random() * 0.5,
+                totalBeds: 0,
+                availableBeds: 0,
+                facilities: ['24/7 Emergency', 'Advanced ICU'],
+                icuBeds: [],
+                doctors: [],
+                nurses: []
+              })
+            }
+            
+            const hospital = hospitalMap.get(bed.hospital)
+            hospital.totalBeds++
+            if (bed.status === 'available') {
+              hospital.availableBeds++
+            }
+            
+            hospital.icuBeds.push({
+              id: bed.id,
+              bedNumber: bed.bedNumber,
+              type: bed.icuType,
+              status: bed.status,
+              pricePerDay: bed.dailyRate ? Math.round(bed.dailyRate) : 10000,
+              facilities: bed.equipment ? JSON.parse(bed.equipment) : ['Basic Equipment'],
+              reservationInfo: bed.status === 'reserved' ? {
+                patientName: bed.patientName || 'Unknown Patient',
+                startTime: bed.startTime || new Date().toISOString(),
+                endTime: bed.endTime || new Date().toISOString(),
+                isReservedByCurrentUser: bed.patientId === 'user-patient-1' // Demo user check
+              } : undefined
+            })
+          })
+          
+          // Convert map to array and update state
+          const hospitalsArray = Array.from(hospitalMap.values())
+          setHospitals(hospitalsArray)
+          console.log('✅ Fetched ICU beds from backend:', hospitalsArray.length, 'hospitals')
+          console.log('✅ ICU beds data:', hospitalsArray)
+        }
+      } else {
+        console.warn('⚠️ Backend ICU beds not accessible, using mock data')
+      }
+    } catch (error) {
+      console.warn('⚠️ Error fetching ICU beds from backend, using mock data:', error)
+    } finally {
+      setIsLoadingBeds(false)
+    }
+  }
+
+  // Mock data fallback (only used if backend fails)
   useEffect(() => {
-    const bangladeshHospitals: Hospital[] = [
+    // Only load mock data if no hospitals are loaded from backend
+    if (hospitals.length === 0) {
+      const bangladeshHospitals: Hospital[] = [
       {
         id: '1',
         name: 'Dhaka Medical College Hospital',
@@ -496,7 +576,8 @@ export default function ICUReservationSystem() {
       }
     ]
     setHospitals(bangladeshHospitals)
-  }, [])
+    }
+  }, [hospitals.length])
 
   // Real-time updates simulation
   useEffect(() => {
@@ -508,10 +589,10 @@ export default function ICUReservationSystem() {
 
   const refreshData = () => {
     setIsRefreshing(true)
-    setTimeout(() => {
+    fetchICUBeds().finally(() => {
       setLastUpdated(new Date())
       setIsRefreshing(false)
-    }, 1000)
+    })
   }
 
   const handleBookBed = (hospital: Hospital, bed: ICUBed) => {
@@ -534,6 +615,60 @@ export default function ICUReservationSystem() {
     const bedCost = selectedBed.pricePerDay * bookingDetails.expectedDays
     const nurseCost = bookingDetails.selectedNurses.length * 2000 * bookingDetails.expectedDays
     return bedCost + nurseCost
+  }
+
+  const handleReserveBed = async () => {
+    if (!selectedBed || !selectedHospital) {
+      alert('Please select a bed and hospital first')
+      return
+    }
+
+    setIsReserving(true)
+    try {
+      // Calculate start and end times
+      const startTime = new Date()
+      const endTime = new Date()
+      endTime.setDate(endTime.getDate() + bookingDetails.expectedDays)
+
+      // Format dates for Java LocalDateTime.parse() - remove timezone info
+      const formatForJava = (date: Date) => {
+        return date.toISOString().replace('Z', '').replace(/\.\d{3}/, '')
+      }
+
+      const reservationData = {
+        bedId: selectedBed.id,
+        patientId: 'user-patient-1', // Default patient ID for demo
+        startTime: formatForJava(startTime),
+        endTime: formatForJava(endTime)
+      }
+
+      console.log('🔄 Sending reservation data:', reservationData)
+
+      const response = await fetch('http://localhost:8080/api/icu-beds/reserve', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(reservationData),
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        alert('ICU bed reservation confirmed! Your reservation has been saved.')
+        setShowBookingModal(false)
+        // Refresh the hospital data to show updated bed status
+        await fetchICUBeds()
+        setLastUpdated(new Date())
+      } else {
+        alert('Failed to reserve bed: ' + result.message)
+      }
+    } catch (error) {
+      console.error('Error reserving bed:', error)
+      alert('Failed to reserve bed. Please try again.')
+    } finally {
+      setIsReserving(false)
+    }
   }
 
   const getBedTypeIcon = (type: string) => {
@@ -701,7 +836,21 @@ export default function ICUReservationSystem() {
 
         {/* Hospital Cards */}
         <div className="space-y-6">
-          {filteredHospitals.map((hospital) => (
+          {isLoadingBeds ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="text-center">
+                <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <p className="text-gray-600 font-medium">Loading ICU beds from database...</p>
+              </div>
+            </div>
+          ) : filteredHospitals.length === 0 ? (
+            <div className="text-center py-12">
+              <BedDouble className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No hospitals found</h3>
+              <p className="text-gray-600">Try adjusting your search criteria or check back later</p>
+            </div>
+          ) : (
+            filteredHospitals.map((hospital) => (
             <motion.div
               key={hospital.id}
               initial={{ opacity: 0, scale: 0.9 }}
@@ -756,10 +905,10 @@ export default function ICUReservationSystem() {
               <div className="p-6">
                 <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
                   <BedDouble className="w-5 h-5" />
-                  <span>Available ICU Beds</span>
+                  <span>ICU Beds</span>
                 </h4>
 
-                {hospital.icuBeds.filter(bed => bed.status === 'available').length === 0 ? (
+                {hospital.icuBeds.filter(bed => bed.status === 'available' || bed.status === 'reserved').length === 0 ? (
                   <div className="text-center py-8 text-gray-500">
                     <BedDouble className="w-12 h-12 mx-auto mb-3 text-gray-300" />
                     <p>No ICU beds currently available</p>
@@ -767,25 +916,53 @@ export default function ICUReservationSystem() {
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {hospital.icuBeds
-                      .filter(bed => bed.status === 'available')
+                      .filter(bed => bed.status === 'available' || bed.status === 'reserved')
                       .map((bed) => (
                         <motion.div
                           key={bed.id}
-                          whileHover={{ scale: 1.02 }}
-                          className="group bg-white border-2 border-gray-200 rounded-xl p-6 hover:shadow-lg transition-all hover:border-blue-300 transform hover:scale-105"
+                          whileHover={{ scale: bed.status === 'reserved' ? 1.0 : 1.02 }}
+                          className={`group rounded-xl p-6 transition-all transform ${
+                            bed.status === 'reserved' 
+                              ? 'bg-orange-50 border-2 border-orange-200 hover:border-orange-300' 
+                              : 'bg-white border-2 border-gray-200 hover:shadow-lg hover:border-blue-300 hover:scale-105'
+                          }`}
                         >
+                          {/* Reservation Status Banner */}
+                          {bed.status === 'reserved' && (
+                            <div className="mb-4 p-3 bg-orange-100 border border-orange-200 rounded-lg">
+                              <div className="flex items-center space-x-2">
+                                <Timer className="w-4 h-4 text-orange-600" />
+                                <span className="text-sm font-semibold text-orange-800">
+                                  {bed.reservationInfo?.isReservedByCurrentUser ? 'Reserved by You' : 'Reserved'}
+                                </span>
+                              </div>
+                              {bed.reservationInfo && (
+                                <div className="mt-2 text-xs text-orange-700">
+                                  <p>Patient: {bed.reservationInfo.patientName}</p>
+                                  <p>Period: {new Date(bed.reservationInfo.startTime).toLocaleDateString()} - {new Date(bed.reservationInfo.endTime).toLocaleDateString()}</p>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
                           <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center space-x-2">
                               {getBedTypeIcon(bed.type)}
                               <span className="font-semibold text-gray-900">{bed.bedNumber}</span>
                             </div>
-                            <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                            <span className={`text-xs px-2 py-1 rounded ${
+                              bed.status === 'reserved' 
+                                ? 'bg-orange-100 text-orange-700' 
+                                : 'bg-gray-100 text-gray-700'
+                            }`}>
                               {bed.type.toUpperCase()}
                             </span>
                           </div>
 
                           <div className="space-y-2 mb-4">
-                            <div className="text-lg font-bold text-green-600">
+                            <div className={`text-lg font-bold ${
+                              bed.status === 'reserved' ? 'text-orange-600' : 'text-green-600'
+                            }`}>
                               ৳{bed.pricePerDay.toLocaleString()}/day
                             </div>
                           </div>
@@ -794,27 +971,39 @@ export default function ICUReservationSystem() {
                             <h5 className="text-sm font-medium text-gray-700 mb-2">Equipment:</h5>
                             <div className="flex flex-wrap gap-1">
                               {bed.facilities.map((facility, index) => (
-                                <span key={index} className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
+                                <span key={index} className={`text-xs px-2 py-1 rounded ${
+                                  bed.status === 'reserved' 
+                                    ? 'bg-orange-100 text-orange-700' 
+                                    : 'bg-green-100 text-green-700'
+                                }`}>
                                   {facility}
                                 </span>
                               ))}
                             </div>
                           </div>
 
-                          <button
-                            onClick={() => handleBookBed(hospital, bed)}
-                            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 px-4 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all flex items-center justify-center space-x-2 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
-                          >
-                            <CalendarCheck className="w-5 h-5" />
-                            <span>Reserve ICU Bed</span>
-                          </button>
+                          {bed.status === 'available' ? (
+                            <button
+                              onClick={() => handleBookBed(hospital, bed)}
+                              className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 px-4 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all flex items-center justify-center space-x-2 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+                            >
+                              <CalendarCheck className="w-5 h-5" />
+                              <span>Reserve ICU Bed</span>
+                            </button>
+                          ) : (
+                            <div className="w-full bg-gray-100 text-gray-500 py-3 px-4 rounded-xl flex items-center justify-center space-x-2 font-semibold">
+                              <X className="w-5 h-5" />
+                              <span>Not Available</span>
+                            </div>
+                          )}
                         </motion.div>
                       ))}
                   </div>
                 )}
               </div>
             </motion.div>
-          ))}
+          ))
+          )}
         </div>
 
         {/* Enhanced Booking Modal */}
@@ -1066,14 +1255,21 @@ export default function ICUReservationSystem() {
                     {/* Action Buttons */}
                     <div className="space-y-4">
                       <button
-                        className="w-full bg-gradient-to-r from-blue-600 to-teal-600 text-white py-4 px-6 rounded-xl hover:from-blue-700 hover:to-teal-700 transition-all flex items-center justify-center space-x-3 font-bold text-lg shadow-lg hover:shadow-xl transform hover:scale-105"
-                        onClick={() => {
-                          alert('ICU bed reservation confirmed!')
-                          setShowBookingModal(false)
-                        }}
+                        className="w-full bg-gradient-to-r from-blue-600 to-teal-600 text-white py-4 px-6 rounded-xl hover:from-blue-700 hover:to-teal-700 transition-all flex items-center justify-center space-x-3 font-bold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                        onClick={handleReserveBed}
+                        disabled={isReserving}
                       >
-                        <CreditCard className="w-6 h-6" />
-                        <span>Confirm Reservation - ৳{calculateTotalCost().toLocaleString()}</span>
+                        {isReserving ? (
+                          <>
+                            <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            <span>Reserving...</span>
+                          </>
+                        ) : (
+                          <>
+                            <CreditCard className="w-6 h-6" />
+                            <span>Confirm Reservation - ৳{calculateTotalCost().toLocaleString()}</span>
+                          </>
+                        )}
                       </button>
 
                       <button

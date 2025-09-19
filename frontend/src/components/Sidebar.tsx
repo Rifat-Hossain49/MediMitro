@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { motion } from 'framer-motion'
 import type { Role } from '@/lib/roles'
-import { Heart, Calendar, FileText, Pill, MapPin, BedDouble, User, Settings } from 'lucide-react'
+import { Heart, Calendar, FileText, Pill, MapPin, BedDouble, User, Settings, MessageCircle } from 'lucide-react'
 
 type NavItem = { name: string; href: string; icon: React.ComponentType<{ className?: string }> }
 
@@ -17,6 +17,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const base: NavItem[] = [
     { name: 'Dashboard', href: '/dashboard', icon: Heart },
     { name: 'Appointments', href: '/appointments', icon: Calendar },
+    { name: 'Messages', href: '/messaging', icon: MessageCircle },
     { name: 'EHR', href: '/ehr', icon: FileText },
   ]
 

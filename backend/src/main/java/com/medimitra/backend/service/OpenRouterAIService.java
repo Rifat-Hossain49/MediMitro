@@ -68,7 +68,7 @@ public class OpenRouterAIService {
 
         return String.format(
                 """
-                        You are a medical AI assistant. Analyze the patient's symptoms and recommend the most suitable doctors from the available list.
+                        You are a medical AI assistant. Analyze the patient's symptoms and provide both doctor recommendations and helpful patient advice.
 
                         Patient Symptoms: "%s"
 
@@ -85,6 +85,12 @@ public class OpenRouterAIService {
                                 "symptoms": "symptoms",
                                 "conditions": ["possible conditions"],
                                 "specializations": ["relevant specializations"]
+                            },
+                            "patientAdvice": {
+                                "briefAdvice": "Provide a brief 80-100 word health advice for the patient about their symptoms, including immediate steps they can take, what to monitor, and when to seek urgent care. Be helpful but not diagnostic.",
+                                "urgency": "low/medium/high",
+                                "monitoring": "What symptoms to watch for",
+                                "immediateSteps": "What the patient can do right now"
                             },
                             "recommendedDoctors": [
                                 {
@@ -178,6 +184,7 @@ public class OpenRouterAIService {
             result.put("success", true);
             result.put("doctors", recommendedDoctors);
             result.put("analysis", aiAnalysis.get("analysis"));
+            result.put("patientAdvice", aiAnalysis.get("patientAdvice"));
             result.put("source", "ai");
 
             return result;
@@ -222,6 +229,7 @@ public class OpenRouterAIService {
                 "recommendedSpecializations", getRecommendedSpecializations(symptoms),
                 "totalMatches", recommendedDoctors.size(),
                 "note", "Rule-based analysis (AI service temporarily unavailable)"));
+        result.put("patientAdvice", generateFallbackPatientAdvice(symptoms));
         result.put("source", "rule_based_fallback");
 
         return result;
@@ -234,10 +242,10 @@ public class OpenRouterAIService {
 
         // Define symptom-to-specialization mapping
         Map<String, List<String>> symptomMapping = new HashMap<>();
-        symptomMapping.put("chest pain", Arrays.asList("Cardiology", "Emergency Medicine"));
-        symptomMapping.put("heart", Arrays.asList("Cardiology"));
-        symptomMapping.put("breathing", Arrays.asList("Cardiology", "Pulmonology"));
-        symptomMapping.put("shortness of breath", Arrays.asList("Cardiology", "Pulmonology"));
+        symptomMapping.put("chest pain", Arrays.asList("Cardiology", "Cardiothoracic Surgery", "Emergency Medicine", "Critical Care Medicine"));
+        symptomMapping.put("heart", Arrays.asList("Cardiology", "Cardiothoracic Surgery"));
+        symptomMapping.put("breathing", Arrays.asList("Cardiology", "Cardiothoracic Surgery", "Pulmonology"));
+        symptomMapping.put("shortness of breath", Arrays.asList("Cardiology", "Cardiothoracic Surgery", "Pulmonology"));
         symptomMapping.put("skin", Arrays.asList("Dermatology"));
         symptomMapping.put("rash", Arrays.asList("Dermatology"));
         symptomMapping.put("acne", Arrays.asList("Dermatology"));
@@ -408,6 +416,41 @@ public class OpenRouterAIService {
         }
 
         return new ArrayList<>(specializations);
+    }
+
+    private Map<String, Object> generateFallbackPatientAdvice(String symptoms) {
+        String symptomsLower = symptoms.toLowerCase();
+        Map<String, Object> advice = new HashMap<>();
+        
+        // Generate advice based on symptoms
+        if (symptomsLower.contains("chest") || symptomsLower.contains("heart")) {
+            advice.put("briefAdvice", "Chest symptoms require prompt medical attention. If you experience severe chest pain, shortness of breath, or pain radiating to your arm, seek emergency care immediately. For mild chest discomfort, monitor your symptoms and avoid strenuous activities until you can see a cardiologist.");
+            advice.put("urgency", "high");
+            advice.put("monitoring", "Watch for worsening pain, difficulty breathing, or pain spreading to arms, neck, or jaw");
+            advice.put("immediateSteps", "Rest, avoid physical exertion, and seek medical attention if symptoms worsen");
+        } else if (symptomsLower.contains("skin") || symptomsLower.contains("black") || symptomsLower.contains("dot")) {
+            advice.put("briefAdvice", "Skin changes, especially new or changing moles, should be evaluated by a dermatologist. Monitor the area for changes in size, color, shape, or texture. Avoid picking or scratching the area and protect it from sun exposure. Early detection of skin issues is crucial for effective treatment.");
+            advice.put("urgency", "medium");
+            advice.put("monitoring", "Watch for changes in size, color, shape, texture, or if it becomes itchy, painful, or bleeds");
+            advice.put("immediateSteps", "Take photos to track changes, avoid sun exposure, and schedule a dermatology appointment");
+        } else if (symptomsLower.contains("headache") || symptomsLower.contains("dizziness")) {
+            advice.put("briefAdvice", "Headaches and dizziness can have various causes. Rest in a quiet, dark room and stay hydrated. If you experience severe, sudden headaches, vision changes, or neck stiffness, seek immediate medical attention. Keep track of headache patterns and triggers to help with diagnosis.");
+            advice.put("urgency", "medium");
+            advice.put("monitoring", "Watch for severe pain, vision changes, fever, neck stiffness, or confusion");
+            advice.put("immediateSteps", "Rest, stay hydrated, avoid bright lights and loud noises, and consider over-the-counter pain relief if appropriate");
+        } else if (symptomsLower.contains("back") || symptomsLower.contains("joint")) {
+            advice.put("briefAdvice", "Musculoskeletal pain often improves with rest, gentle stretching, and over-the-counter pain relievers. Avoid activities that worsen the pain and consider applying ice or heat. If pain is severe, persistent, or accompanied by numbness or weakness, consult an orthopedic specialist.");
+            advice.put("urgency", "low");
+            advice.put("monitoring", "Watch for worsening pain, numbness, weakness, or loss of function");
+            advice.put("immediateSteps", "Rest the affected area, apply ice for 15-20 minutes, and avoid activities that worsen pain");
+        } else {
+            advice.put("briefAdvice", "Your symptoms should be evaluated by a healthcare professional. Keep a symptom diary noting when symptoms occur, their severity, and any triggers. Stay hydrated, get adequate rest, and avoid self-medication without professional guidance. If symptoms worsen or new symptoms appear, seek medical attention promptly.");
+            advice.put("urgency", "low");
+            advice.put("monitoring", "Watch for symptom progression, new symptoms, or signs of worsening condition");
+            advice.put("immediateSteps", "Rest, stay hydrated, keep a symptom diary, and schedule an appointment with a healthcare provider");
+        }
+        
+        return advice;
     }
 
     public boolean isConfigured() {

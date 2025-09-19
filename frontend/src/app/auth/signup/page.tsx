@@ -73,7 +73,12 @@ export default function SignUpPage() {
       })
 
       if (result?.ok) {
-        router.push('/dashboard')
+        // Redirect based on user role
+        if (formData.role === 'doctor') {
+          router.push('/doctor-portal')
+        } else {
+          router.push('/dashboard')
+        }
       }
     } catch (error) {
       setError('An error occurred. Please try again.')
@@ -85,7 +90,9 @@ export default function SignUpPage() {
   const handleOAuthSignup = async (provider: string) => {
     setLoading(true)
     try {
-      await signIn(provider, { callbackUrl: '/dashboard' })
+      // For OAuth, we'll default to patient role and let them update later
+      const callbackUrl = formData.role === 'doctor' ? '/doctor-portal' : '/dashboard'
+      await signIn(provider, { callbackUrl })
     } catch (error) {
       setError('An error occurred. Please try again.')
       setLoading(false)
@@ -114,21 +121,21 @@ export default function SignUpPage() {
         {/* Header */}
         <div className="text-center">
           <div className="flex items-center justify-center mb-6">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 via-purple-500 to-green-500 rounded-2xl flex items-center justify-center shadow-lg">
-              <Heart className="w-8 h-8 text-white" />
+            <div className="w-20 h-20 bg-gradient-to-br from-blue-500 via-purple-500 to-green-500 rounded-3xl flex items-center justify-center shadow-xl border-4 border-white">
+              <Heart className="w-10 h-10 text-white" strokeWidth={2} fill="currentColor" />
             </div>
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Join MediMitra</h2>
-          <p className="text-gray-600">Create your account to get started</p>
+          <h2 className="text-4xl font-bold text-gray-900 mb-3 tracking-tight">Join MediMitra</h2>
+          <p className="text-lg text-gray-700 font-medium">Create your account to get started</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl p-8 space-y-6">
+        <div className="bg-white rounded-3xl shadow-2xl p-8 space-y-6 border border-gray-100">
           {/* OAuth Buttons */}
           <div className="space-y-3">
             <button
               onClick={() => handleOAuthSignup('google')}
               disabled={loading}
-              className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-300 rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-colors disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-3 px-4 py-3 border-2 border-gray-300 rounded-xl text-gray-800 font-semibold bg-white hover:bg-gray-50 hover:border-gray-400 transition-colors disabled:opacity-50"
             >
               <Chrome className="w-5 h-5" />
               Continue with Google
@@ -141,24 +148,24 @@ export default function SignUpPage() {
               <div className="w-full border-t border-gray-300" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">Or create account with email</span>
+              <span className="px-2 bg-white text-gray-600 font-medium">Or create account with email</span>
             </div>
           </div>
 
           {/* Credentials Form */}
           <form onSubmit={handleCredentialsSignup} className="space-y-4">
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl">
+              <div className="bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-xl font-medium">
                 {error}
               </div>
             )}
 
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="name" className="block text-sm font-semibold text-gray-800 mb-2">
                 Full Name
               </label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
                 <input
                   id="name"
                   name="name"
@@ -166,18 +173,18 @@ export default function SignUpPage() {
                   value={formData.name}
                   onChange={handleChange}
                   required
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 font-medium"
                   placeholder="Enter your full name"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="email" className="block text-sm font-semibold text-gray-800 mb-2">
                 Email Address
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
                 <input
                   id="email"
                   name="email"
@@ -185,14 +192,14 @@ export default function SignUpPage() {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 font-medium"
                   placeholder="Enter your email"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="role" className="block text-sm font-semibold text-gray-800 mb-2">
                 I am a
               </label>
               <select
@@ -200,20 +207,25 @@ export default function SignUpPage() {
                 name="role"
                 value={formData.role}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 font-medium"
               >
                 <option value="patient">Patient</option>
                 <option value="doctor">Doctor</option>
                 <option value="pharmacist">Pharmacist</option>
               </select>
+              {formData.role === 'doctor' && (
+                <p className="text-sm text-blue-600 mt-2 font-medium">
+                  💡 Doctors will need to complete additional verification after registration
+                </p>
+              )}
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="password" className="block text-sm font-semibold text-gray-800 mb-2">
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
                 <input
                   id="password"
                   name="password"
@@ -221,18 +233,18 @@ export default function SignUpPage() {
                   value={formData.password}
                   onChange={handleChange}
                   required
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 font-medium"
                   placeholder="Create a password"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="confirmPassword" className="block text-sm font-semibold text-gray-800 mb-2">
                 Confirm Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
                 <input
                   id="confirmPassword"
                   name="confirmPassword"
@@ -240,7 +252,7 @@ export default function SignUpPage() {
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   required
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 font-medium"
                   placeholder="Confirm your password"
                 />
               </div>
@@ -249,7 +261,7 @@ export default function SignUpPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 disabled:opacity-50"
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl font-bold text-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 disabled:opacity-50 shadow-lg"
             >
               {loading ? 'Creating Account...' : 'Create Account'}
             </button>
@@ -257,9 +269,9 @@ export default function SignUpPage() {
 
           {/* Footer */}
           <div className="text-center">
-            <p className="text-gray-600">
+            <p className="text-gray-700 font-medium">
               Already have an account?{' '}
-              <Link href="/auth/signin" className="text-blue-600 hover:text-blue-700 font-semibold">
+              <Link href="/auth/signin" className="text-blue-600 hover:text-blue-700 font-bold">
                 Sign in
               </Link>
             </p>

@@ -31,7 +31,6 @@ export const {
     }),
 
     // Email/Password - Essential for healthcare compliance
-    // TODO: Implement with Spring JDBC backend API
     Credentials({
       name: "credentials",
       credentials: {
@@ -39,9 +38,35 @@ export const {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        // TODO: Replace with API call to Spring backend for authentication
-        console.log("Credentials authentication not yet implemented with Spring backend")
-        return null
+        try {
+          const response = await fetch('http://localhost:8080/api/auth/verify-credentials', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email: credentials?.email,
+              password: credentials?.password,
+            }),
+          })
+
+          if (response.ok) {
+            const data = await response.json()
+            if (data.success && data.user) {
+              return {
+                id: data.user.id,
+                email: data.user.email,
+                name: data.user.name,
+                role: data.user.role,
+                image: data.user.image,
+              }
+            }
+          }
+          return null
+        } catch (error) {
+          console.error('Credentials authentication error:', error)
+          return null
+        }
       },
     }),
   ],
@@ -102,7 +127,7 @@ export const {
       return session
     },
     async redirect({ url, baseUrl }) {
-      // Redirect to dashboard after successful authentication
+      // Redirect to appropriate dashboard based on user role
       if (url.startsWith("/")) return `${baseUrl}${url}`
       else if (new URL(url).origin === baseUrl) return url
       return `${baseUrl}/dashboard`
@@ -117,14 +142,40 @@ export const {
 })
 
 // Helper function to register new users
-// TODO: Implement with Spring JDBC backend API
 export async function registerUser(email: string, password: string, name: string, role: string = "patient") {
   try {
-    // TODO: Replace with API call to Spring backend for user registration
-    console.log("User registration not yet implemented with Spring backend")
-    return { success: false, error: "User registration not yet implemented with Spring backend" }
+    const response = await fetch('http://localhost:8080/api/auth/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email,
+        password,
+        name,
+        role,
+      }),
+    })
+
+    const data = await response.json()
+
+    if (response.ok && data.success) {
+      return { 
+        success: true, 
+        message: data.message || 'User registered successfully',
+        user: data.user 
+      }
+    } else {
+      return { 
+        success: false, 
+        error: data.message || data.error || 'Registration failed' 
+      }
+    }
   } catch (error) {
     console.error("Registration error:", error)
-    return { success: false, error: error instanceof Error ? error.message : "Registration failed" }
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : "Registration failed" 
+    }
   }
 }

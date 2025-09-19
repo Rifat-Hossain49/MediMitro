@@ -35,6 +35,28 @@ public class DoctorRepository {
             doctor.setRating(rs.getBigDecimal("rating"));
             doctor.setTotalRatings(rs.getInt("total_ratings"));
             
+            // Enhanced credentials
+            doctor.setMedicalDegree(rs.getString("medical_degree"));
+            doctor.setUniversity(rs.getString("university"));
+            if (rs.getObject("graduation_year") != null) {
+                doctor.setGraduationYear(rs.getInt("graduation_year"));
+            }
+            doctor.setBoardCertification(rs.getString("board_certification"));
+            doctor.setAdditionalQualifications(rs.getString("additional_qualifications"));
+            doctor.setLanguages(rs.getString("languages"));
+            doctor.setBio(rs.getString("bio"));
+            doctor.setProfilePictureUrl(rs.getString("profile_picture_url"));
+            
+            // Verification status
+            doctor.setIsVerified(rs.getBoolean("is_verified"));
+            doctor.setVerificationDocuments(rs.getString("verification_documents"));
+            doctor.setVerificationStatus(rs.getString("verification_status"));
+            doctor.setRejectionReason(rs.getString("rejection_reason"));
+            if (rs.getTimestamp("verified_at") != null) {
+                doctor.setVerifiedAt(rs.getTimestamp("verified_at").toLocalDateTime());
+            }
+            doctor.setVerifiedBy(rs.getString("verified_by"));
+            
             if (rs.getTimestamp("created_at") != null) {
                 doctor.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
             }
@@ -203,6 +225,61 @@ public class DoctorRepository {
             ORDER BY d.rating DESC, d.total_ratings DESC
             """;
         return jdbcTemplate.query(sql, doctorRowMapper, "%" + name + "%");
+    }
+
+    // Methods for verified doctors
+    public List<Doctor> findVerifiedDoctors() {
+        String sql = """
+            SELECT * FROM doctors 
+            WHERE is_verified = true AND verification_status = 'approved'
+            ORDER BY rating DESC, total_ratings DESC
+            """;
+        return jdbcTemplate.query(sql, doctorRowMapper);
+    }
+
+    public List<Doctor> findVerifiedDoctorsBySpecialization(String specialization) {
+        String sql = """
+            SELECT * FROM doctors 
+            WHERE specialization = ? AND is_verified = true AND verification_status = 'approved'
+            ORDER BY rating DESC, total_ratings DESC
+            """;
+        return jdbcTemplate.query(sql, doctorRowMapper, specialization);
+    }
+
+    public List<Doctor> findVerifiedDoctorsByHospital(String hospital) {
+        String sql = """
+            SELECT * FROM doctors 
+            WHERE hospital = ? AND is_verified = true AND verification_status = 'approved'
+            ORDER BY rating DESC, total_ratings DESC
+            """;
+        return jdbcTemplate.query(sql, doctorRowMapper, hospital);
+    }
+
+    public List<Doctor> findVerifiedDoctorsByName(String name) {
+        String sql = """
+            SELECT d.* FROM doctors d 
+            JOIN users u ON d.user_id = u.id 
+            WHERE LOWER(u.name) LIKE LOWER(?) 
+            AND d.is_verified = true AND d.verification_status = 'approved'
+            ORDER BY d.rating DESC, d.total_ratings DESC
+            """;
+        return jdbcTemplate.query(sql, doctorRowMapper, "%" + name + "%");
+    }
+
+    public long countVerifiedDoctors() {
+        String sql = "SELECT COUNT(*) FROM doctors WHERE is_verified = true AND verification_status = 'approved'";
+        Long count = jdbcTemplate.queryForObject(sql, Long.class);
+        return count != null ? count : 0;
+    }
+
+    public Optional<String> findDoctorIdByUserId(String userId) {
+        try {
+            String sql = "SELECT id FROM doctors WHERE user_id = ?";
+            String doctorId = jdbcTemplate.queryForObject(sql, String.class, userId);
+            return Optional.ofNullable(doctorId);
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
     }
 }
 

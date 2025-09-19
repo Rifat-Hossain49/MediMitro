@@ -37,6 +37,25 @@ public class Doctor {
     private String availability; // JSON string of available time slots
     private BigDecimal rating = BigDecimal.ZERO;
     private int totalRatings = 0;
+    
+    // Enhanced credentials
+    private String medicalDegree;
+    private String university;
+    private Integer graduationYear;
+    private String boardCertification;
+    private String additionalQualifications; // JSON array
+    private String languages; // JSON array
+    private String bio;
+    private String profilePictureUrl;
+    
+    // Verification status
+    private Boolean isVerified = false;
+    private String verificationDocuments; // JSON array
+    private String verificationStatus = "pending"; // pending, approved, rejected
+    private String rejectionReason;
+    private LocalDateTime verifiedAt;
+    private String verifiedBy; // Admin who verified
+    
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -164,6 +183,120 @@ public class Doctor {
 
     public void setUserInfo(Map<String, Object> userInfo) {
         this.userInfo = userInfo;
+    }
+
+    // Enhanced credentials getters and setters
+    public String getMedicalDegree() {
+        return medicalDegree;
+    }
+
+    public void setMedicalDegree(String medicalDegree) {
+        this.medicalDegree = medicalDegree;
+    }
+
+    public String getUniversity() {
+        return university;
+    }
+
+    public void setUniversity(String university) {
+        this.university = university;
+    }
+
+    public Integer getGraduationYear() {
+        return graduationYear;
+    }
+
+    public void setGraduationYear(Integer graduationYear) {
+        this.graduationYear = graduationYear;
+    }
+
+    public String getBoardCertification() {
+        return boardCertification;
+    }
+
+    public void setBoardCertification(String boardCertification) {
+        this.boardCertification = boardCertification;
+    }
+
+    public String getAdditionalQualifications() {
+        return additionalQualifications;
+    }
+
+    public void setAdditionalQualifications(String additionalQualifications) {
+        this.additionalQualifications = additionalQualifications;
+    }
+
+    public String getLanguages() {
+        return languages;
+    }
+
+    public void setLanguages(String languages) {
+        this.languages = languages;
+    }
+
+    public String getBio() {
+        return bio;
+    }
+
+    public void setBio(String bio) {
+        this.bio = bio;
+    }
+
+    public String getProfilePictureUrl() {
+        return profilePictureUrl;
+    }
+
+    public void setProfilePictureUrl(String profilePictureUrl) {
+        this.profilePictureUrl = profilePictureUrl;
+    }
+
+    // Verification status getters and setters
+    public Boolean getIsVerified() {
+        return isVerified;
+    }
+
+    public void setIsVerified(Boolean isVerified) {
+        this.isVerified = isVerified;
+    }
+
+    public String getVerificationDocuments() {
+        return verificationDocuments;
+    }
+
+    public void setVerificationDocuments(String verificationDocuments) {
+        this.verificationDocuments = verificationDocuments;
+    }
+
+    public String getVerificationStatus() {
+        return verificationStatus;
+    }
+
+    public void setVerificationStatus(String verificationStatus) {
+        this.verificationStatus = verificationStatus;
+    }
+
+    public String getRejectionReason() {
+        return rejectionReason;
+    }
+
+    public void setRejectionReason(String rejectionReason) {
+        this.rejectionReason = rejectionReason;
+    }
+
+    public LocalDateTime getVerifiedAt() {
+        return verifiedAt;
+    }
+
+    public void setVerifiedAt(LocalDateTime verifiedAt) {
+        this.verifiedAt = verifiedAt;
+    }
+
+    public String getVerifiedBy() {
+        return verifiedBy;
+    }
+
+    public void setVerifiedBy(String verifiedBy) {
+        this.verifiedBy = verifiedBy;
     }
 
     // Utility methods

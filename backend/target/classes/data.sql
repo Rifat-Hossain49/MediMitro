@@ -55,3 +55,25 @@ VALUES
     ('record-1', 'user-patient-1', 'visit_note', 'Routine Physical Examination', 'Annual physical examination with blood work', NULL, CURRENT_TIMESTAMP - INTERVAL '1 month', 'Patient in good overall health. Blood pressure slightly elevated.', CURRENT_TIMESTAMP - INTERVAL '1 month', CURRENT_TIMESTAMP - INTERVAL '1 month'),
     ('record-2', 'user-patient-2', 'lab_result', 'Complete Blood Count', 'CBC with differential and platelets', NULL, CURRENT_TIMESTAMP - INTERVAL '2 weeks', 'All values within normal limits.', CURRENT_TIMESTAMP - INTERVAL '2 weeks', CURRENT_TIMESTAMP - INTERVAL '2 weeks')
 ON CONFLICT (id) DO NOTHING;
+
+-- Insert sample medications (drug database)
+INSERT INTO medications (id, name, generic_name, manufacturer, description, side_effects, dosage_form, strength, category, requires_prescription, created_at, updated_at)
+VALUES 
+    ('med-1', 'Lisinopril', 'Lisinopril', 'Generic Pharma', 'ACE inhibitor used to treat high blood pressure and heart failure', 'Dizziness, dry cough, fatigue, headache', 'Tablet', '10mg', 'Cardiovascular', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('med-2', 'Aspirin', 'Acetylsalicylic acid', 'Bayer', 'NSAID used for pain relief, fever reduction, and cardiovascular protection', 'Stomach upset, bleeding risk, ringing in ears', 'Tablet', '81mg', 'Pain Relief', false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('med-3', 'Metformin', 'Metformin hydrochloride', 'Generic Pharma', 'Antidiabetic medication used to treat type 2 diabetes', 'Nausea, diarrhea, metallic taste, stomach upset', 'Tablet', '500mg', 'Diabetes', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('med-4', 'Atorvastatin', 'Atorvastatin calcium', 'Pfizer', 'Statin used to lower cholesterol and reduce cardiovascular risk', 'Muscle pain, liver problems, digestive issues', 'Tablet', '20mg', 'Cardiovascular', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('med-5', 'Omeprazole', 'Omeprazole', 'Generic Pharma', 'Proton pump inhibitor used to treat acid reflux and stomach ulcers', 'Headache, nausea, diarrhea, stomach pain', 'Capsule', '20mg', 'Gastrointestinal', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('med-6', 'Vitamin D3', 'Cholecalciferol', 'Nature Made', 'Vitamin supplement for bone health and immune function', 'Nausea, vomiting, constipation, weakness', 'Softgel', '1000 IU', 'Vitamins', false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('med-7', 'Ibuprofen', 'Ibuprofen', 'Advil', 'NSAID used for pain relief, inflammation, and fever reduction', 'Stomach upset, dizziness, headache, rash', 'Tablet', '200mg', 'Pain Relief', false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('med-8', 'Loratadine', 'Loratadine', 'Claritin', 'Antihistamine used to treat allergies and hay fever', 'Drowsiness, dry mouth, headache, fatigue', 'Tablet', '10mg', 'Allergy', false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+ON CONFLICT (id) DO NOTHING;
+
+-- Insert sample patient medications (EHR)
+INSERT INTO ehr_medications (id, patient_id, medication_name, dosage, frequency, route, start_date, end_date, status, prescribed_by, reason, notes, created_at, updated_at)
+VALUES 
+    ('ehr-med-1', 'user-patient-1', 'Lisinopril', '10mg', 'Once daily', 'oral', CURRENT_DATE - INTERVAL '30 days', NULL, 'active', 'doctor-1', 'Hypertension management', 'Take in the morning with or without food', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('ehr-med-2', 'user-patient-1', 'Aspirin', '81mg', 'Once daily', 'oral', CURRENT_DATE - INTERVAL '30 days', NULL, 'active', 'doctor-1', 'Cardiovascular protection', 'Low-dose aspirin for heart health', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('ehr-med-3', 'user-patient-2', 'Metformin', '500mg', 'Twice daily', 'oral', CURRENT_DATE - INTERVAL '14 days', NULL, 'active', 'doctor-2', 'Type 2 diabetes management', 'Take with meals to reduce stomach upset', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('ehr-med-4', 'user-patient-2', 'Vitamin D3', '1000 IU', 'Once daily', 'oral', CURRENT_DATE - INTERVAL '60 days', NULL, 'active', NULL, 'Bone health and immune support', 'Take with a meal containing fat for better absorption', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+ON CONFLICT (id) DO NOTHING;
