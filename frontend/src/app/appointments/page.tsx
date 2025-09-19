@@ -1,11 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { 
-  Calendar, 
-  Clock, 
-  MapPin, 
-  User, 
+import {
+  Calendar,
+  Clock,
+  MapPin,
+  User,
   Search,
   Filter,
   Phone,
@@ -89,7 +89,7 @@ export default function AppointmentsPage() {
   })
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null)
   const [showBookingModal, setShowBookingModal] = useState(false)
-  const [selectedSlot, setSelectedSlot] = useState<{day: string, time: string} | null>(null)
+  const [selectedSlot, setSelectedSlot] = useState<{ day: string, time: string } | null>(null)
   const [filteredDoctors, setFilteredDoctors] = useState<Doctor[]>([])
   const [showFilters, setShowFilters] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -110,16 +110,127 @@ export default function AppointmentsPage() {
   const fetchDoctors = async () => {
     try {
       setLoading(true)
-      const response = await fetch('http://localhost:8080/api/doctors')
-      const data = await response.json()
-      
-      if (data.success) {
-        setFilteredDoctors(data.doctors)
-      } else {
-        console.error('Failed to fetch doctors:', data.message)
+
+      // Try to fetch from backend
+      try {
+        const response = await fetch('http://localhost:8080/api/doctors')
+
+        if (response.ok) {
+          const data = await response.json()
+
+          if (data.success && data.doctors) {
+            setFilteredDoctors(data.doctors)
+            console.log('✅ Fetched doctors from backend:', data.doctors.length)
+            return
+          } else {
+            console.warn('⚠️ Backend returned no doctors:', data.message)
+          }
+        } else {
+          console.warn(`⚠️ Backend HTTP error: ${response.status}`)
+        }
+      } catch (backendError) {
+        console.warn('⚠️ Backend not accessible, using mock data:', backendError)
       }
+
+      // Fallback: Use mock doctors data
+      console.log('🔄 Using mock doctors data')
+      const mockDoctors: Doctor[] = [
+        {
+          id: 'mock-1',
+          userId: 'user-mock-1',
+          licenseNumber: 'MD12345',
+          specialization: 'Cardiology',
+          experience: 15,
+          hospital: 'Central Medical Hospital',
+          consultationFee: 150,
+          availability: 'Available',
+          rating: 4.8,
+          totalRatings: 25,
+          userInfo: {
+            id: 'user-mock-1',
+            name: 'Dr. John Smith',
+            email: 'dr.smith@medimitra.com',
+            image: null
+          }
+        },
+        {
+          id: 'mock-2',
+          userId: 'user-mock-2',
+          licenseNumber: 'MD67890',
+          specialization: 'Dermatology',
+          experience: 12,
+          hospital: 'Skin Care Center',
+          consultationFee: 120,
+          availability: 'Available',
+          rating: 4.6,
+          totalRatings: 18,
+          userInfo: {
+            id: 'user-mock-2',
+            name: 'Dr. Sarah Johnson',
+            email: 'dr.johnson@medimitra.com',
+            image: null
+          }
+        },
+        {
+          id: 'mock-3',
+          userId: 'user-mock-3',
+          licenseNumber: 'MD11111',
+          specialization: 'Neurology',
+          experience: 20,
+          hospital: 'Brain Health Institute',
+          consultationFee: 180,
+          availability: 'Available',
+          rating: 4.9,
+          totalRatings: 32,
+          userInfo: {
+            id: 'user-mock-3',
+            name: 'Dr. Michael Brown',
+            email: 'dr.brown@medimitra.com',
+            image: null
+          }
+        },
+        {
+          id: 'mock-4',
+          userId: 'user-mock-4',
+          licenseNumber: 'MD22222',
+          specialization: 'Orthopedics',
+          experience: 18,
+          hospital: 'Sports Medicine Center',
+          consultationFee: 160,
+          availability: 'Available',
+          rating: 4.7,
+          totalRatings: 28,
+          userInfo: {
+            id: 'user-mock-4',
+            name: 'Dr. Emily Davis',
+            email: 'dr.davis@medimitra.com',
+            image: null
+          }
+        },
+        {
+          id: 'mock-5',
+          userId: 'user-mock-5',
+          licenseNumber: 'MD33333',
+          specialization: 'Pediatrics',
+          experience: 10,
+          hospital: 'Children\'s Hospital',
+          consultationFee: 100,
+          availability: 'Available',
+          rating: 4.8,
+          totalRatings: 22,
+          userInfo: {
+            id: 'user-mock-5',
+            name: 'Dr. Lisa Wilson',
+            email: 'dr.wilson@medimitra.com',
+            image: null
+          }
+        }
+      ]
+
+      setFilteredDoctors(mockDoctors)
+
     } catch (error) {
-      console.error('Error fetching doctors:', error)
+      console.error('❌ Error fetching doctors:', error)
     } finally {
       setLoading(false)
     }
@@ -135,32 +246,42 @@ export default function AppointmentsPage() {
 
     try {
       setLoading(true)
-      const response = await fetch('http://localhost:8080/api/doctors/ai-search', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ symptoms: aiQuery }),
-      })
 
-      const data = await response.json()
-      
-      if (data.success) {
-        setFilteredDoctors(data.doctors)
-        // Show AI analysis in console for debugging
-        console.log('AI Analysis:', data.analysis)
-      } else {
-        console.error('AI search failed:', data.message)
-        // Fallback to simple search
-        const filtered = filteredDoctors.filter(doctor =>
-          doctor.userInfo?.name.toLowerCase().includes(aiQuery.toLowerCase()) ||
-          doctor.specialization.toLowerCase().includes(aiQuery.toLowerCase())
-        )
-        setFilteredDoctors(filtered)
+      // Try backend AI search first
+      try {
+        const response = await fetch('http://localhost:8080/api/doctors/ai-search', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ symptoms: aiQuery }),
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+
+          if (data.success && data.doctors && data.doctors.length > 0) {
+            setFilteredDoctors(data.doctors)
+            console.log('✅ AI Analysis successful:', data.analysis)
+            return // Success, exit early
+          } else {
+            console.warn('⚠️ AI search returned no doctors:', data.message)
+          }
+        } else {
+          console.warn(`⚠️ AI search HTTP error: ${response.status}`)
+        }
+      } catch (backendError) {
+        console.warn('⚠️ Backend AI search failed, using fallback:', backendError)
       }
+
+      // Fallback: Intelligent local search based on symptoms
+      console.log('🔄 Using intelligent fallback search for:', aiQuery)
+      const filtered = performLocalAISearch(aiQuery)
+      setFilteredDoctors(filtered)
+
     } catch (error) {
-      console.error('Error in AI search:', error)
-      // Fallback to simple search
+      console.error('❌ Error in AI search:', error)
+      // Final fallback: simple text search
       const filtered = filteredDoctors.filter(doctor =>
         doctor.userInfo?.name.toLowerCase().includes(aiQuery.toLowerCase()) ||
         doctor.specialization.toLowerCase().includes(aiQuery.toLowerCase())
@@ -171,20 +292,103 @@ export default function AppointmentsPage() {
     }
   }
 
+  // Intelligent local search fallback
+  const performLocalAISearch = (symptoms: string): Doctor[] => {
+    const symptomsLower = symptoms.toLowerCase()
+
+    // Define symptom-to-specialization mapping (simplified version of backend logic)
+    const symptomMapping: { [key: string]: string[] } = {
+      'chest pain': ['Cardiology', 'Emergency Medicine'],
+      'heart': ['Cardiology'],
+      'breathing': ['Cardiology', 'Pulmonology'],
+      'shortness of breath': ['Cardiology', 'Pulmonology'],
+      'skin': ['Dermatology'],
+      'rash': ['Dermatology'],
+      'acne': ['Dermatology'],
+      'headache': ['Neurology', 'Internal Medicine'],
+      'migraine': ['Neurology'],
+      'dizziness': ['Neurology', 'Cardiology'],
+      'back pain': ['Orthopedics', 'Physical Medicine'],
+      'joint': ['Orthopedics', 'Rheumatology'],
+      'knee': ['Orthopedics'],
+      'shoulder': ['Orthopedics'],
+      'neck pain': ['Orthopedics'],
+      'cough': ['Pulmonology', 'Internal Medicine'],
+      'asthma': ['Pulmonology'],
+      'stomach': ['Gastroenterology'],
+      'nausea': ['Gastroenterology'],
+      'vomiting': ['Gastroenterology'],
+      'diarrhea': ['Gastroenterology'],
+      'anxiety': ['Psychiatry', 'Psychology'],
+      'depression': ['Psychiatry'],
+      'stress': ['Psychiatry'],
+      'panic': ['Psychiatry'],
+      'child': ['Pediatrics'],
+      'baby': ['Pediatrics'],
+      'fever': ['Internal Medicine', 'Pediatrics'],
+      'fatigue': ['Internal Medicine'],
+      'diabetes': ['Endocrinology'],
+      'thyroid': ['Endocrinology'],
+      'allergy': ['Allergy and Immunology']
+    }
+
+    // Find relevant specializations
+    const relevantSpecializations = new Set<string>()
+    for (const [symptom, specializations] of Object.entries(symptomMapping)) {
+      if (symptomsLower.includes(symptom)) {
+        specializations.forEach(spec => relevantSpecializations.add(spec))
+      }
+    }
+
+    // If no specific symptoms found, add common specializations
+    if (relevantSpecializations.size === 0) {
+      relevantSpecializations.add('Internal Medicine')
+      relevantSpecializations.add('General Practice')
+    }
+
+    // Filter and score doctors
+    const scoredDoctors = filteredDoctors.map(doctor => {
+      let score = 0
+
+      // Specialization match
+      if (relevantSpecializations.has(doctor.specialization)) {
+        score += 10
+      }
+
+      // Experience bonus
+      score += Math.min(doctor.experience * 0.1, 2)
+
+      // Rating bonus
+      score += doctor.rating * 0.5
+
+      // Review count bonus
+      score += Math.min(doctor.totalRatings * 0.01, 1)
+
+      return { doctor, score }
+    })
+
+    // Sort by score and return top results
+    return scoredDoctors
+      .filter(item => item.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .map(item => item.doctor)
+      .slice(0, 8) // Return top 8 matches
+  }
+
   // Manual search filtering
   const applyManualFilters = () => {
     let filtered = [...filteredDoctors]
-    
+
     if (manualFilters.hospital) {
       filtered = filtered.filter(doctor => doctor.hospital.toLowerCase().includes(manualFilters.hospital.toLowerCase()))
     }
-    
+
     if (manualFilters.department) {
       filtered = filtered.filter(doctor => doctor.specialization === manualFilters.department)
     }
-    
+
     if (manualFilters.doctorName) {
-      filtered = filtered.filter(doctor => 
+      filtered = filtered.filter(doctor =>
         doctor.userInfo?.name.toLowerCase().includes(manualFilters.doctorName.toLowerCase())
       )
     }
@@ -233,7 +437,7 @@ export default function AppointmentsPage() {
       })
 
       const result = await response.json()
-      
+
       if (result.success) {
         setBookingSuccess(true)
         setTimeout(() => {
@@ -261,12 +465,12 @@ export default function AppointmentsPage() {
     const slots = []
     const startHour = 9
     const endHour = 17
-    
+
     for (let hour = startHour; hour < endHour; hour++) {
       for (let minute = 0; minute < 60; minute += 30) {
         const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`
-        const displayTime = hour < 12 ? `${hour === 0 ? 12 : hour}:${minute.toString().padStart(2, '0')} AM` : 
-                           `${hour === 12 ? 12 : hour - 12}:${minute.toString().padStart(2, '0')} PM`
+        const displayTime = hour < 12 ? `${hour === 0 ? 12 : hour}:${minute.toString().padStart(2, '0')} AM` :
+          `${hour === 12 ? 12 : hour - 12}:${minute.toString().padStart(2, '0')} PM`
         slots.push({ time: timeString, display: displayTime })
       }
     }
@@ -300,7 +504,7 @@ export default function AppointmentsPage() {
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Find Your Perfect Doctor</h2>
                 <p className="text-gray-600">Choose your preferred search method</p>
               </div>
-              
+
               {/* Search Type Toggle */}
               <div className="flex space-x-4 mb-6 justify-center">
                 <button
@@ -308,11 +512,10 @@ export default function AppointmentsPage() {
                     setSearchType('ai')
                     setAiQuery('')
                   }}
-                  className={`flex items-center px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
-                    searchType === 'ai' 
-                      ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg transform scale-105' 
+                  className={`flex items-center px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${searchType === 'ai'
+                      ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg transform scale-105'
                       : 'bg-white text-gray-700 hover:bg-gray-50 shadow-md hover:shadow-lg border border-gray-200'
-                  }`}
+                    }`}
                 >
                   <Sparkles className="w-5 h-5 mr-2" />
                   AI Smart Search
@@ -323,11 +526,10 @@ export default function AppointmentsPage() {
                     setManualFilters({ hospital: '', department: '', doctorName: '' })
                     fetchDoctors() // Reset to show all doctors
                   }}
-                  className={`flex items-center px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
-                    searchType === 'manual' 
-                      ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg transform scale-105' 
+                  className={`flex items-center px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${searchType === 'manual'
+                      ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg transform scale-105'
                       : 'bg-white text-gray-700 hover:bg-gray-50 shadow-md hover:shadow-lg border border-gray-200'
-                  }`}
+                    }`}
                 >
                   <Search className="w-5 h-5 mr-2" />
                   Manual Search
@@ -382,11 +584,10 @@ export default function AppointmentsPage() {
                     </div>
                     <button
                       onClick={toggleVoiceInput}
-                      className={`absolute right-3 top-3 p-2 rounded-full transition-colors ${
-                        isListening 
-                          ? 'bg-red-100 text-red-600' 
+                      className={`absolute right-3 top-3 p-2 rounded-full transition-colors ${isListening
+                          ? 'bg-red-100 text-red-600'
                           : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                      }`}
+                        }`}
                     >
                       {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
                     </button>
@@ -410,7 +611,7 @@ export default function AppointmentsPage() {
                       <input
                         type="text"
                         value={manualFilters.hospital}
-                        onChange={(e) => setManualFilters({...manualFilters, hospital: e.target.value})}
+                        onChange={(e) => setManualFilters({ ...manualFilters, hospital: e.target.value })}
                         placeholder="Enter hospital name"
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder:text-gray-500"
                       />
@@ -419,7 +620,7 @@ export default function AppointmentsPage() {
                       <label className="block text-sm font-medium text-gray-700 mb-2">Department</label>
                       <select
                         value={manualFilters.department}
-                        onChange={(e) => setManualFilters({...manualFilters, department: e.target.value})}
+                        onChange={(e) => setManualFilters({ ...manualFilters, department: e.target.value })}
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900"
                       >
                         <option value="">Select Department</option>
@@ -435,7 +636,7 @@ export default function AppointmentsPage() {
                       <input
                         type="text"
                         value={manualFilters.doctorName}
-                        onChange={(e) => setManualFilters({...manualFilters, doctorName: e.target.value})}
+                        onChange={(e) => setManualFilters({ ...manualFilters, doctorName: e.target.value })}
                         placeholder="Enter doctor name"
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder:text-gray-500"
                       />
@@ -667,11 +868,10 @@ export default function AppointmentsPage() {
                     <div className="grid grid-cols-2 gap-4">
                       <button
                         onClick={() => setAppointmentType('in-person')}
-                        className={`p-4 border rounded-lg text-left transition-colors ${
-                          appointmentType === 'in-person'
+                        className={`p-4 border rounded-lg text-left transition-colors ${appointmentType === 'in-person'
                             ? 'border-blue-500 bg-blue-50 text-blue-700'
                             : 'border-gray-300 hover:border-gray-400'
-                        }`}
+                          }`}
                       >
                         <div className="flex items-center space-x-3">
                           <Users className="w-5 h-5" />
@@ -683,11 +883,10 @@ export default function AppointmentsPage() {
                       </button>
                       <button
                         onClick={() => setAppointmentType('video')}
-                        className={`p-4 border rounded-lg text-left transition-colors ${
-                          appointmentType === 'video'
+                        className={`p-4 border rounded-lg text-left transition-colors ${appointmentType === 'video'
                             ? 'border-blue-500 bg-blue-50 text-blue-700'
                             : 'border-gray-300 hover:border-gray-400'
-                        }`}
+                          }`}
                       >
                         <div className="flex items-center space-x-3">
                           <Video className="w-5 h-5" />

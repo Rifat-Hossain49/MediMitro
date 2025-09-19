@@ -1,10 +1,17 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import EmergencyAmbulanceBooking from '@/components/EmergencyAmbulanceBooking'
 import { Truck, AlertTriangle } from 'lucide-react'
 
 export default function HireAmbulancePage() {
+  const router = useRouter()
+
+  const handleClose = () => {
+    router.push('/dashboard')
+  }
+
   // Since this is for signed-in users, show the component directly without modal wrapper
   return (
     <div className="min-h-screen bg-gray-50">
@@ -41,7 +48,7 @@ export default function HireAmbulancePage() {
         <div className="absolute inset-0 bg-white"></div>
         <EmergencyAmbulanceBooking
           isOpen={true}
-          onClose={() => { }}
+          onClose={handleClose}
         />
       </div>
     </div>
