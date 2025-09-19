@@ -1,45 +1,43 @@
-import { NextRequest, NextResponse } from "next/server"
-import { registerUser } from "@/auth"
-import { z } from "zod"
-
-const registerSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters long"),
-  role: z.enum(["patient", "doctor", "pharmacist"]).default("patient"),
-})
+import { NextRequest, NextResponse } from 'next/server'
+import { registerUser } from '@/auth'
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const validatedData = registerSchema.safeParse(body)
+    const { name, email, password, role } = body
 
-    if (!validatedData.success) {
+    if (!name || !email || !password) {
       return NextResponse.json(
-        { error: "Invalid input", details: validatedData.error.errors },
+        { success: false, error: 'Name, email, and password are required' },
         { status: 400 }
       )
     }
 
-    const { name, email, password, role } = validatedData.data
-
-    const result = await registerUser(email, password, name, role)
-
-    if (!result.success) {
+    if (password.length < 6) {
       return NextResponse.json(
-        { error: result.error },
+        { success: false, error: 'Password must be at least 6 characters' },
         { status: 400 }
       )
     }
 
-    return NextResponse.json(
-      { message: "User registered successfully", user: result.user },
-      { status: 201 }
-    )
+    const result = await registerUser(email, password, name, role || 'patient')
+
+    if (result.success) {
+      return NextResponse.json({
+        success: true,
+        message: result.message,
+        user: result.user
+      })
+    } else {
+      return NextResponse.json(
+        { success: false, error: result.error },
+        { status: 400 }
+      )
+    }
   } catch (error) {
-    console.error("Registration error:", error)
+    console.error('Registration API error:', error)
     return NextResponse.json(
-      { error: "Internal server error" },
+      { success: false, error: 'Internal server error' },
       { status: 500 }
     )
   }

@@ -1,5 +1,6 @@
 package com.medimitra.backend.model;
 
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -7,34 +8,38 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "appointments")
 public class Appointment {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
-    
+
     @NotBlank(message = "Patient ID is required")
     private String patientId;
-    
+
     @NotBlank(message = "Doctor ID is required")
     private String doctorId;
-    
+
     @NotNull(message = "Date and time is required")
     private LocalDateTime dateTime;
-    
+
     @Min(value = 1, message = "Duration must be at least 1 minute")
     private int duration; // in minutes
-    
+
     @NotBlank(message = "Appointment type is required")
     private String type; // online, in-person, emergency
-    
+
     private String status = "scheduled"; // scheduled, completed, cancelled, no-show
     private String notes;
     private String symptoms; // Patient's reported symptoms
     private String diagnosis; // Doctor's diagnosis
     private String prescription; // Prescription details
-    
+
     @NotNull(message = "Fee is required")
     @Min(value = 0, message = "Fee cannot be negative")
     private BigDecimal fee;
-    
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -45,8 +50,8 @@ public class Appointment {
     }
 
     // Constructor with essential fields
-    public Appointment(String patientId, String doctorId, LocalDateTime dateTime, 
-                      int duration, String type, BigDecimal fee) {
+    public Appointment(String patientId, String doctorId, LocalDateTime dateTime,
+            int duration, String type, BigDecimal fee) {
         this();
         this.patientId = patientId;
         this.doctorId = doctorId;
@@ -216,4 +221,3 @@ public class Appointment {
                 '}';
     }
 }
-

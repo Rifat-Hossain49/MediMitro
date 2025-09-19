@@ -1,6 +1,7 @@
 'use client'
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import { useSession } from 'next-auth/react'
 import { UserProfile, profileService } from '@/lib/profileService'
 
 interface UserContextType {
@@ -27,11 +28,20 @@ interface UserProviderProps {
 }
 
 export function UserProvider({ children }: UserProviderProps) {
+  const { data: session, status } = useSession()
   const [user, setUser] = useState<UserProfile | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const fetchUser = async () => {
+    // Only fetch user profile if user is authenticated
+    if (!session?.user?.email || status !== 'authenticated') {
+      setUser(null)
+      setLoading(false)
+      setError(null)
+      return
+    }
+
     try {
       setLoading(true)
       setError(null)
@@ -39,26 +49,11 @@ export function UserProvider({ children }: UserProviderProps) {
       setUser(userData)
     } catch (err) {
       console.error('Failed to fetch user:', err)
-      setError(err instanceof Error ? err.message : 'Failed to fetch user data')
-      // For development, set a mock user if API fails
-      if (process.env.NODE_ENV === 'development') {
-        setUser({
-          id: 'mock-user-id',
-          email: 'john.doe@email.com',
-          name: 'John Doe',
-          role: 'patient',
-          phoneNumber: '+1 (555) 123-4567',
-          dateOfBirth: '1985-03-15',
-          gender: 'Male',
-          address: '123 Health Street, Medical City, MC',
-          bloodType: 'O+',
-          allergies: '["Penicillin", "Peanuts"]',
-          emergencyContact: '[{"name": "Jane Doe", "relationship": "Spouse", "phone": "+1 (555) 987-6543"}]',
-          emailVerified: true,
-          createdAt: '2023-01-01T00:00:00Z',
-          updatedAt: new Date().toISOString()
-        })
+      // Only set error if we're still authenticated (avoid errors during sign-out)
+      if (status === 'authenticated') {
+        setError(err instanceof Error ? err.message : 'Failed to fetch user data')
       }
+      setUser(null)
     } finally {
       setLoading(false)
     }
@@ -80,17 +75,30 @@ export function UserProvider({ children }: UserProviderProps) {
     await fetchUser()
   }
 
+  // Only fetch user profile when session is available and authenticated
   useEffect(() => {
-    fetchUser()
-  }, [])
+    if (status === 'loading') {
+      setLoading(true)
+      return
+    }
+
+    if (status === 'authenticated' && session?.user?.email) {
+      fetchUser()
+    } else if (status === 'unauthenticated') {
+      // Clear user data when unauthenticated
+      setUser(null)
+      setLoading(false)
+      setError(null)
+    }
+  }, [session, status])
 
   const value: UserContextType = {
     user,
-    loading,
+    loading: loading || status === 'loading',
     error,
     updateUser,
     refreshUser,
-    isAuthenticated: !!user
+    isAuthenticated: status === 'authenticated' && !!session?.user
   }
 
   return (

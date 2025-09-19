@@ -1,5 +1,6 @@
 package com.medimitra.backend.model;
 
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -8,34 +9,39 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Map;
 
+@Entity
+@Table(name = "doctors")
 public class Doctor {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
-    
+
     @NotBlank(message = "User ID is required")
     private String userId;
-    
+
     @NotBlank(message = "License number is required")
     private String licenseNumber;
-    
+
     @NotBlank(message = "Specialization is required")
     private String specialization;
-    
+
     @Min(value = 0, message = "Experience cannot be negative")
     private int experience; // years of experience
-    
+
     private String hospital;
-    
+
     @NotNull(message = "Consultation fee is required")
     @Min(value = 0, message = "Consultation fee cannot be negative")
     private BigDecimal consultationFee;
-    
+
     private String availability; // JSON string of available time slots
     private BigDecimal rating = BigDecimal.ZERO;
     private int totalRatings = 0;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    
+
     // Transient field for user information (not stored in database)
+    @Transient
     private Map<String, Object> userInfo;
 
     // Default constructor
@@ -45,8 +51,8 @@ public class Doctor {
     }
 
     // Constructor with essential fields
-    public Doctor(String userId, String licenseNumber, String specialization, 
-                  int experience, BigDecimal consultationFee) {
+    public Doctor(String userId, String licenseNumber, String specialization,
+            int experience, BigDecimal consultationFee) {
         this();
         this.userId = userId;
         this.licenseNumber = licenseNumber;
@@ -191,4 +197,3 @@ public class Doctor {
                 '}';
     }
 }
-

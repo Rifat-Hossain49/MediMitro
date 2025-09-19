@@ -87,7 +87,7 @@ const Navigation = () => {
                       {user?.name || session.user?.name || session.user?.email}
                     </span>
                   </button>
-                  
+
                   {showUserMenu && (
                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
                       <Link
@@ -147,9 +147,8 @@ const Navigation = () => {
         {/* panel */}
         <div
           ref={drawerRef}
-          className={`absolute left-0 top-0 h-full w-72 bg-white shadow-xl transition-transform ${
-            drawerOpen ? 'translate-x-0' : '-translate-x-full'
-          }`}
+          className={`absolute left-0 top-0 h-full w-72 bg-white shadow-xl transition-transform ${drawerOpen ? 'translate-x-0' : '-translate-x-full'
+            }`}
         >
           <div className="flex items-center justify-between p-4 border-b">
             <div className="flex items-center gap-2">

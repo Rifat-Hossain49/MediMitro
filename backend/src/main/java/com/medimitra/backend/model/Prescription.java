@@ -1,30 +1,35 @@
 package com.medimitra.backend.model;
 
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "prescriptions")
 public class Prescription {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
-    
+
     @NotBlank(message = "Patient ID is required")
     private String patientId;
-    
+
     private String doctorId;
-    
+
     @NotBlank(message = "Medications are required")
     private String medications; // JSON array of medications
-    
+
     @NotBlank(message = "Instructions are required")
     private String instructions;
-    
+
     @NotNull(message = "Date issued is required")
     private LocalDateTime dateIssued;
-    
+
     @NotNull(message = "Valid until date is required")
     private LocalDateTime validUntil;
-    
+
     private String status = "active"; // active, expired, fulfilled
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -39,8 +44,8 @@ public class Prescription {
     }
 
     // Constructor with essential fields
-    public Prescription(String patientId, String doctorId, String medications, 
-                       String instructions, LocalDateTime validUntil) {
+    public Prescription(String patientId, String doctorId, String medications,
+            String instructions, LocalDateTime validUntil) {
         this();
         this.patientId = patientId;
         this.doctorId = doctorId;
@@ -178,4 +183,3 @@ public class Prescription {
                 '}';
     }
 }
-

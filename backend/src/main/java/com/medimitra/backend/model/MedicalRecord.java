@@ -1,30 +1,35 @@
 package com.medimitra.backend.model;
 
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "medical_records")
 public class MedicalRecord {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
-    
+
     @NotBlank(message = "Patient ID is required")
     private String patientId;
-    
+
     @NotBlank(message = "Record type is required")
     private String recordType; // lab_result, imaging, prescription, visit_note
-    
+
     @NotBlank(message = "Title is required")
     private String title;
-    
+
     @NotBlank(message = "Description is required")
     private String description;
-    
+
     private String fileUrl;
-    
+
     @NotNull(message = "Date recorded is required")
     private LocalDateTime dateRecorded;
-    
+
     private String doctorNotes;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -37,8 +42,8 @@ public class MedicalRecord {
     }
 
     // Constructor with essential fields
-    public MedicalRecord(String patientId, String recordType, String title, 
-                        String description, LocalDateTime dateRecorded) {
+    public MedicalRecord(String patientId, String recordType, String title,
+            String description, LocalDateTime dateRecorded) {
         this();
         this.patientId = patientId;
         this.recordType = recordType;
@@ -166,4 +171,3 @@ public class MedicalRecord {
                 '}';
     }
 }
-

@@ -1,10 +1,10 @@
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import Image from 'next/image'
-import { 
-  Calendar, 
-  Heart, 
-  Pill, 
+import {
+  Calendar,
+  Heart,
+  Pill,
   AlertCircle,
   Plus,
   FileText,
@@ -31,105 +31,81 @@ export default async function Dashboard() {
   const displayName = session.user.name?.split(' ')[0] || 'there'
 
   const healthMetrics = [
-    { 
-      title: 'Total Appointments', 
-      value: '12', 
-      unit: 'this year', 
-      icon: Calendar, 
+    {
+      title: 'Total Appointments',
+      value: '0',
+      unit: 'this year',
+      icon: Calendar,
       color: 'blue',
       bgGradient: 'from-blue-500 to-blue-600',
-      change: '+15%',
+      change: '--',
       trend: 'up'
     },
-    { 
-      title: 'Active Prescriptions', 
-      value: '3', 
-      unit: 'medications', 
-      icon: Pill, 
+    {
+      title: 'Active Prescriptions',
+      value: '0',
+      unit: 'medications',
+      icon: Pill,
       color: 'purple',
       bgGradient: 'from-purple-500 to-purple-600',
-      change: '+2',
+      change: '--',
       trend: 'up'
     },
-    { 
-      title: 'Health Records', 
-      value: '8', 
-      unit: 'documents', 
-      icon: FileText, 
+    {
+      title: 'Health Records',
+      value: '0',
+      unit: 'documents',
+      icon: FileText,
       color: 'green',
       bgGradient: 'from-green-500 to-green-600',
-      change: '+3',
+      change: '--',
       trend: 'up'
     },
-    { 
-      title: 'Health Score', 
-      value: '92', 
-      unit: 'out of 100', 
-      icon: Activity, 
+    {
+      title: 'Health Score',
+      value: '--',
+      unit: 'out of 100',
+      icon: Activity,
       color: 'orange',
       bgGradient: 'from-orange-500 to-orange-600',
-      change: '+8%',
+      change: '--',
       trend: 'up'
     },
   ]
 
-  const upcomingAppointments = [
-    { 
-      doctor: 'Dr. Sarah Johnson', 
-      specialty: 'Cardiology', 
-      date: 'Today', 
-      time: '2:30 PM', 
-      status: 'Confirmed',
-      image: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=100&h=100&fit=crop&crop=face'
-    },
-    { 
-      doctor: 'Dr. Michael Chen', 
-      specialty: 'Dermatology', 
-      date: 'Tomorrow', 
-      time: '10:00 AM', 
-      status: 'Pending',
-      image: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=100&h=100&fit=crop&crop=face'
-    },
-    { 
-      doctor: 'Dr. Emily Davis', 
-      specialty: 'General Checkup', 
-      date: 'Dec 15', 
-      time: '9:00 AM', 
-      status: 'Confirmed',
-      image: 'https://images.unsplash.com/photo-1594824475546-7da6ba09d5c4?w=100&h=100&fit=crop&crop=face'
-    },
-  ]
+  // Remove hardcoded appointments data
+  const upcomingAppointments = [] as any[]
 
   const quickActions = [
-    { 
-      title: 'Book Appointment', 
+    {
+      title: 'Book Appointment',
       description: 'Schedule with specialists',
-      icon: Calendar, 
-      href: '/appointments', 
+      icon: Calendar,
+      href: '/appointments',
       gradient: 'from-blue-500 to-blue-600',
       hoverGradient: 'from-blue-600 to-blue-700'
     },
-    { 
-      title: 'Health Records', 
+    {
+      title: 'Health Records',
       description: 'View your EHR data',
-      icon: FileText, 
-      href: '/ehr', 
+      icon: FileText,
+      href: '/ehr',
       gradient: 'from-green-500 to-green-600',
       hoverGradient: 'from-green-600 to-green-700'
     },
-    { 
-      title: 'Medications', 
+    {
+      title: 'Medications',
       description: 'Track prescriptions',
-      icon: Pill, 
-      href: '/meds', 
+      icon: Pill,
+      href: '/meds',
       gradient: 'from-purple-500 to-purple-600',
       hoverGradient: 'from-purple-600 to-purple-700'
     },
-    { 
-      title: 'Emergency', 
+    {
+      title: 'Emergency',
       description: '24/7 urgent care',
-      icon: AlertCircle, 
-      href: '/ambulance', 
+      icon: AlertCircle,
+      href: '/ambulance',
       gradient: 'from-red-500 to-red-600',
       hoverGradient: 'from-red-600 to-red-700'
     },
@@ -144,34 +120,34 @@ export default async function Dashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <div className="flex items-center space-x-3 mb-4">
-                  <div className="p-3 bg-white bg-opacity-20 rounded-xl">
-                    <Heart className="w-8 h-8 text-white" />
+                  <div className="p-3 bg-red-500 rounded-xl shadow-lg border-2 border-white border-opacity-30">
+                    <Heart className="w-8 h-8 text-white filter drop-shadow-lg" strokeWidth={2} fill="currentColor" />
                   </div>
-                  <h1 className="text-4xl font-bold">Welcome back, {displayName}!</h1>
+                  <h1 className="text-4xl font-bold text-white" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>Welcome back, {displayName}!</h1>
                 </div>
-                <p className="text-xl text-blue-100 mb-6">Your personalized health dashboard - track, manage, and improve your wellbeing</p>
-                
+                <p className="text-xl text-white mb-6 font-medium" style={{ textShadow: '1px 1px 3px rgba(0,0,0,0.8)' }}>Your personalized health dashboard - track, manage, and improve your wellbeing</p>
+
                 {/* Quick Stats */}
                 <div className="flex items-center space-x-6">
                   <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                    <span className="text-green-100 font-medium">All systems healthy</span>
+                    <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse shadow-lg"></div>
+                    <span className="text-white font-semibold" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.8)' }}>All systems healthy</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Clock className="w-4 h-4 text-blue-200" />
-                    <span className="text-blue-100">Last updated: Today</span>
+                    <Clock className="w-4 h-4 text-white filter drop-shadow-md" strokeWidth={2} />
+                    <span className="text-white font-medium" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.8)' }}>Last updated: Today</span>
                   </div>
                 </div>
               </div>
-              
+
               {/* User Avatar Section */}
               <div className="hidden lg:block">
-                <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-6 text-center">
-                  <div className="w-20 h-20 bg-white bg-opacity-20 rounded-full mx-auto mb-3 flex items-center justify-center">
-                    <Users className="w-10 h-10 text-white" />
+                <div className="bg-white bg-opacity-15 backdrop-blur-sm rounded-2xl p-6 text-center border border-white border-opacity-20 shadow-lg">
+                  <div className="w-20 h-20 bg-blue-600 rounded-full mx-auto mb-3 flex items-center justify-center shadow-lg border-2 border-white border-opacity-30">
+                    <Users className="w-10 h-10 text-white filter drop-shadow-lg" strokeWidth={2} fill="currentColor" />
                   </div>
-                  <p className="text-white font-semibold">{session.user.name}</p>
-                  <p className="text-blue-200 text-sm">Patient ID: #12345</p>
+                  <p className="text-white font-bold" style={{ textShadow: '1px 1px 3px rgba(0,0,0,0.8)' }}>{session.user.name}</p>
+                  <p className="text-white text-sm font-medium" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.8)' }}>Welcome to MediMitra</p>
                 </div>
               </div>
             </div>
@@ -182,34 +158,36 @@ export default async function Dashboard() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">{/* Rest of content will go here */}
 
         {/* Health Metrics Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
           {healthMetrics.map((metric, index) => (
-            <div key={metric.title} className="group bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg border-2 border-gray-100 hover:border-gray-200 p-8 transition-all duration-300 hover:shadow-xl transform hover:scale-105">
-              <div className="flex items-center justify-between mb-4">
-                <div className={`p-4 bg-gradient-to-br ${metric.bgGradient} rounded-xl group-hover:scale-110 transition-transform shadow-lg`}>
-                  <metric.icon className="w-8 h-8 text-white" />
+            <div key={metric.title} className="group bg-white rounded-2xl shadow-lg border border-gray-200 hover:border-gray-300 p-6 transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1 h-full flex flex-col justify-between min-h-[180px]">
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <div className={`p-4 bg-gradient-to-br ${metric.bgGradient} rounded-xl group-hover:scale-110 transition-transform shadow-lg border border-white border-opacity-20`}>
+                    <metric.icon className="w-8 h-8 text-white filter drop-shadow-lg" strokeWidth={2} fill="currentColor" />
+                  </div>
+                  <div className="text-right">
+                    <div className={`flex items-center space-x-1 text-sm font-bold ${metric.trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
+                      <TrendingUp className="w-4 h-4" strokeWidth={2.5} />
+                      <span>{metric.change}</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <div className={`flex items-center space-x-1 text-sm font-semibold ${metric.trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
-                    <TrendingUp className="w-4 h-4" />
-                    <span>{metric.change}</span>
+
+                <div className="space-y-3">
+                  <p className="text-sm font-bold text-gray-800 uppercase tracking-wider">{metric.title}</p>
+                  <div className="flex items-baseline space-x-2">
+                    <span className="text-3xl font-bold text-gray-900">{metric.value}</span>
+                    <span className="text-sm text-gray-600 font-semibold">{metric.unit}</span>
                   </div>
                 </div>
               </div>
-              
-              <div className="space-y-2">
-                <p className="text-sm font-semibold text-gray-600 uppercase tracking-wider">{metric.title}</p>
-                <div className="flex items-baseline space-x-2">
-                  <span className="text-3xl font-bold text-gray-900">{metric.value}</span>
-                  <span className="text-sm text-gray-500 font-medium">{metric.unit}</span>
-                </div>
-              </div>
-              
+
               {/* Progress bar simulation */}
               <div className="mt-4">
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className={`bg-gradient-to-r ${metric.bgGradient} h-2 rounded-full transition-all duration-1000`}
+                <div className="w-full bg-gray-200 rounded-full h-3 shadow-inner">
+                  <div
+                    className={`bg-gradient-to-r ${metric.bgGradient} h-3 rounded-full transition-all duration-1000 shadow-sm`}
                     style={{ width: `${Math.min(parseInt(metric.value) || 0, 100)}%` }}
                   ></div>
                 </div>
@@ -224,28 +202,32 @@ export default async function Dashboard() {
             <h2 className="text-3xl font-bold text-gray-900 mb-2">Quick Actions</h2>
             <p className="text-gray-600">Access your most used features instantly</p>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {quickActions.map((action, index) => (
               <a
                 key={action.title}
                 href={action.href}
-                className="group block"
+                className="group block h-full"
               >
-                <div className={`bg-gradient-to-br ${action.gradient} hover:bg-gradient-to-br hover:${action.hoverGradient} rounded-2xl p-8 text-white transition-all duration-300 transform hover:scale-105 hover:shadow-2xl`}>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="p-4 bg-white bg-opacity-20 rounded-xl group-hover:bg-opacity-30 transition-all">
-                      <action.icon className="w-8 h-8 text-white" />
+                <div className={`bg-gradient-to-br ${action.gradient} hover:bg-gradient-to-br hover:${action.hoverGradient} rounded-2xl p-6 text-white transition-all duration-300 transform hover:scale-105 hover:shadow-2xl h-full flex flex-col justify-between min-h-[200px]`}>
+                  <div>
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="p-4 bg-gray-900 bg-opacity-80 backdrop-blur-sm rounded-xl group-hover:bg-opacity-90 transition-all shadow-lg border-2 border-white border-opacity-30">
+                        <action.icon className="w-8 h-8 text-white filter drop-shadow-lg" strokeWidth={2} fill="currentColor" />
+                      </div>
+                      <ArrowRight className="w-6 h-6 text-white opacity-60 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0 transition-all filter drop-shadow-lg" strokeWidth={2.5} />
                     </div>
-                    <ArrowRight className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0 transition-all" />
+
+                    <div className="mb-4">
+                      <h3 className="text-xl font-bold mb-2 text-white" style={{ textShadow: '1px 1px 3px rgba(0,0,0,0.8)' }}>{action.title}</h3>
+                      <p className="text-white text-sm leading-relaxed" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.8)' }}>{action.description}</p>
+                    </div>
                   </div>
-                  
-                  <h3 className="text-xl font-bold mb-2">{action.title}</h3>
-                  <p className="text-white text-opacity-90 text-sm">{action.description}</p>
-                  
-                  <div className="mt-4 flex items-center text-sm font-medium">
-                    <span>Get started</span>
-                    <ArrowRight className="w-4 h-4 ml-2 transform group-hover:translate-x-1 transition-transform" />
+
+                  <div className="flex items-center text-sm font-bold text-white">
+                    <span style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.8)' }}>Get started</span>
+                    <ArrowRight className="w-4 h-4 ml-2 transform group-hover:translate-x-1 transition-transform text-white" strokeWidth={2.5} />
                   </div>
                 </div>
               </a>
@@ -256,68 +238,81 @@ export default async function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Upcoming Appointments */}
           <div className="lg:col-span-2">
-            <div className="bg-gradient-to-br from-white to-blue-50 rounded-2xl shadow-xl border-2 border-blue-100 p-8">
-              <div className="flex items-center justify-between mb-8">
+            <div className="bg-white rounded-2xl shadow-xl border border-blue-200 p-6 md:p-8">
+              <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">Upcoming Appointments</h2>
+                  <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">Upcoming Appointments</h2>
                   <p className="text-gray-600">Your scheduled medical consultations</p>
                 </div>
-                <a 
+                <a
                   href="/appointments"
-                  className="group flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                  className="group flex items-center justify-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 md:px-6 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 whitespace-nowrap"
                 >
-                  <Plus className="w-5 h-5" />
+                  <Plus className="w-4 h-4 md:w-5 md:h-5" />
                   <span>Book New</span>
-                  <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transform translate-x-1 group-hover:translate-x-0 transition-all" />
+                  <ArrowRight className="w-3 h-3 md:w-4 md:h-4 opacity-0 group-hover:opacity-100 transform translate-x-1 group-hover:translate-x-0 transition-all" />
                 </a>
               </div>
-              
+
               <div className="space-y-6">
-                {upcomingAppointments.map((appointment, index) => (
-                  <div key={index} className="group bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-blue-200 transform hover:scale-102">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-6">
-                        <div className="relative w-16 h-16 rounded-2xl overflow-hidden ring-4 ring-blue-100 group-hover:ring-blue-200 transition-all">
-                          <Image
-                            src={appointment.image}
-                            alt={appointment.doctor}
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-bold text-gray-900 mb-1">{appointment.doctor}</h3>
-                          <p className="text-blue-600 font-semibold mb-2">{appointment.specialty}</p>
-                          <div className="flex items-center space-x-4">
-                            <div className="flex items-center space-x-2">
-                              <Calendar className="w-4 h-4 text-gray-400" />
-                              <span className="text-sm text-gray-600 font-medium">{appointment.date}</span>
+                {upcomingAppointments.length > 0 ? (
+                  upcomingAppointments.map((appointment, index) => (
+                    <div key={index} className="group bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-blue-200 transform hover:scale-102">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-6">
+                          <div className="relative w-16 h-16 rounded-2xl overflow-hidden ring-4 ring-blue-100 group-hover:ring-blue-200 transition-all">
+                            <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
+                              <Users className="w-8 h-8 text-white" />
                             </div>
-                            <div className="flex items-center space-x-2">
-                              <Clock className="w-4 h-4 text-gray-400" />
-                              <span className="text-sm text-gray-600 font-medium">{appointment.time}</span>
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-bold text-gray-900 mb-1">{appointment.doctor}</h3>
+                            <p className="text-blue-600 font-semibold mb-2">{appointment.specialty}</p>
+                            <div className="flex items-center space-x-4">
+                              <div className="flex items-center space-x-2">
+                                <Calendar className="w-4 h-4 text-gray-400" />
+                                <span className="text-sm text-gray-600 font-medium">{appointment.date}</span>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <Clock className="w-4 h-4 text-gray-400" />
+                                <span className="text-sm text-gray-600 font-medium">{appointment.time}</span>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                      <div className="text-right">
-                        <span className={`px-4 py-2 rounded-xl text-sm font-semibold ${
-                          appointment.status === 'Confirmed' 
-                            ? 'bg-green-100 text-green-800 border border-green-200' 
+                        <div className="text-right">
+                          <span className={`px-4 py-2 rounded-xl text-sm font-semibold ${appointment.status === 'Confirmed'
+                            ? 'bg-green-100 text-green-800 border border-green-200'
                             : 'bg-yellow-100 text-yellow-800 border border-yellow-200'
-                        }`}>
-                          {appointment.status}
-                        </span>
-                        {appointment.status === 'Confirmed' && (
-                          <div className="flex items-center space-x-1 mt-2 text-green-600">
-                            <CheckCircle className="w-4 h-4" />
-                            <span className="text-xs font-medium">Ready</span>
-                          </div>
-                        )}
+                            }`}>
+                            {appointment.status}
+                          </span>
+                          {appointment.status === 'Confirmed' && (
+                            <div className="flex items-center space-x-1 mt-2 text-green-600">
+                              <CheckCircle className="w-4 h-4" />
+                              <span className="text-xs font-medium">Ready</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
+                  ))
+                ) : (
+                  <div className="text-center py-12">
+                    <div className="w-20 h-20 bg-blue-100 rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg">
+                      <Calendar className="w-10 h-10 text-blue-600" strokeWidth={2} />
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">No upcoming appointments</h3>
+                    <p className="text-gray-700 mb-6 font-medium">Schedule your next appointment with a specialist.</p>
+                    <a
+                      href="/appointments"
+                      className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-xl font-bold transition-all duration-200 shadow-lg hover:shadow-xl"
+                    >
+                      <Calendar className="w-5 h-5" strokeWidth={2} />
+                      <span>Book Appointment</span>
+                    </a>
                   </div>
-                ))}
+                )}
               </div>
             </div>
           </div>
@@ -325,77 +320,52 @@ export default async function Dashboard() {
           {/* Enhanced Activity & Insights */}
           <div className="lg:col-span-1 space-y-6">
             {/* Recent Activity */}
-            <div className="bg-gradient-to-br from-white to-green-50 rounded-2xl shadow-xl border-2 border-green-100 p-6">
+            <div className="bg-white rounded-2xl shadow-xl border border-green-200 p-6">
               <div className="flex items-center space-x-3 mb-6">
                 <div className="p-3 bg-green-100 rounded-xl">
                   <Activity className="w-6 h-6 text-green-600" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-900">Recent Activity</h2>
+                <h2 className="text-lg md:text-xl font-bold text-gray-900">Recent Activity</h2>
               </div>
-              
+
               <div className="space-y-4">
-                <div className="flex items-start space-x-4 p-4 bg-white rounded-xl border border-green-100">
-                  <div className="p-2 bg-green-100 rounded-lg">
-                    <CheckCircle className="w-4 h-4 text-green-600" />
+                <div className="text-center py-6 md:py-8">
+                  <div className="w-16 h-16 bg-green-100 rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg">
+                    <Activity className="w-8 h-8 text-green-600" strokeWidth={2} />
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">Appointment confirmed</p>
-                    <p className="text-xs text-gray-600">Dr. Johnson • Cardiology</p>
-                    <p className="text-xs text-gray-500 mt-1">2 hours ago</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start space-x-4 p-4 bg-white rounded-xl border border-blue-100">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <FileText className="w-4 h-4 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">Health records updated</p>
-                    <p className="text-xs text-gray-600">3 new documents added</p>
-                    <p className="text-xs text-gray-500 mt-1">Yesterday</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start space-x-4 p-4 bg-white rounded-xl border border-purple-100">
-                  <div className="p-2 bg-purple-100 rounded-lg">
-                    <Pill className="w-4 h-4 text-purple-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">New prescription</p>
-                    <p className="text-xs text-gray-600">Blood pressure medication</p>
-                    <p className="text-xs text-gray-500 mt-1">3 days ago</p>
-                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">No recent activity</h3>
+                  <p className="text-sm text-gray-700 font-medium">Your activity will appear here as you use MediMitra.</p>
                 </div>
               </div>
             </div>
 
             {/* Health Insights */}
-            <div className="bg-gradient-to-br from-white to-purple-50 rounded-2xl shadow-xl border-2 border-purple-100 p-6">
+            <div className="bg-white rounded-2xl shadow-xl border border-purple-200 p-6">
               <div className="flex items-center space-x-3 mb-6">
                 <div className="p-3 bg-purple-100 rounded-xl">
                   <BarChart3 className="w-6 h-6 text-purple-600" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-900">Health Insights</h2>
+                <h2 className="text-lg md:text-xl font-bold text-gray-900">Health Insights</h2>
               </div>
-              
+
               <div className="space-y-4">
-                <div className="bg-white rounded-xl p-4 border border-purple-100">
+                <div className="bg-white rounded-xl p-4 border border-gray-300 shadow-sm">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-semibold text-gray-900">Overall Health Score</span>
-                    <span className="text-lg font-bold text-purple-600">92/100</span>
+                    <span className="text-sm font-bold text-gray-900">Overall Health Score</span>
+                    <span className="text-lg font-bold text-gray-900">Not available</span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-gradient-to-r from-purple-500 to-purple-600 h-2 rounded-full" style={{ width: '92%' }}></div>
+                  <div className="w-full bg-gray-200 rounded-full h-3 shadow-inner">
+                    <div className="bg-purple-500 h-3 rounded-full" style={{ width: '0%' }}></div>
                   </div>
-                  <p className="text-xs text-gray-600 mt-2">Excellent! Keep up the good work.</p>
+                  <p className="text-sm text-gray-700 mt-2 font-medium">Complete your profile to see your health score.</p>
                 </div>
-                
-                <div className="bg-white rounded-xl p-4 border border-orange-100">
+
+                <div className="bg-white rounded-xl p-4 border border-gray-300 shadow-sm">
                   <div className="flex items-center space-x-2 mb-2">
-                    <Zap className="w-4 h-4 text-orange-500" />
-                    <span className="text-sm font-semibold text-gray-900">Next Checkup</span>
+                    <Calendar className="w-5 h-5 text-purple-600" strokeWidth={2} />
+                    <span className="text-sm font-bold text-gray-900">Next Checkup</span>
                   </div>
-                  <p className="text-xs text-gray-600">Annual physical exam due in 2 months</p>
+                  <p className="text-sm text-gray-700 font-medium">No upcoming checkup scheduled</p>
                 </div>
               </div>
             </div>
@@ -403,43 +373,43 @@ export default async function Dashboard() {
         </div>
 
         {/* Enhanced Health Tips */}
-        <div className="mt-8 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-2xl p-8 text-white shadow-2xl">
-          <div className="flex items-center justify-between mb-6">
+        <div className="mt-8 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-2xl p-6 md:p-8 text-white shadow-2xl">
+          <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
             <div className="flex items-center space-x-4">
-              <div className="p-4 bg-white bg-opacity-20 rounded-2xl backdrop-blur-sm">
-                <Sparkles className="w-8 h-8" />
+              <div className="p-4 bg-yellow-500 rounded-2xl shadow-lg border-2 border-white border-opacity-30">
+                <Sparkles className="w-8 h-8 text-white filter drop-shadow-lg" strokeWidth={2} fill="currentColor" />
               </div>
               <div>
-                <h3 className="text-2xl font-bold mb-2">Daily Wellness Tip</h3>
-                <p className="text-purple-100">Personalized health advice for you</p>
+                <h3 className="text-2xl font-bold mb-2 text-white" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>Daily Wellness Tip</h3>
+                <p className="text-white font-medium" style={{ textShadow: '1px 1px 3px rgba(0,0,0,0.8)' }}>Personalized health advice for you</p>
               </div>
             </div>
             <div className="hidden md:block">
-              <div className="p-3 bg-white bg-opacity-10 rounded-xl">
-                <Heart className="w-8 h-8 text-pink-200 animate-pulse" />
+              <div className="p-3 bg-pink-500 rounded-xl shadow-lg border-2 border-white border-opacity-30">
+                <Heart className="w-8 h-8 text-white animate-pulse filter drop-shadow-lg" strokeWidth={2} fill="currentColor" />
               </div>
             </div>
           </div>
-          
-          <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-6 border border-white border-opacity-20">
-            <div className="flex items-start space-x-4">
-              <div className="p-2 bg-blue-200 bg-opacity-30 rounded-lg">
-                <Shield className="w-6 h-6 text-blue-100" />
+
+          <div className="bg-white bg-opacity-95 backdrop-blur-md rounded-2xl p-6 border border-gray-200 shadow-lg">
+            <div className="flex flex-col md:flex-row md:items-start space-y-4 md:space-y-0 md:space-x-4">
+              <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex-shrink-0 shadow-lg">
+                <Shield className="w-6 h-6 text-white filter drop-shadow-sm" strokeWidth={2} fill="currentColor" />
               </div>
-              <div>
-                <h4 className="font-semibold text-lg mb-2">Stay Hydrated for Optimal Health</h4>
-                <p className="text-purple-100 text-sm leading-relaxed">
-                  Drinking 8-10 glasses of water daily helps maintain your body&apos;s vital functions, keeps your skin healthy, 
+              <div className="flex-1">
+                <h4 className="font-bold text-lg mb-3 text-gray-900">Stay Hydrated for Optimal Health</h4>
+                <p className="text-gray-700 text-base leading-relaxed font-medium">
+                  Drinking 8-10 glasses of water daily helps maintain your body&apos;s vital functions, keeps your skin healthy,
                   and boosts your immune system. Try setting hourly reminders to stay on track!
                 </p>
-                <div className="mt-4 flex items-center space-x-4">
+                <div className="mt-4 flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-6">
                   <div className="flex items-center space-x-2">
-                    <Star className="w-4 h-4 text-yellow-300" />
-                    <span className="text-xs text-purple-100">Health Score Impact: +5 points</span>
+                    <Star className="w-5 h-5 text-yellow-500" strokeWidth={2} />
+                    <span className="text-sm text-gray-700 font-semibold">Health Score Impact: +5 points</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Clock className="w-4 h-4 text-blue-200" />
-                    <span className="text-xs text-purple-100">Daily Goal: 8 glasses</span>
+                    <Clock className="w-5 h-5 text-blue-600" strokeWidth={2} />
+                    <span className="text-sm text-gray-700 font-semibold">Daily Goal: 8 glasses</span>
                   </div>
                 </div>
               </div>

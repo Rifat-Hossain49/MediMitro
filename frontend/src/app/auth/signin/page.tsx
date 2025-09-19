@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { signIn, getSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Heart, Mail, Lock, Github, Chrome } from 'lucide-react'
+import { Heart, Mail, Lock, Chrome } from 'lucide-react'
 
 export default function SignInPage() {
   const [email, setEmail] = useState('')
@@ -71,15 +71,6 @@ export default function SignInPage() {
             >
               <Chrome className="w-5 h-5" />
               Continue with Google
-            </button>
-            
-            <button
-              onClick={() => handleOAuthLogin('github')}
-              disabled={loading}
-              className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-300 rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-colors disabled:opacity-50"
-            >
-              <Github className="w-5 h-5" />
-              Continue with GitHub
             </button>
           </div>
 

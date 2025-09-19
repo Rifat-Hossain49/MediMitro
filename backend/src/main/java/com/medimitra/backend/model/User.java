@@ -1,26 +1,31 @@
 package com.medimitra.backend.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "users")
 public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
-    
+
     @NotBlank(message = "Email is required")
     @Email(message = "Email should be valid")
     private String email;
-    
+
     @JsonIgnore
     @Size(min = 6, message = "Password should have at least 6 characters")
     private String password;
-    
+
     @NotBlank(message = "Name is required")
     private String name;
-    
+
     private String image;
     private String role = "patient"; // patient, doctor, admin, pharmacist
     private String phoneNumber;
@@ -219,4 +224,3 @@ public class User {
                 '}';
     }
 }
-

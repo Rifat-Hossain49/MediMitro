@@ -2,17 +2,17 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  Pill, 
-  Bell, 
-  Plus, 
-  Calendar, 
-  Clock, 
-  CheckCircle, 
-  AlertCircle, 
-  TrendingUp, 
-  Activity, 
-  Target, 
+import {
+  Pill,
+  Bell,
+  Plus,
+  Calendar,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  TrendingUp,
+  Activity,
+  Target,
   Trash2,
   Edit3,
   Heart,
@@ -47,12 +47,12 @@ export default function ClientScheduler() {
   const alarmTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const [isAlarmPlaying, setIsAlarmPlaying] = useState(false)
 
-  const [form, setForm] = useState({ 
-    name: '', 
-    dose: '', 
-    timesPerDay: 2, 
-    times: ['08:00', '20:00'], 
-    startDate: nowLocalISODate(), 
+  const [form, setForm] = useState({
+    name: '',
+    dose: '',
+    timesPerDay: 2,
+    times: ['08:00', '20:00'],
+    startDate: nowLocalISODate(),
     notes: '',
     category: 'prescription' as const,
     priority: 'medium' as const,
@@ -66,10 +66,10 @@ export default function ClientScheduler() {
   })
 
   useEffect(() => {
-    try { const raw = localStorage.getItem(MEDS_KEY); if (raw) setMeds(JSON.parse(raw)) } catch {}
-    try { const raw = localStorage.getItem(LOG_KEY); if (raw) setLog(JSON.parse(raw)) } catch {}
-    try { const rawN = localStorage.getItem(NOTIFY_KEY); if (rawN) setNotifyLog(JSON.parse(rawN)) } catch {}
-    try { const rawE = localStorage.getItem(ENABLE_KEY); if (rawE) setRemindersEnabled(JSON.parse(rawE)) } catch {}
+    try { const raw = localStorage.getItem(MEDS_KEY); if (raw) setMeds(JSON.parse(raw)) } catch { }
+    try { const raw = localStorage.getItem(LOG_KEY); if (raw) setLog(JSON.parse(raw)) } catch { }
+    try { const rawN = localStorage.getItem(NOTIFY_KEY); if (rawN) setNotifyLog(JSON.parse(rawN)) } catch { }
+    try { const rawE = localStorage.getItem(ENABLE_KEY); if (rawE) setRemindersEnabled(JSON.parse(rawE)) } catch { }
   }, [])
 
   // Load user profile from context
@@ -77,7 +77,7 @@ export default function ClientScheduler() {
     const loadUserProfile = async () => {
       try {
         const profile = await profileService.getUserProfile()
-        setUserProfile({ 
+        setUserProfile({
           email: profile.email || '',
           phone: profile.phoneNumber || ''
         })
@@ -87,14 +87,14 @@ export default function ClientScheduler() {
         setUserProfile({ email: '', phone: '' })
       }
     }
-    
+
     loadUserProfile()
   }, [])
 
-  useEffect(() => { try { localStorage.setItem(MEDS_KEY, JSON.stringify(meds)) } catch {} }, [meds])
-  useEffect(() => { try { localStorage.setItem(LOG_KEY, JSON.stringify(log)) } catch {} }, [log])
-  useEffect(() => { try { localStorage.setItem(NOTIFY_KEY, JSON.stringify(notifyLog)) } catch {} }, [notifyLog])
-  useEffect(() => { try { localStorage.setItem(ENABLE_KEY, JSON.stringify(remindersEnabled)) } catch {} }, [remindersEnabled])
+  useEffect(() => { try { localStorage.setItem(MEDS_KEY, JSON.stringify(meds)) } catch { } }, [meds])
+  useEffect(() => { try { localStorage.setItem(LOG_KEY, JSON.stringify(log)) } catch { } }, [log])
+  useEffect(() => { try { localStorage.setItem(NOTIFY_KEY, JSON.stringify(notifyLog)) } catch { } }, [notifyLog])
+  useEffect(() => { try { localStorage.setItem(ENABLE_KEY, JSON.stringify(remindersEnabled)) } catch { } }, [remindersEnabled])
 
   useEffect(() => {
     if (!remindersEnabled) {
@@ -104,7 +104,7 @@ export default function ClientScheduler() {
     }
     // Ask permission once
     if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
-      Notification.requestPermission().catch(() => {})
+      Notification.requestPermission().catch(() => { })
     }
 
     const check = () => {
@@ -126,7 +126,7 @@ export default function ClientScheduler() {
             }
           }
         }
-      } catch {}
+      } catch { }
     }
 
     check()
@@ -148,18 +148,18 @@ export default function ClientScheduler() {
   function triggerReminder(name: string, dose: string, time: string, medication?: Medication) {
     const title = `Time for ${name}`
     const body = `${dose} at ${time}`
-    
+
     try {
       // Browser notification
       if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-        const notification = new Notification(title, { 
-          body, 
+        const notification = new Notification(title, {
+          body,
           icon: '/pill-icon.png',
           badge: '/pill-badge.png',
           tag: `med-${name}-${time}`,
           requireInteraction: true
         })
-        
+
         notification.onclick = () => {
           window.focus()
           notification.close()
@@ -217,38 +217,38 @@ export default function ClientScheduler() {
   const playAlarmSound = () => {
     try {
       if (isAlarmPlaying) return // Prevent multiple alarms
-      
+
       setIsAlarmPlaying(true)
-      
+
       // Try to use Web Audio API for beep sound
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
-      
-      const playBeep = () => {        
+
+      const playBeep = () => {
         const oscillator = audioContext.createOscillator()
         const gainNode = audioContext.createGain()
-        
+
         oscillator.connect(gainNode)
         gainNode.connect(audioContext.destination)
-        
+
         oscillator.frequency.setValueAtTime(800, audioContext.currentTime) // 800Hz beep
         gainNode.gain.setValueAtTime(0.1, audioContext.currentTime)
-        
+
         oscillator.start()
         oscillator.stop(audioContext.currentTime + 0.2) // Short beep
-        
+
         // Schedule next beep
         alarmTimeoutRef.current = setTimeout(() => {
           playBeep()
         }, 800) // Beep every 800ms
       }
-      
+
       playBeep()
-      
+
       // Auto-stop after 30 seconds
       setTimeout(() => {
         stopAlarm()
       }, 30000)
-      
+
     } catch (error) {
       console.error('Alarm sound failed:', error)
       setIsAlarmPlaying(false)
@@ -259,12 +259,12 @@ export default function ClientScheduler() {
 
   const stopAlarm = () => {
     setIsAlarmPlaying(false)
-    
+
     if (alarmTimeoutRef.current) {
       clearTimeout(alarmTimeoutRef.current)
       alarmTimeoutRef.current = null
     }
-    
+
     if (alarmAudioRef.current) {
       try {
         alarmAudioRef.current.pause()
@@ -291,12 +291,12 @@ export default function ClientScheduler() {
       notifications: form.notifications
     }
     setMeds((prev) => [...prev, newMed])
-    setForm({ 
-      name: '', 
-      dose: '', 
-      timesPerDay: 2, 
-      times: ['08:00', '20:00'], 
-      startDate: nowLocalISODate(), 
+    setForm({
+      name: '',
+      dose: '',
+      timesPerDay: 2,
+      times: ['08:00', '20:00'],
+      startDate: nowLocalISODate(),
       notes: '',
       category: 'prescription',
       priority: 'medium',
@@ -378,40 +378,40 @@ export default function ClientScheduler() {
             <div className="flex items-center justify-between">
               <div>
                 <div className="flex items-center space-x-4 mb-4">
-                  <div className="p-4 bg-white bg-opacity-20 rounded-2xl backdrop-blur-sm">
-                    <Pill className="w-10 h-10 text-white" />
+                  <div className="p-4 bg-orange-400 rounded-2xl shadow-lg border-2 border-orange-500">
+                    <Pill className="w-10 h-10 text-purple-900" strokeWidth={2} fill="currentColor" />
                   </div>
                   <div>
-                    <h1 className="text-4xl font-bold">Smart Medication Manager</h1>
-                    <p className="text-xl text-indigo-100 mt-2">Never miss a dose with intelligent tracking and reminders</p>
+                    <h1 className="text-4xl font-bold text-yellow-100">Smart Medication Manager</h1>
+                    <p className="text-xl text-yellow-50 mt-2 font-medium">Never miss a dose with intelligent tracking and reminders</p>
                   </div>
                 </div>
-                
+
                 {/* Quick Stats */}
                 <div className="flex items-center space-x-8 mt-6">
                   <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                    <span className="text-indigo-100 font-medium">{adherence}% adherence today</span>
+                    <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse shadow-lg"></div>
+                    <span className="text-yellow-100 font-semibold">{adherence}% adherence today</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Bell className="w-4 h-4 text-purple-200" />
-                    <span className="text-purple-100">{upcomingDoses} doses remaining</span>
+                    <Bell className="w-4 h-4 text-yellow-200" strokeWidth={2} />
+                    <span className="text-yellow-100 font-medium">{upcomingDoses} doses remaining</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Activity className="w-4 h-4 text-pink-200" />
-                    <span className="text-pink-100">{meds.length} active medications</span>
+                    <Activity className="w-4 h-4 text-yellow-200" strokeWidth={2} />
+                    <span className="text-yellow-100 font-medium">{meds.length} active medications</span>
                   </div>
                 </div>
               </div>
-              
+
               {/* Today's Progress */}
               <div className="hidden lg:block">
-                <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-6 text-center">
-                  <div className="text-3xl font-bold text-white mb-2">{takenDoses}/{totalDoses}</div>
-                  <div className="text-indigo-200 text-sm mb-3">Today's Doses</div>
-                  <div className="w-32 bg-white bg-opacity-20 rounded-full h-2">
-                    <div 
-                      className="bg-green-400 h-2 rounded-full transition-all duration-500"
+                <div className="bg-gray-800 bg-opacity-90 backdrop-blur-sm rounded-2xl p-6 text-center border-2 border-gray-700 shadow-lg">
+                  <div className="text-3xl font-bold text-green-400 mb-2">{takenDoses}/{totalDoses}</div>
+                  <div className="text-gray-300 text-sm mb-3 font-medium">Today's Doses</div>
+                  <div className="w-32 bg-gray-700 rounded-full h-3 shadow-inner">
+                    <div
+                      className="bg-green-400 h-3 rounded-full transition-all duration-500 shadow-sm"
                       style={{ width: `${adherence}%` }}
                     ></div>
                   </div>
@@ -432,11 +432,10 @@ export default function ClientScheduler() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center space-x-3 px-8 py-4 rounded-xl font-semibold transition-all duration-200 ${
-                activeTab === tab.id
+              className={`flex items-center space-x-3 px-8 py-4 rounded-xl font-semibold transition-all duration-200 ${activeTab === tab.id
                   ? `bg-gradient-to-r from-${tab.color}-500 to-${tab.color}-600 text-white shadow-lg transform scale-105`
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              }`}
+                }`}
             >
               <tab.icon className="w-5 h-5" />
               <span>{tab.label}</span>
@@ -475,11 +474,11 @@ export default function ClientScheduler() {
                           <div className="text-sm text-gray-600">Adherence</div>
                         </div>
                         <label className="inline-flex items-center space-x-3">
-                          <input 
-                            type="checkbox" 
+                          <input
+                            type="checkbox"
                             className="w-5 h-5 text-blue-600 rounded"
-                            checked={remindersEnabled} 
-                            onChange={(e) => setRemindersEnabled(e.target.checked)} 
+                            checked={remindersEnabled}
+                            onChange={(e) => setRemindersEnabled(e.target.checked)}
                           />
                           <span className="font-medium text-gray-700">Smart Reminders</span>
                         </label>
@@ -494,7 +493,7 @@ export default function ClientScheduler() {
                           </div>
                           <h3 className="text-xl font-semibold text-gray-700 mb-2">No medications scheduled</h3>
                           <p className="text-gray-500 mb-6">Add your first medication to get started</p>
-                          <button 
+                          <button
                             onClick={() => setActiveTab('add')}
                             className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-8 py-3 rounded-xl font-semibold hover:from-blue-600 hover:to-blue-700 transition-all"
                           >
@@ -503,12 +502,12 @@ export default function ClientScheduler() {
                           </button>
                         </div>
                       )}
-                      
+
                       {meds.map((medication) => {
                         const CategoryIcon = getCategoryIcon(medication.category || 'prescription')
                         const categoryColor = getCategoryColor(medication.category || 'prescription')
                         const priorityColor = getPriorityColor(medication.priority || 'medium')
-                        
+
                         return (
                           <motion.div
                             key={medication.id}
@@ -539,7 +538,7 @@ export default function ClientScheduler() {
                                 <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
                                   <Edit3 className="w-4 h-4" />
                                 </button>
-                                <button 
+                                <button
                                   onClick={() => deleteMedication(medication.id)}
                                   className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                 >
@@ -557,22 +556,21 @@ export default function ClientScheduler() {
                                 const now = new Date()
                                 const isPast = doseTime < now
                                 const isUpcoming = doseTime > now && Math.abs(doseTime.getTime() - now.getTime()) <= 30 * 60 * 1000 // 30 minutes
-                                
+
                                 return (
                                   <motion.button
                                     key={time}
                                     onClick={() => toggleTaken(medication.id, today, time)}
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
-                                    className={`relative px-6 py-3 rounded-xl font-semibold transition-all ${
-                                      taken 
-                                        ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg' 
+                                    className={`relative px-6 py-3 rounded-xl font-semibold transition-all ${taken
+                                        ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg'
                                         : isUpcoming
-                                        ? 'bg-gradient-to-r from-orange-400 to-orange-500 text-white shadow-lg animate-pulse'
-                                        : isPast && !taken
-                                        ? 'bg-red-100 text-red-700 border-2 border-red-300'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                    }`}
+                                          ? 'bg-gradient-to-r from-orange-400 to-orange-500 text-white shadow-lg animate-pulse'
+                                          : isPast && !taken
+                                            ? 'bg-red-100 text-red-700 border-2 border-red-300'
+                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                      }`}
                                   >
                                     <div className="flex items-center space-x-2">
                                       <Clock className="w-4 h-4" />
@@ -628,7 +626,7 @@ export default function ClientScheduler() {
                             required
                           />
                         </div>
-                        
+
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">Dose *</label>
                           <input
@@ -734,7 +732,7 @@ export default function ClientScheduler() {
                           <Bell className="w-5 h-5 mr-2 text-blue-600" />
                           Notification Preferences
                         </h3>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div className="space-y-4">
                             <label className="flex items-center space-x-3">
@@ -883,7 +881,7 @@ export default function ClientScheduler() {
                 </div>
                 <h3 className="text-xl font-bold text-gray-900">Health Stats</h3>
               </div>
-              
+
               <div className="space-y-4">
                 <div className="bg-white rounded-xl p-4 border border-green-100">
                   <div className="flex items-center justify-between">
@@ -894,7 +892,7 @@ export default function ClientScheduler() {
                     <Target className="w-8 h-8 text-green-400" />
                   </div>
                 </div>
-                
+
                 <div className="bg-white rounded-xl p-4 border border-blue-100">
                   <div className="flex items-center justify-between">
                     <div>
@@ -904,7 +902,7 @@ export default function ClientScheduler() {
                     <Pill className="w-8 h-8 text-blue-400" />
                   </div>
                 </div>
-                
+
                 <div className="bg-white rounded-xl p-4 border border-orange-100">
                   <div className="flex items-center justify-between">
                     <div>
@@ -918,16 +916,16 @@ export default function ClientScheduler() {
             </div>
 
             {/* Quick Add Button */}
-            <div className="bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 rounded-2xl p-6 text-white shadow-2xl">
+            <div className="bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 rounded-2xl p-6 shadow-2xl">
               <div className="text-center">
-                <div className="p-4 bg-white bg-opacity-20 rounded-xl backdrop-blur-sm w-fit mx-auto mb-4">
-                  <Plus className="w-8 h-8 text-white" />
+                <div className="p-4 bg-green-500 rounded-xl shadow-lg w-fit mx-auto mb-4 border-2 border-green-400">
+                  <Plus className="w-8 h-8 text-green-100" strokeWidth={2} />
                 </div>
-                <h3 className="text-xl font-bold mb-2">Add New Medication</h3>
-                <p className="text-blue-100 mb-6">Keep track of all your medications</p>
-                <button 
+                <h3 className="text-xl font-bold mb-2 text-yellow-100">Add New Medication</h3>
+                <p className="text-yellow-200 mb-6 font-medium">Keep track of all your medications</p>
+                <button
                   onClick={() => setActiveTab('add')}
-                  className="w-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white py-3 rounded-xl font-semibold transition-all backdrop-blur-sm border border-white border-opacity-20"
+                  className="w-full bg-green-600 hover:bg-green-700 text-green-100 py-3 rounded-xl font-bold transition-all border-2 border-green-500 shadow-lg"
                 >
                   Get Started
                 </button>
@@ -939,26 +937,25 @@ export default function ClientScheduler() {
               <h3 className="text-lg font-bold text-gray-900 mb-4">Smart Reminders</h3>
               <div className="space-y-4">
                 <label className="flex items-center space-x-3">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     className="w-5 h-5 text-blue-600 rounded"
-                    checked={remindersEnabled} 
-                    onChange={(e) => setRemindersEnabled(e.target.checked)} 
+                    checked={remindersEnabled}
+                    onChange={(e) => setRemindersEnabled(e.target.checked)}
                   />
                   <span className="font-medium text-gray-700">Enable Notifications</span>
                 </label>
                 <div className="text-sm text-gray-600">
                   Get reminded with browser, email, SMS, or alarm notifications.
                 </div>
-                
+
                 {/* Stop Alarm Button */}
                 <button
                   onClick={stopAlarm}
-                  className={`w-full py-3 px-4 rounded-xl font-semibold transition-all flex items-center justify-center space-x-2 ${
-                    isAlarmPlaying 
-                      ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse' 
+                  className={`w-full py-3 px-4 rounded-xl font-semibold transition-all flex items-center justify-center space-x-2 ${isAlarmPlaying
+                      ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse'
                       : 'bg-gray-300 text-gray-600 cursor-not-allowed'
-                  }`}
+                    }`}
                   disabled={!isAlarmPlaying}
                 >
                   <AlertCircle className="w-5 h-5" />

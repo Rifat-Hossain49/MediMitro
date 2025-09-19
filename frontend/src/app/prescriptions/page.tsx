@@ -3,20 +3,20 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { prescriptionService, type PrescriptionDocument } from '@/lib/prescriptionService'
-import { 
-  Upload, 
-  FileText, 
-  Camera, 
-  Clock, 
-  Calendar, 
-  Bell, 
-  Pill, 
-  AlertCircle, 
-  CheckCircle, 
-  X, 
-  Plus, 
-  Eye, 
-  Download, 
+import {
+  Upload,
+  FileText,
+  Camera,
+  Clock,
+  Calendar,
+  Bell,
+  Pill,
+  AlertCircle,
+  CheckCircle,
+  X,
+  Plus,
+  Eye,
+  Download,
   Edit3,
   Activity,
   Heart,
@@ -76,7 +76,7 @@ export default function PrescriptionsPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  
+
   // Hardcoded patient ID for demo - in real app, get from auth/session
   const patientId = 'user-4'
 
@@ -103,7 +103,7 @@ export default function PrescriptionsPage() {
       }
     }
   }, [])
-  
+
   const loadPrescriptionDocuments = async () => {
     try {
       setLoading(true)
@@ -194,7 +194,7 @@ export default function PrescriptionsPage() {
       setIsProcessing(true)
       setError(null)
       setUploadProgress(0)
-      
+
       // Upload to Appwrite and save to database
       const document = await prescriptionService.uploadPrescription({
         file,
@@ -202,10 +202,10 @@ export default function PrescriptionsPage() {
         title: title || `Prescription - ${file.name.replace(/\.[^/.]+$/, '')}`,
         description: description || 'Prescription document uploaded by patient'
       })
-      
+
       // Add to real prescriptions list
       setRealPrescriptions(prev => [document, ...prev])
-      
+
       // Create a prescription object for UI compatibility
       const newPrescription: Prescription = {
         id: document.id,
@@ -218,12 +218,12 @@ export default function PrescriptionsPage() {
         notes: 'Prescription uploaded successfully. File stored in cloud storage and awaiting manual review for medication extraction.',
         extractedText: `File: ${document.fileName} (${(document.fileSize / 1024).toFixed(1)} KB)`
       }
-      
+
       setPrescriptions(prev => [newPrescription, ...prev])
       setIsProcessing(false)
       setShowUploadModal(false)
       setActiveTab('history')
-      
+
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed')
       setIsProcessing(false)
@@ -243,15 +243,15 @@ export default function PrescriptionsPage() {
   const startCamera = async () => {
     try {
       setError(null)
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { 
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
           width: { ideal: 1280 },
           height: { ideal: 720 },
           facingMode: 'environment' // Use back camera on mobile
-        } 
+        }
       })
       setCameraStream(stream)
-      
+
       // Wait for video element to be available and set stream
       if (videoRef.current) {
         videoRef.current.srcObject = stream
@@ -290,12 +290,12 @@ export default function PrescriptionsPage() {
       const video = videoRef.current
       const canvas = canvasRef.current
       const context = canvas.getContext('2d')
-      
+
       if (context) {
         canvas.width = video.videoWidth
         canvas.height = video.videoHeight
         context.drawImage(video, 0, 0)
-        
+
         const imageDataUrl = canvas.toDataURL('image/jpeg', 0.8)
         setCapturedImage(imageDataUrl)
       }
@@ -304,16 +304,16 @@ export default function PrescriptionsPage() {
 
   const uploadCapturedImage = async () => {
     if (!capturedImage) return
-    
+
     try {
       // Convert data URL to File object
       const response = await fetch(capturedImage)
       const blob = await response.blob()
       const file = new File([blob], `prescription-photo-${Date.now()}.jpg`, { type: 'image/jpeg' })
-      
+
       // Upload the captured image
       await handleFileUpload(file)
-      
+
       // Clean up
       setCapturedImage(null)
       setShowCameraModal(false)
@@ -361,39 +361,39 @@ export default function PrescriptionsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <div className="flex items-center space-x-4 mb-4">
-                  <div className="p-4 bg-white bg-opacity-20 rounded-2xl backdrop-blur-sm">
-                    <Pill className="w-10 h-10 text-white" />
+                  <div className="p-4 bg-yellow-400 rounded-2xl shadow-lg border-2 border-yellow-500">
+                    <Pill className="w-10 h-10 text-blue-900" strokeWidth={2} fill="currentColor" />
                   </div>
                   <div>
-                    <h1 className="text-4xl font-bold">Smart Prescription Manager</h1>
-                    <p className="text-xl text-emerald-100 mt-2">AI-powered medication tracking and health management</p>
+                    <h1 className="text-4xl font-bold text-yellow-100">Smart Prescription Manager</h1>
+                    <p className="text-xl text-yellow-50 mt-2 font-medium">AI-powered medication tracking and health management</p>
                   </div>
                 </div>
-                
+
                 {/* Quick Stats */}
                 <div className="flex items-center space-x-8 mt-6">
                   <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                    <span className="text-emerald-100 font-medium">{prescriptions.flatMap(p => p.medications).filter(m => m.isActive).length} active medications</span>
+                    <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse shadow-lg"></div>
+                    <span className="text-yellow-100 font-semibold">{prescriptions.flatMap(p => p.medications).filter(m => m.isActive).length} active medications</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <FileText className="w-4 h-4 text-blue-200" />
-                    <span className="text-blue-100">{realPrescriptions.length + prescriptions.length} total prescriptions</span>
+                    <FileText className="w-4 h-4 text-yellow-200" strokeWidth={2} />
+                    <span className="text-yellow-100 font-medium">{realPrescriptions.length + prescriptions.length} total prescriptions</span>
                   </div>
                 </div>
               </div>
-              
+
               {/* Stats Card */}
               <div className="hidden lg:block">
-                <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-6 text-center">
+                <div className="bg-gray-800 bg-opacity-90 backdrop-blur-sm rounded-2xl p-6 text-center border-2 border-gray-700 shadow-lg">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <div className="text-2xl font-bold text-white">{prescriptions.length}</div>
-                      <div className="text-emerald-200 text-sm">Prescriptions</div>
+                      <div className="text-2xl font-bold text-yellow-400">{prescriptions.length}</div>
+                      <div className="text-gray-300 text-sm font-medium">Prescriptions</div>
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-white">95%</div>
-                      <div className="text-emerald-200 text-sm">Adherence</div>
+                      <div className="text-2xl font-bold text-green-400">95%</div>
+                      <div className="text-gray-300 text-sm font-medium">Adherence</div>
                     </div>
                   </div>
                 </div>
@@ -414,11 +414,10 @@ export default function PrescriptionsPage() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center space-x-3 px-8 py-4 rounded-xl font-semibold transition-all duration-200 ${
-                activeTab === tab.id
-                  ? `bg-gradient-to-r from-${tab.color}-500 to-${tab.color}-600 text-white shadow-lg transform scale-105`
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              }`}
+              className={`flex items-center space-x-3 px-8 py-4 rounded-xl font-semibold transition-all duration-200 ${activeTab === tab.id
+                ? `bg-gradient-to-r from-${tab.color}-500 to-${tab.color}-600 text-white shadow-lg transform scale-105`
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
             >
               <tab.icon className="w-5 h-5" />
               <span>{tab.label}</span>
@@ -445,7 +444,7 @@ export default function PrescriptionsPage() {
                       <h2 className="text-3xl font-bold text-gray-900 mb-2">Upload Your Prescription</h2>
                       <p className="text-gray-600">Choose your preferred method to digitize your prescription</p>
                     </div>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       {/* File Upload */}
                       <motion.button
@@ -454,9 +453,9 @@ export default function PrescriptionsPage() {
                         onClick={() => setShowUploadModal(true)}
                         className="group bg-gradient-to-br from-blue-500 to-blue-600 text-white p-8 rounded-2xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-xl hover:shadow-2xl"
                       >
-                        <CloudUpload className="w-16 h-16 mx-auto mb-4 group-hover:scale-110 transition-transform" />
-                        <h3 className="text-xl font-bold mb-2">Upload File</h3>
-                        <p className="text-blue-100 text-sm">PDF, JPG, PNG up to 10MB</p>
+                        <CloudUpload className="w-16 h-16 mx-auto mb-4 group-hover:scale-110 transition-transform text-blue-100" strokeWidth={2} fill="currentColor" />
+                        <h3 className="text-xl font-bold mb-2 text-blue-100">Upload File</h3>
+                        <p className="text-blue-200 text-sm font-medium">PDF, JPG, PNG up to 10MB</p>
                         <div className="mt-4 w-full bg-blue-400 bg-opacity-30 rounded-lg h-1">
                           <div className="w-0 group-hover:w-full bg-white h-1 rounded-lg transition-all duration-500"></div>
                         </div>
@@ -469,9 +468,9 @@ export default function PrescriptionsPage() {
                         onClick={() => setShowCameraModal(true)}
                         className="group bg-gradient-to-br from-green-500 to-green-600 text-white p-8 rounded-2xl hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-xl hover:shadow-2xl"
                       >
-                        <Camera className="w-16 h-16 mx-auto mb-4 group-hover:scale-110 transition-transform" />
-                        <h3 className="text-xl font-bold mb-2">Take Photo</h3>
-                        <p className="text-green-100 text-sm">Instant camera capture</p>
+                        <Camera className="w-16 h-16 mx-auto mb-4 group-hover:scale-110 transition-transform text-green-100" strokeWidth={2} fill="currentColor" />
+                        <h3 className="text-xl font-bold mb-2 text-green-100">Take Photo</h3>
+                        <p className="text-green-200 text-sm font-medium">Instant camera capture</p>
                         <div className="mt-4 w-full bg-green-400 bg-opacity-30 rounded-lg h-1">
                           <div className="w-0 group-hover:w-full bg-white h-1 rounded-lg transition-all duration-500"></div>
                         </div>
@@ -482,7 +481,7 @@ export default function PrescriptionsPage() {
                   {/* Benefits */}
                   <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-8">
                     <h3 className="text-xl font-semibold text-gray-900 mb-6">Why Upload Your Prescriptions?</h3>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {[
                         {
@@ -518,7 +517,7 @@ export default function PrescriptionsPage() {
                           className="flex items-start space-x-4"
                         >
                           <div className={`p-3 rounded-lg bg-${benefit.color}-100`}>
-                            <benefit.icon className={`w-6 h-6 text-${benefit.color}-600`} />
+                            <benefit.icon className={`w-6 h-6 text-${benefit.color}-600`} strokeWidth={2} />
                           </div>
                           <div>
                             <h4 className="font-semibold text-gray-900">{benefit.title}</h4>
@@ -559,12 +558,12 @@ export default function PrescriptionsPage() {
                         <p className="text-gray-600">Loading prescriptions...</p>
                       </div>
                     )}
-                    
+
                     {error && (
                       <div className="text-center py-8">
                         <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
                         <p className="text-red-600 mb-4">{error}</p>
-                        <button 
+                        <button
                           onClick={loadPrescriptionDocuments}
                           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                         >
@@ -601,20 +600,20 @@ export default function PrescriptionsPage() {
                                 )}
                               </div>
                             </div>
-                            
+
                             <div className="flex items-center space-x-2">
                               <span className="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
                                 Uploaded
                               </span>
                               <div className="flex space-x-1">
-                                <button 
+                                <button
                                   onClick={() => window.open(doc.fileUrl, '_blank')}
                                   className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
                                   title="View file"
                                 >
                                   <Eye className="w-4 h-4" />
                                 </button>
-                                <button 
+                                <button
                                   onClick={() => {
                                     const downloadUrl = doc.fileUrl.replace('/view?', '/download?')
                                     window.open(downloadUrl, '_blank')
@@ -642,7 +641,7 @@ export default function PrescriptionsPage() {
                           </div>
                         </motion.div>
                       ))}
-                      
+
                       {/* Show message if no real prescriptions found */}
                       {realPrescriptions.length === 0 && !loading && !error && (
                         <div className="text-center py-8 text-gray-500">
@@ -653,7 +652,7 @@ export default function PrescriptionsPage() {
                           <p className="text-sm mt-1">Upload prescription files to see them here</p>
                         </div>
                       )}
-                      
+
                       {/* Mock prescription data for demo */}
                       {prescriptions.map((prescription) => (
                         <motion.div
@@ -675,15 +674,14 @@ export default function PrescriptionsPage() {
                                 <p className="text-sm text-gray-700 mt-2"><strong>Diagnosis:</strong> {prescription.diagnosis}</p>
                               </div>
                             </div>
-                            
+
                             <div className="flex items-center space-x-2">
-                              <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                                prescription.status === 'completed' 
-                                  ? 'bg-green-100 text-green-800' 
-                                  : prescription.status === 'processing'
+                              <span className={`px-3 py-1 rounded-full text-sm font-medium ${prescription.status === 'completed'
+                                ? 'bg-green-100 text-green-800'
+                                : prescription.status === 'processing'
                                   ? 'bg-yellow-100 text-yellow-800'
                                   : 'bg-red-100 text-red-800'
-                              }`}>
+                                }`}>
                                 {prescription.status.charAt(0).toUpperCase() + prescription.status.slice(1)}
                               </span>
                               <div className="flex space-x-1">
@@ -732,7 +730,7 @@ export default function PrescriptionsPage() {
                 </div>
                 <h3 className="text-xl font-bold text-gray-900">Health Overview</h3>
               </div>
-              
+
               <div className="space-y-4">
                 <div className="group bg-white rounded-xl p-4 hover:shadow-lg transition-all border border-emerald-100">
                   <div className="flex items-center justify-between">
@@ -745,7 +743,7 @@ export default function PrescriptionsPage() {
                     <Pill className="w-8 h-8 text-emerald-400 group-hover:scale-110 transition-transform" />
                   </div>
                 </div>
-                
+
                 <div className="group bg-white rounded-xl p-4 hover:shadow-lg transition-all border border-blue-100">
                   <div className="flex items-center justify-between">
                     <div>
@@ -755,7 +753,7 @@ export default function PrescriptionsPage() {
                     <FileText className="w-8 h-8 text-blue-400 group-hover:scale-110 transition-transform" />
                   </div>
                 </div>
-                
+
                 <div className="group bg-white rounded-xl p-4 hover:shadow-lg transition-all border border-purple-100">
                   <div className="flex items-center justify-between">
                     <div>
@@ -771,62 +769,33 @@ export default function PrescriptionsPage() {
             </div>
 
             {/* Enhanced Next Medication */}
-            <div className="bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 rounded-2xl p-6 text-white shadow-2xl">
+            <div className="bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 rounded-2xl p-6 shadow-2xl">
               <div className="flex items-center space-x-3 mb-6">
-                <div className="p-3 bg-white bg-opacity-20 rounded-xl backdrop-blur-sm">
-                  <Clock className="w-6 h-6 text-white" />
+                <div className="p-3 bg-yellow-500 rounded-xl shadow-lg border-2 border-yellow-400">
+                  <Clock className="w-6 h-6 text-gray-900" strokeWidth={2} fill="currentColor" />
                 </div>
-                <h3 className="text-xl font-bold">Next Medication</h3>
+                <h3 className="text-xl font-bold text-yellow-100">Next Medication</h3>
               </div>
-              
-              <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-xl p-4 space-y-3">
+
+              <div className="bg-gray-800 bg-opacity-80 backdrop-blur-sm rounded-xl p-4 space-y-3 border-2 border-gray-700">
                 <div className="flex items-center justify-between">
-                  <span className="text-blue-100 font-medium">Metformin 500mg</span>
-                  <span className="font-bold text-lg">2:00 PM</span>
+                  <span className="text-yellow-300 font-semibold">Metformin 500mg</span>
+                  <span className="font-bold text-lg text-green-400">2:00 PM</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-blue-100">Time remaining</span>
-                  <span className="font-bold text-lg text-yellow-300">1h 23m</span>
+                  <span className="text-gray-300 font-medium">Time remaining</span>
+                  <span className="font-bold text-lg text-yellow-400">1h 23m</span>
                 </div>
-                <div className="w-full bg-white bg-opacity-20 rounded-full h-2 mt-3">
-                  <div className="bg-yellow-300 h-2 rounded-full" style={{ width: '75%' }}></div>
+                <div className="w-full bg-gray-700 rounded-full h-3 mt-3 shadow-inner">
+                  <div className="bg-yellow-400 h-3 rounded-full shadow-sm" style={{ width: '75%' }}></div>
                 </div>
-                <button className="w-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white py-3 rounded-xl font-semibold transition-all backdrop-blur-sm border border-white border-opacity-20">
-                  <Bell className="w-4 h-4 inline mr-2" />
-                  Set Reminder
+                <button className="w-full bg-blue-600 hover:bg-blue-700 text-blue-100 py-3 rounded-xl font-bold transition-all border-2 border-blue-500 shadow-lg">
+                  <Bell className="w-4 h-4 inline mr-2 text-blue-100" strokeWidth={2} />
+                  <span>Set Reminder</span>
                 </button>
               </div>
             </div>
 
-            {/* Enhanced Quick Actions */}
-            <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-xl border-2 border-gray-100 p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-6">Quick Actions</h3>
-              <div className="space-y-3">
-                <button 
-                  onClick={() => setShowUploadModal(true)}
-                  className="group w-full flex items-center space-x-4 p-4 text-left bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl transition-all hover:shadow-lg"
-                >
-                  <div className="p-2 bg-blue-200 rounded-lg group-hover:bg-blue-300 transition-colors">
-                    <Upload className="w-5 h-5 text-blue-700" />
-                  </div>
-                  <span className="font-semibold text-blue-900">Upload Prescription</span>
-                </button>
-                
-                <button className="group w-full flex items-center space-x-4 p-4 text-left bg-green-50 hover:bg-green-100 border border-green-200 rounded-xl transition-all hover:shadow-lg">
-                  <div className="p-2 bg-green-200 rounded-lg group-hover:bg-green-300 transition-colors">
-                    <Bell className="w-5 h-5 text-green-700" />
-                  </div>
-                  <span className="font-semibold text-green-900">Set Medication Reminder</span>
-                </button>
-                
-                <button className="group w-full flex items-center space-x-4 p-4 text-left bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-xl transition-all hover:shadow-lg">
-                  <div className="p-2 bg-purple-200 rounded-lg group-hover:bg-purple-300 transition-colors">
-                    <Calendar className="w-5 h-5 text-purple-700" />
-                  </div>
-                  <span className="font-semibold text-purple-900">Schedule Follow-up</span>
-                </button>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -861,7 +830,7 @@ export default function PrescriptionsPage() {
                     </div>
                   </div>
                 )}
-                
+
                 {isProcessing ? (
                   <div className="text-center py-12">
                     <motion.div
@@ -875,7 +844,7 @@ export default function PrescriptionsPage() {
                     <p className="text-gray-600">Uploading to secure cloud storage...</p>
                     {uploadProgress > 0 && (
                       <div className="w-full bg-gray-200 rounded-full h-2 mt-4">
-                        <div 
+                        <div
                           className="bg-blue-500 h-2 rounded-full transition-all duration-300"
                           style={{ width: `${uploadProgress}%` }}
                         />
@@ -981,7 +950,7 @@ export default function PrescriptionsPage() {
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="flex justify-center space-x-4">
                         <button
                           onClick={closeCameraModal}
@@ -1010,7 +979,7 @@ export default function PrescriptionsPage() {
                           className="max-w-full h-auto max-h-96 mx-auto rounded-lg shadow-lg"
                         />
                       </div>
-                      
+
                       <div className="flex justify-center space-x-4">
                         <button
                           onClick={retakePhoto}
@@ -1111,9 +1080,8 @@ export default function PrescriptionsPage() {
                             <p className="text-sm text-gray-500">Duration: {medication.duration}</p>
                           </div>
                         </div>
-                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                          medication.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                        }`}>
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${medication.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                          }`}>
                           {medication.isActive ? 'Active' : 'Completed'}
                         </span>
                       </div>

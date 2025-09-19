@@ -1,5 +1,4 @@
 import NextAuth from "next-auth"
-import GitHub from "next-auth/providers/github"
 import Google from "next-auth/providers/google"
 import Credentials from "next-auth/providers/credentials"
 import bcrypt from "bcryptjs"
@@ -30,13 +29,7 @@ export const {
         },
       },
     }),
-    
-    // GitHub OAuth - For developers and tech-savvy users
-    GitHub({
-      clientId: process.env.GITHUB_CLIENT_ID!,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
-    }),
-    
+
     // Email/Password - Essential for healthcare compliance
     // TODO: Implement with Spring JDBC backend API
     Credentials({
@@ -59,8 +52,8 @@ export const {
   },
   callbacks: {
     async signIn({ user, account, profile }) {
-      // Handle OAuth sign-in (Google, GitHub)
-      if (account?.provider === "google" || account?.provider === "github") {
+      // Handle OAuth sign-in (Google)
+      if (account?.provider === "google") {
         try {
           const response = await fetch(`http://localhost:8080/api/auth/oauth-user`, {
             method: 'POST',
@@ -83,7 +76,7 @@ export const {
               return true
             }
           }
-          
+
           console.error('Failed to save OAuth user to database')
           return false
         } catch (error) {
@@ -91,7 +84,7 @@ export const {
           return false
         }
       }
-      
+
       return true
     },
     async jwt({ token, user, account }) {

@@ -17,6 +17,8 @@ DROP TABLE IF EXISTS ehr_medical_history CASCADE;
 DROP TABLE IF EXISTS ehr_demographics CASCADE;
 
 -- Drop main tables
+DROP TABLE IF EXISTS ambulance_bookings CASCADE;
+DROP TABLE IF EXISTS icu_beds CASCADE;
 DROP TABLE IF EXISTS appointments CASCADE;
 DROP TABLE IF EXISTS prescriptions CASCADE;
 DROP TABLE IF EXISTS medical_records CASCADE;
@@ -404,6 +406,68 @@ CREATE INDEX idx_ehr_amendment_requests_status ON ehr_amendment_requests(status)
 CREATE INDEX idx_ehr_documents_patient_id ON ehr_documents(patient_id);
 CREATE INDEX idx_ehr_documents_document_type ON ehr_documents(document_type);
 CREATE INDEX idx_ehr_documents_upload_date ON ehr_documents(upload_date);
+
+-- ICU Beds table - ICU bed management
+CREATE TABLE icu_beds (
+    id VARCHAR(255) PRIMARY KEY,
+    bed_number VARCHAR(50) NOT NULL,
+    hospital VARCHAR(255) NOT NULL,
+    hospital_address TEXT,
+    icu_type VARCHAR(50) NOT NULL CHECK (icu_type IN ('general', 'cardiac', 'neuro', 'pediatric')),
+    status VARCHAR(20) DEFAULT 'available' CHECK (status IN ('available', 'occupied', 'maintenance', 'reserved')),
+    daily_rate DECIMAL(10,2) CHECK (daily_rate >= 0),
+    equipment TEXT, -- JSON string of available equipment
+    assigned_patient_id VARCHAR(255),
+    reservation_start_time TIMESTAMP,
+    reservation_end_time TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (assigned_patient_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
+-- Ambulance Bookings table - Emergency ambulance service
+CREATE TABLE ambulance_bookings (
+    id VARCHAR(255) PRIMARY KEY,
+    patient_id VARCHAR(255) NOT NULL,
+    emergency_type VARCHAR(50) NOT NULL CHECK (emergency_type IN ('medical', 'trauma', 'cardiac', 'stroke', 'general')),
+    priority VARCHAR(20) NOT NULL CHECK (priority IN ('critical', 'high', 'medium', 'low')),
+    pickup_address TEXT NOT NULL,
+    pickup_latitude VARCHAR(50),
+    pickup_longitude VARCHAR(50),
+    destination TEXT NOT NULL,
+    destination_latitude VARCHAR(50),
+    destination_longitude VARCHAR(50),
+    contact_phone VARCHAR(20),
+    symptoms TEXT,
+    additional_info TEXT,
+    status VARCHAR(20) DEFAULT 'requested' CHECK (status IN ('requested', 'dispatched', 'en_route', 'arrived', 'completed', 'cancelled')),
+    ambulance_id VARCHAR(255),
+    driver_id VARCHAR(255),
+    paramedics_ids TEXT, -- JSON array of paramedic IDs
+    estimated_cost DECIMAL(10,2) CHECK (estimated_cost >= 0),
+    final_cost DECIMAL(10,2) CHECK (final_cost >= 0),
+    request_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    dispatch_time TIMESTAMP,
+    arrival_time TIMESTAMP,
+    completion_time TIMESTAMP,
+    estimated_arrival_minutes INTEGER,
+    cancellation_reason TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (patient_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Create indexes for ICU beds and ambulance bookings
+CREATE INDEX idx_icu_beds_hospital ON icu_beds(hospital);
+CREATE INDEX idx_icu_beds_icu_type ON icu_beds(icu_type);
+CREATE INDEX idx_icu_beds_status ON icu_beds(status);
+CREATE INDEX idx_icu_beds_assigned_patient_id ON icu_beds(assigned_patient_id);
+
+CREATE INDEX idx_ambulance_bookings_patient_id ON ambulance_bookings(patient_id);
+CREATE INDEX idx_ambulance_bookings_emergency_type ON ambulance_bookings(emergency_type);
+CREATE INDEX idx_ambulance_bookings_priority ON ambulance_bookings(priority);
+CREATE INDEX idx_ambulance_bookings_status ON ambulance_bookings(status);
+CREATE INDEX idx_ambulance_bookings_request_time ON ambulance_bookings(request_time);
 
 -- Note: Automatic timestamp updates will be handled by the application layer
 -- This avoids complex PostgreSQL function syntax issues
