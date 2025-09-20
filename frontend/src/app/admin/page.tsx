@@ -221,8 +221,8 @@ export default function AdminPanel() {
               <button
                 onClick={() => setActiveTab('pending')}
                 className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'pending'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
                   }`}
               >
                 Pending Verification ({stats.pending})
@@ -230,8 +230,8 @@ export default function AdminPanel() {
               <button
                 onClick={() => setActiveTab('verified')}
                 className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'verified'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
                   }`}
               >
                 Verified Doctors ({stats.approved})
@@ -343,7 +343,7 @@ export default function AdminPanel() {
                             </div>
                             <div>
                               <p className="text-sm font-medium text-gray-700">Consultation Fee</p>
-                              <p className="text-sm text-gray-600">${doctor.consultation_fee || 'Not specified'}</p>
+                              <p className="text-sm text-gray-600">৳{doctor.consultation_fee || 'Not specified'}</p>
                             </div>
                           </div>
                         </div>
