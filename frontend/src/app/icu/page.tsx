@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
+import {
   BedDouble,
   CalendarCheck,
   MapPin,
@@ -193,8 +193,8 @@ export default function ICUReservationSystem() {
     // Only load mock data if no hospitals are loaded from backend
     if (hospitals.length === 0) {
       const bangladeshHospitals: Hospital[] = [
-      {
-        id: '1',
+        {
+          id: '1',
           name: 'Dhaka Medical College Hospital',
           address: 'Bakshibazar, Dhaka 1000, Bangladesh',
           phone: '+880 2-7319002',
@@ -203,30 +203,30 @@ export default function ICUReservationSystem() {
           totalBeds: 32,
           availableBeds: 12,
           facilities: ['24/7 Emergency', 'Advanced ICU', 'Ventilator Support', 'Cardiac Care', 'Neurosurgery'],
-        icuBeds: [
-          {
-            id: 'bed1',
+          icuBeds: [
+            {
+              id: 'bed1',
               bedNumber: 'ICU-A101',
-            type: 'general',
-            status: 'available',
+              type: 'general',
+              status: 'available',
               pricePerDay: 8000,
-            facilities: ['Ventilator', 'Cardiac Monitor', 'Defibrillator', 'IV Pump']
-          },
-          {
-            id: 'bed2',
+              facilities: ['Ventilator', 'Cardiac Monitor', 'Defibrillator', 'IV Pump']
+            },
+            {
+              id: 'bed2',
               bedNumber: 'ICU-A102',
-            type: 'cardiac',
-            status: 'available',
+              type: 'cardiac',
+              status: 'available',
               pricePerDay: 12000,
-            facilities: ['Advanced Cardiac Monitor', 'ECMO', 'Balloon Pump', 'Ventilator']
-          },
-          {
-            id: 'bed3',
+              facilities: ['Advanced Cardiac Monitor', 'ECMO', 'Balloon Pump', 'Ventilator']
+            },
+            {
+              id: 'bed3',
               bedNumber: 'ICU-A103',
-            type: 'neuro',
-            status: 'available',
+              type: 'neuro',
+              status: 'available',
               pricePerDay: 10000,
-            facilities: ['Neuro Monitor', 'ICP Monitor', 'Ventilator', 'EEG']
+              facilities: ['Neuro Monitor', 'ICP Monitor', 'Ventilator', 'EEG']
             },
             {
               id: 'bed4',
@@ -235,21 +235,21 @@ export default function ICUReservationSystem() {
               status: 'available',
               pricePerDay: 8000,
               facilities: ['Ventilator', 'Monitor', 'IV Pump', 'Dialysis Support']
-          }
-        ],
-        doctors: [
-          {
-            id: 'doc1',
+            }
+          ],
+          doctors: [
+            {
+              id: 'doc1',
               name: 'Prof. Dr. Mohammad Shahidullah',
-            specialty: 'Critical Care Medicine',
+              specialty: 'Critical Care Medicine',
               experience: 25,
               rating: 4.8,
-            availability: 'available'
-          },
-          {
-            id: 'doc2',
+              availability: 'available'
+            },
+            {
+              id: 'doc2',
               name: 'Dr. Rashida Begum',
-            specialty: 'Cardiothoracic Surgery',
+              specialty: 'Cardiothoracic Surgery',
               experience: 18,
               rating: 4.7,
               availability: 'available'
@@ -260,24 +260,24 @@ export default function ICUReservationSystem() {
               specialty: 'Neurosurgery',
               experience: 20,
               rating: 4.6,
-            availability: 'available'
-          }
-        ],
-        nurses: [
-          {
-            id: 'nurse1',
+              availability: 'available'
+            }
+          ],
+          nurses: [
+            {
+              id: 'nurse1',
               name: 'Fatima Khatun',
               experience: 12,
-            specialty: 'Critical Care',
-            shift: 'day',
+              specialty: 'Critical Care',
+              shift: 'day',
               rating: 4.7
-          },
-          {
-            id: 'nurse2',
+            },
+            {
+              id: 'nurse2',
               name: 'Shahana Begum',
               experience: 9,
-            specialty: 'Cardiac Care',
-            shift: 'night',
+              specialty: 'Cardiac Care',
+              shift: 'night',
               rating: 4.5
             },
             {
@@ -287,11 +287,11 @@ export default function ICUReservationSystem() {
               specialty: 'ICU Nursing',
               shift: 'both',
               rating: 4.8
-          }
-        ]
-      },
-      {
-        id: '2',
+            }
+          ]
+        },
+        {
+          id: '2',
           name: 'Bangabandhu Sheikh Mujib Medical University Hospital',
           address: 'Shahbag, Dhaka 1000, Bangladesh',
           phone: '+880 2-9661064',
@@ -300,12 +300,12 @@ export default function ICUReservationSystem() {
           totalBeds: 28,
           availableBeds: 8,
           facilities: ['24/7 Emergency', 'Advanced ICU', 'Cardiac Surgery', 'Neurosurgery', 'Transplant Unit'],
-        icuBeds: [
-          {
+          icuBeds: [
+            {
               id: 'bed5',
               bedNumber: 'BSMMU-ICU-201',
               type: 'cardiac',
-            status: 'available',
+              status: 'available',
               pricePerDay: 15000,
               facilities: ['Advanced Cardiac Monitor', 'ECMO', 'IABP', 'Ventilator', 'Dialysis']
             },
@@ -313,7 +313,7 @@ export default function ICUReservationSystem() {
               id: 'bed6',
               bedNumber: 'BSMMU-ICU-202',
               type: 'neuro',
-            status: 'available',
+              status: 'available',
               pricePerDay: 13000,
               facilities: ['Neuro Monitor', 'ICP Monitor', 'Ventilator', 'EEG', 'CT Scanner Access']
             },
@@ -324,11 +324,11 @@ export default function ICUReservationSystem() {
               status: 'available',
               pricePerDay: 10000,
               facilities: ['Ventilator', 'Monitor', 'IV Pump', 'CRRT']
-          }
-        ],
-        doctors: [
-          {
-            id: 'doc4',
+            }
+          ],
+          doctors: [
+            {
+              id: 'doc4',
               name: 'Prof. Dr. Kanak Kanti Barua',
               specialty: 'Cardiac Surgery',
               experience: 30,
@@ -341,16 +341,16 @@ export default function ICUReservationSystem() {
               specialty: 'Neurology',
               experience: 28,
               rating: 4.8,
-            availability: 'available'
-          }
-        ],
-        nurses: [
-          {
-            id: 'nurse4',
+              availability: 'available'
+            }
+          ],
+          nurses: [
+            {
+              id: 'nurse4',
               name: 'Ruma Akter',
               experience: 14,
               specialty: 'Cardiac ICU',
-            shift: 'day',
+              shift: 'day',
               rating: 4.8
             },
             {
@@ -424,9 +424,9 @@ export default function ICUReservationSystem() {
               experience: 10,
               specialty: 'Cardiac Care',
               shift: 'night',
-            rating: 4.7
-          }
-        ]
+              rating: 4.7
+            }
+          ]
         },
         {
           id: '4',
@@ -690,7 +690,7 @@ export default function ICUReservationSystem() {
     }
   }
 
-  const filteredHospitals = hospitals.filter(hospital => 
+  const filteredHospitals = hospitals.filter(hospital =>
     hospital.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     hospital.address.toLowerCase().includes(searchTerm.toLowerCase())
   )
@@ -709,9 +709,9 @@ export default function ICUReservationSystem() {
               <div>
                 <div className="mb-4">
                   <h1 className="text-4xl font-bold text-white">ICU Bed Reservation System</h1>
-                    <p className="text-xl text-blue-100 mt-2">Real-time availability with specialized medical care</p>
+                  <p className="text-xl text-blue-100 mt-2">Real-time availability with specialized medical care</p>
                 </div>
-                
+
                 {/* Real-time Stats */}
                 <div className="flex items-center space-x-8 mt-6">
                   <div className="flex items-center space-x-2">
@@ -734,7 +734,7 @@ export default function ICUReservationSystem() {
                   </div>
                 </div>
               </div>
-              
+
             </div>
           </motion.div>
         </div>
@@ -832,73 +832,73 @@ export default function ICUReservationSystem() {
             </div>
           ) : (
             filteredHospitals.map((hospital) => (
-            <motion.div
-              key={hospital.id}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-xl border-2 border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-300 hover:border-blue-200"
-            >
-              {/* Hospital Header */}
-              <div className="p-6 border-b border-gray-200">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <h3 className="text-xl font-semibold text-gray-900">{hospital.name}</h3>
-                      <div className="flex items-center space-x-1">
-                        <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                        <span className="text-sm font-medium text-gray-700">{hospital.rating}</span>
+              <motion.div
+                key={hospital.id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-xl border-2 border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-300 hover:border-blue-200"
+              >
+                {/* Hospital Header */}
+                <div className="p-6 border-b border-gray-200">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-3 mb-2">
+                        <h3 className="text-xl font-semibold text-gray-900">{hospital.name}</h3>
+                        <div className="flex items-center space-x-1">
+                          <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                          <span className="text-sm font-medium text-gray-700">{hospital.rating}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-4 text-sm text-gray-600 mb-3">
+                        <div className="flex items-center space-x-1">
+                          <MapPin className="w-4 h-4" />
+                          <span>{hospital.address}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-4 text-sm">
+                        <div className="flex items-center space-x-1">
+                          <Phone className="w-4 h-4 text-blue-600" />
+                          <span className="text-blue-600">{hospital.phone}</span>
+                        </div>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-4 text-sm text-gray-600 mb-3">
-                      <div className="flex items-center space-x-1">
-                        <MapPin className="w-4 h-4" />
-                        <span>{hospital.address}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-4 text-sm">
-                      <div className="flex items-center space-x-1">
-                        <Phone className="w-4 h-4 text-blue-600" />
-                        <span className="text-blue-600">{hospital.phone}</span>
-                      </div>
+
+                    <div className="text-right">
+                      <div className="text-lg font-bold text-green-600">{hospital.availableBeds}</div>
+                      <div className="text-xs text-gray-600">Available Beds</div>
                     </div>
                   </div>
-                  
-                  <div className="text-right">
-                    <div className="text-lg font-bold text-green-600">{hospital.availableBeds}</div>
-                    <div className="text-xs text-gray-600">Available Beds</div>
+
+                  {/* Facilities */}
+                  <div className="mt-4">
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">Facilities:</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {hospital.facilities.map((facility, index) => (
+                        <span key={index} className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
+                          {facility}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
-                {/* Facilities */}
-                <div className="mt-4">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Facilities:</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {hospital.facilities.map((facility, index) => (
-                      <span key={index} className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
-                        {facility}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Available ICU Beds */}
-              <div className="p-6">
-                <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
-                  <BedDouble className="w-5 h-5" />
+                {/* Available ICU Beds */}
+                <div className="p-6">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+                    <BedDouble className="w-5 h-5" />
                     <span>ICU Beds</span>
-                </h4>
-                
+                  </h4>
+
                   {hospital.icuBeds.filter(bed => bed.status === 'available' || bed.status === 'reserved').length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <BedDouble className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                    <p>No ICU beds currently available</p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {hospital.icuBeds
+                    <div className="text-center py-8 text-gray-500">
+                      <BedDouble className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                      <p>No ICU beds currently available</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {hospital.icuBeds
                         .filter(bed => bed.status === 'available' || bed.status === 'reserved')
-                      .map((bed) => (
+                        .map((bed) => (
                           <motion.div
                             key={bed.id}
                             whileHover={{ scale: bed.status === 'reserved' ? 1.0 : 1.02 }}
@@ -925,60 +925,60 @@ export default function ICUReservationSystem() {
                               </div>
                             )}
 
-                          <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center space-x-2">
-                              {getBedTypeIcon(bed.type)}
-                              <span className="font-semibold text-gray-900">{bed.bedNumber}</span>
-                            </div>
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center space-x-2">
+                                {getBedTypeIcon(bed.type)}
+                                <span className="font-semibold text-gray-900">{bed.bedNumber}</span>
+                              </div>
                               <span className={`text-xs px-2 py-1 rounded ${bed.status === 'reserved'
                                 ? 'bg-orange-100 text-orange-700'
                                 : 'bg-gray-100 text-gray-700'
                                 }`}>
-                              {bed.type.toUpperCase()}
-                            </span>
-                          </div>
-                          
-                          <div className="space-y-2 mb-4">
+                                {bed.type.toUpperCase()}
+                              </span>
+                            </div>
+
+                            <div className="space-y-2 mb-4">
                               <div className={`text-lg font-bold ${bed.status === 'reserved' ? 'text-orange-600' : 'text-green-600'
                                 }`}>
                                 ৳{bed.pricePerDay.toLocaleString()}/day
+                              </div>
                             </div>
-                          </div>
 
-                          <div className="mb-4">
-                            <h5 className="text-sm font-medium text-gray-700 mb-2">Equipment:</h5>
-                            <div className="flex flex-wrap gap-1">
-                              {bed.facilities.map((facility, index) => (
+                            <div className="mb-4">
+                              <h5 className="text-sm font-medium text-gray-700 mb-2">Equipment:</h5>
+                              <div className="flex flex-wrap gap-1">
+                                {bed.facilities.map((facility, index) => (
                                   <span key={index} className={`text-xs px-2 py-1 rounded ${bed.status === 'reserved'
                                     ? 'bg-orange-100 text-orange-700'
                                     : 'bg-green-100 text-green-700'
                                     }`}>
-                                  {facility}
-                                </span>
-                              ))}
+                                    {facility}
+                                  </span>
+                                ))}
+                              </div>
                             </div>
-                          </div>
 
                             {bed.status === 'available' ? (
-                          <button
-                            onClick={() => handleBookBed(hospital, bed)}
-                            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 px-4 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all flex items-center justify-center space-x-2 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
-                          >
-                            <CalendarCheck className="w-5 h-5" />
-                            <span>Reserve ICU Bed</span>
-                          </button>
+                              <button
+                                onClick={() => handleBookBed(hospital, bed)}
+                                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 px-4 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all flex items-center justify-center space-x-2 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+                              >
+                                <CalendarCheck className="w-5 h-5" />
+                                <span>Reserve ICU Bed</span>
+                              </button>
                             ) : (
                               <div className="w-full bg-gray-100 text-gray-500 py-3 px-4 rounded-xl flex items-center justify-center space-x-2 font-semibold">
                                 <X className="w-5 h-5" />
                                 <span>Not Available</span>
                               </div>
                             )}
-                        </motion.div>
-                      ))}
-                  </div>
-                )}
-            </div>
-            </motion.div>
+                          </motion.div>
+                        ))}
+                    </div>
+                  )}
+                </div>
+              </motion.div>
             ))
           )}
         </div>
@@ -1086,9 +1086,9 @@ export default function ICUReservationSystem() {
                           </label>
                           <div className="flex items-center space-x-4">
                             <button
-                              onClick={() => setBookingDetails(prev => ({ 
-                                ...prev, 
-                                expectedDays: Math.max(1, prev.expectedDays - 1) 
+                              onClick={() => setBookingDetails(prev => ({
+                                ...prev,
+                                expectedDays: Math.max(1, prev.expectedDays - 1)
                               }))}
                               className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                             >
@@ -1096,9 +1096,9 @@ export default function ICUReservationSystem() {
                             </button>
                             <span className="flex-1 text-center font-medium">{bookingDetails.expectedDays} days</span>
                             <button
-                              onClick={() => setBookingDetails(prev => ({ 
-                                ...prev, 
-                                expectedDays: prev.expectedDays + 1 
+                              onClick={() => setBookingDetails(prev => ({
+                                ...prev,
+                                expectedDays: prev.expectedDays + 1
                               }))}
                               className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                             >
@@ -1118,9 +1118,9 @@ export default function ICUReservationSystem() {
                             key={doctor.id}
                             whileHover={{ scale: 1.02 }}
                             className={`p-3 border rounded-lg cursor-pointer transition-all ${bookingDetails.selectedDoctor?.id === doctor.id
-                                ? 'border-blue-500 bg-blue-50'
-                                : 'border-gray-200 hover:border-gray-300'
-                            }`}
+                              ? 'border-blue-500 bg-blue-50'
+                              : 'border-gray-200 hover:border-gray-300'
+                              }`}
                             onClick={() => setBookingDetails(prev => ({ ...prev, selectedDoctor: doctor }))}
                           >
                             <div className="flex items-center justify-between">
@@ -1136,9 +1136,9 @@ export default function ICUReservationSystem() {
                                 </div>
                               </div>
                               <span className={`px-2 py-1 text-xs rounded-full ${doctor.availability === 'available'
-                                  ? 'bg-green-100 text-green-800'
-                                  : 'bg-yellow-100 text-yellow-800'
-                              }`}>
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-yellow-100 text-yellow-800'
+                                }`}>
                                 {doctor.availability}
                               </span>
                             </div>
@@ -1156,9 +1156,9 @@ export default function ICUReservationSystem() {
                             key={nurse.id}
                             whileHover={{ scale: 1.02 }}
                             className={`p-3 border rounded-lg cursor-pointer transition-all ${bookingDetails.selectedNurses.some(n => n.id === nurse.id)
-                                ? 'border-blue-500 bg-blue-50'
-                                : 'border-gray-200 hover:border-gray-300'
-                            }`}
+                              ? 'border-blue-500 bg-blue-50'
+                              : 'border-gray-200 hover:border-gray-300'
+                              }`}
                             onClick={() => handleNurseSelection(nurse)}
                           >
                             <div className="flex items-center justify-between">
@@ -1243,12 +1243,12 @@ export default function ICUReservationSystem() {
                           </>
                         ) : (
                           <>
-                        <CreditCard className="w-6 h-6" />
+                            <CreditCard className="w-6 h-6" />
                             <span>Confirm Reservation - ৳{calculateTotalCost().toLocaleString()}</span>
                           </>
                         )}
                       </button>
-                      
+
                       <button
                         onClick={() => setShowBookingModal(false)}
                         className="w-full border-2 border-gray-300 text-gray-700 py-3 px-6 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all font-semibold"
