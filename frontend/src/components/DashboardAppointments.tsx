@@ -33,12 +33,12 @@ export default function DashboardAppointments() {
       // Get user profile first
       const profileResponse = await fetch('/api/profile')
       const profileData = await profileResponse.json()
-      
+
       if (profileData.success && profileData.user?.id) {
         // Fetch user's appointments
         const appointmentsResponse = await fetch(`http://localhost:8080/api/appointments/patient/${profileData.user.id}`)
         const appointmentsData = await appointmentsResponse.json()
-        
+
         if (appointmentsData.success) {
           setAppointments(appointmentsData.appointments || [])
         }
@@ -131,7 +131,7 @@ export default function DashboardAppointments() {
                       <p className="text-purple-600 font-semibold mb-2">Cardiothoracic Surgery</p>
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div className="flex items-center space-x-2">
                       <Calendar className="w-4 h-4 text-gray-500" />
@@ -177,7 +177,7 @@ export default function DashboardAppointments() {
                   <span className={`px-4 py-2 rounded-xl text-sm font-semibold ${getStatusColor(appointment.status)}`}>
                     {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
                   </span>
-                  <span className="text-lg font-bold text-gray-900">${appointment.fee}</span>
+                  <span className="text-lg font-bold text-gray-900">৳{appointment.fee}</span>
                 </div>
               </div>
             </div>

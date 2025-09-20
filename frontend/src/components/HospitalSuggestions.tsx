@@ -536,7 +536,13 @@ export default function HospitalSuggestions({
               <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded">
                 Available
               </span>
-              <button className="text-xs bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition-colors">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onHospitalSelect(hospital)
+                }}
+                className="text-xs bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition-colors"
+              >
                 Select Hospital
               </button>
             </div>

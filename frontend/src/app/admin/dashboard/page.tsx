@@ -73,14 +73,14 @@ export default function AdminDashboard() {
         fetch('/api/admin/pending-doctors'),
         fetch('/api/admin/verification-stats')
       ])
-      
+
       const pendingData = await pendingResponse.json()
       const statsData = await statsResponse.json()
-      
+
       if (pendingData.success) {
         setDoctors(pendingData.doctors)
       }
-      
+
       if (statsData.success) {
         setStats(statsData.stats)
       }
@@ -99,7 +99,7 @@ export default function AdminDashboard() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action })
       })
-      
+
       const data = await response.json()
       if (data.success) {
         await loadData() // Refresh data
@@ -411,7 +411,7 @@ export default function AdminDashboard() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Consultation Fee</label>
-                    <p className="mt-1 text-sm text-gray-900">${selectedDoctor.consultation_fee || 'Not provided'}</p>
+                    <p className="mt-1 text-sm text-gray-900">৳{selectedDoctor.consultation_fee || 'Not provided'}</p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Bio</label>

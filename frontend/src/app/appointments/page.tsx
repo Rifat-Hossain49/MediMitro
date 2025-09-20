@@ -656,14 +656,14 @@ export default function AppointmentsPage() {
                     </div>
                     <div className="text-right">
                       <span className={`px-3 py-1 rounded-full text-sm font-semibold ${appointment.status === 'scheduled'
-                          ? 'bg-blue-100 text-blue-800'
-                          : appointment.status === 'confirmed'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-gray-100 text-gray-800'
+                        ? 'bg-blue-100 text-blue-800'
+                        : appointment.status === 'confirmed'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-800'
                         }`}>
                         {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
                       </span>
-                      <p className="text-sm text-gray-600 mt-1">${appointment.fee}</p>
+                      <p className="text-sm text-gray-600 mt-1">৳{appointment.fee}</p>
                     </div>
                   </div>
                 </div>
@@ -845,10 +845,10 @@ export default function AppointmentsPage() {
                     <div className="flex items-center space-x-2 mb-3">
                       <h3 className="text-xl font-bold text-gray-900">AI Health Advice</h3>
                       <span className={`px-3 py-1 rounded-full text-xs font-semibold ${patientAdvice.urgency === 'high'
-                          ? 'bg-red-100 text-red-700'
-                          : patientAdvice.urgency === 'medium'
-                            ? 'bg-yellow-100 text-yellow-700'
-                            : 'bg-green-100 text-green-700'
+                        ? 'bg-red-100 text-red-700'
+                        : patientAdvice.urgency === 'medium'
+                          ? 'bg-yellow-100 text-yellow-700'
+                          : 'bg-green-100 text-green-700'
                         }`}>
                         {patientAdvice.urgency?.toUpperCase() || 'LOW'} PRIORITY
                       </span>
@@ -935,7 +935,7 @@ export default function AppointmentsPage() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="text-2xl font-bold text-gray-900">${doctor.consultationFee}</div>
+                          <div className="text-2xl font-bold text-gray-900">৳{doctor.consultationFee}</div>
                           <div className="text-sm text-gray-600 font-medium">Consultation Fee</div>
                           {isDoctorBooked(doctor.id) && (
                             <div className="mt-2 flex items-center justify-end space-x-1">
@@ -1076,7 +1076,7 @@ export default function AppointmentsPage() {
                       <h3 className="font-semibold text-lg">{selectedDoctor.userInfo?.name || 'Dr. Unknown'}</h3>
                       <p className="text-blue-600">{selectedDoctor.specialization}</p>
                       <p className="text-gray-600 text-sm">{selectedDoctor.hospital}</p>
-                      <p className="text-gray-900 font-semibold">Consultation Fee: ${selectedDoctor.consultationFee}</p>
+                      <p className="text-gray-900 font-semibold">Consultation Fee: ৳{selectedDoctor.consultationFee}</p>
                     </div>
                   </div>
 
