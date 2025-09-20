@@ -99,6 +99,13 @@
             <version>5.2.1</version>
         </dependency>
         
+        <!-- Apache HTTP MIME for multipart uploads -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpmime</artifactId>
+            <version>4.5.14</version>
+        </dependency>
+        
         
         <!-- Spring Boot Test Starter -->
         <dependency>

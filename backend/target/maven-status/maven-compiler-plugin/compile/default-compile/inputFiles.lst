@@ -3,14 +3,12 @@ D:\MediMitro\MediMitro\backend\src\main\java\com\medimitra\backend\repository\Us
 D:\MediMitro\MediMitro\backend\src\main\java\com\medimitra\backend\controller\DoctorAvailabilityController.java
 D:\MediMitro\MediMitro\backend\src\main\java\com\medimitra\backend\repository\AppointmentRepository.java
 D:\MediMitro\MediMitro\backend\src\main\java\com\medimitra\backend\model\ICUBed.java
-D:\MediMitro\MediMitro\backend\src\main\java\com\medimitra\backend\controller\FileController.java
 D:\MediMitro\MediMitro\backend\src\main\java\com\medimitra\backend\controller\AmbulanceBookingController.java
 D:\MediMitro\MediMitro\backend\src\main\java\com\medimitra\backend\controller\UserController.java
 D:\MediMitro\MediMitro\backend\src\main\java\com\medimitra\backend\model\Doctor.java
 D:\MediMitro\MediMitro\backend\src\main\java\com\medimitra\backend\controller\ICUBedController.java
 D:\MediMitro\MediMitro\backend\src\main\java\com\medimitra\backend\controller\MessagingController.java
 D:\MediMitro\MediMitro\backend\src\main\java\com\medimitra\backend\model\Appointment.java
-D:\MediMitro\MediMitro\backend\src\main\java\com\medimitra\backend\service\FileUploadService.java
 D:\MediMitro\MediMitro\backend\src\main\java\com\medimitra\backend\controller\DoctorController.java
 D:\MediMitro\MediMitro\backend\src\main\java\com\medimitra\backend\controller\EHRController.java
 D:\MediMitro\MediMitro\backend\src\main\java\com\medimitra\backend\model\MedicalRecord.java

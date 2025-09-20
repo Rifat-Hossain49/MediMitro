@@ -106,19 +106,28 @@ export default function MessagingPage() {
   }
 
   const uploadFile = async (file: File) => {
-    const formData = new FormData()
-    formData.append('file', file)
-
-    const response = await fetch('/api/files/upload', {
-      method: 'POST',
-      body: formData,
+    const { uploadFile: appwriteUpload } = await import('@/lib/appwrite')
+    
+    const result = await appwriteUpload(file, (progress) => {
+      console.log(`Upload progress: ${progress}%`)
     })
+    
+    return {
+      fileUrl: result.fileUrl,
+      messageType: getMessageType(file.name)
+    }
+  }
 
-    const data = await response.json()
-    if (data.success) {
-      return data
+  const getMessageType = (fileName: string) => {
+    const extension = fileName.toLowerCase()
+    if (extension.endsWith('.jpg') || extension.endsWith('.jpeg') || 
+        extension.endsWith('.png') || extension.endsWith('.gif') || 
+        extension.endsWith('.webp')) {
+      return 'image'
+    } else if (extension.endsWith('.pdf')) {
+      return 'prescription'
     } else {
-      throw new Error(data.message || 'Upload failed')
+      return 'file'
     }
   }
 
@@ -376,7 +385,7 @@ export default function MessagingPage() {
                             <div className="mb-2">
                               {message.messageType === 'image' ? (
                                 <img 
-                                  src={`http://localhost:8080/api${message.attachmentUrl}`}
+                                  src={message.attachmentUrl}
                                   alt="Attachment"
                                   className="max-w-full h-auto rounded-lg shadow-sm"
                                   style={{ maxHeight: '200px' }}
@@ -390,7 +399,7 @@ export default function MessagingPage() {
                                   <div className="flex items-center space-x-2">
                                     <Paperclip className="w-4 h-4" />
                                     <a 
-                                      href={`http://localhost:8080/api${message.attachmentUrl}`}
+                                      href={message.attachmentUrl}
                                       target="_blank"
                                       rel="noopener noreferrer"
                                       className="text-sm font-medium hover:underline truncate"
