@@ -152,7 +152,7 @@ export default function ICUReservationSystem() {
 
             const hospital = hospitalMap.get(bed.hospital)
             hospital.totalBeds++
-            if (bed.status === 'available') {
+            if (bed.status === 'available' || bed.status === null || bed.status === undefined) {
               hospital.availableBeds++
             }
 
@@ -160,7 +160,7 @@ export default function ICUReservationSystem() {
               id: bed.id,
               bedNumber: bed.bedNumber,
               type: bed.icuType,
-              status: bed.status,
+              status: bed.status || 'available', // Default to 'available' if status is null/undefined
               pricePerDay: bed.dailyRate ? Math.round(bed.dailyRate) : 10000,
               facilities: bed.equipment ? JSON.parse(bed.equipment) : ['Basic Equipment'],
               reservationInfo: bed.status === 'reserved' ? {
