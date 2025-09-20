@@ -1,5 +1,5 @@
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://your-backend-domain.com/api' 
+const API_BASE_URL = process.env.NODE_ENV === 'production'
+  ? 'https://your-backend-domain.com/api'
   : 'http://localhost:8080/api';
 
 export interface EHRSummary {
@@ -63,7 +63,7 @@ class EHRService {
     console.log('API_BASE_URL:', API_BASE_URL);
     console.log('Endpoint:', endpoint);
     console.log('================================');
-    
+
     const response = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',
@@ -91,13 +91,13 @@ class EHRService {
   }
 
   // ==================== SUMMARY ====================
-  
+
   async getEHRSummary(patientId: string): Promise<EHRSummary> {
     return this.makeRequest(`/summary/${patientId}`);
   }
 
   // ==================== DEMOGRAPHICS ====================
-  
+
   async getDemographics(patientId: string) {
     return this.makeRequest(`/demographics/${patientId}`);
   }
@@ -110,14 +110,14 @@ class EHRService {
   }
 
   // ==================== PATIENT DATA (PGHD) ====================
-  
+
   async getPatientData(patientId: string, dataType?: string, days: number = 30): Promise<PatientData[]> {
     const params = new URLSearchParams({ days: days.toString() });
     if (dataType) params.set('dataType', dataType);
-    
+
     console.log('Getting patient data for:', patientId);
     console.log('Request URL:', `/patient-data/${patientId}?${params}`);
-    
+
     return this.makeRequest(`/patient-data/${patientId}?${params}`);
   }
 
@@ -129,7 +129,7 @@ class EHRService {
   }
 
   // ==================== AMENDMENT REQUESTS ====================
-  
+
   async getAmendmentRequests(patientId: string): Promise<AmendmentRequest[]> {
     return this.makeRequest(`/amendment-requests/${patientId}`);
   }
@@ -142,7 +142,7 @@ class EHRService {
   }
 
   // ==================== DOCUMENTS ====================
-  
+
   async uploadDocument(upload: DocumentUpload): Promise<any> {
     const formData = new FormData();
     formData.append('file', upload.file);
@@ -171,7 +171,7 @@ class EHRService {
   }
 
   // ==================== EHR SECTIONS ====================
-  
+
   async getAllergies(patientId: string) {
     return this.makeRequest(`/allergies/${patientId}`);
   }
@@ -205,13 +205,13 @@ class EHRService {
   }
 
   // ==================== STORAGE STATUS ====================
-  
+
   async getStorageStatus() {
     return this.makeRequest('/storage/status');
   }
 
   // ==================== DOCUMENT MANAGEMENT ====================
-  
+
   async saveDocumentMetadata(documentData: {
     patientId: string;
     documentType: string;
@@ -234,7 +234,7 @@ class EHRService {
   }
 
   // ==================== AMENDMENT REQUESTS ====================
-  
+
   async submitAmendmentRequest(amendmentData: {
     patientId: string;
     recordType: string;
@@ -252,7 +252,7 @@ class EHRService {
   }
 
   // ==================== PATIENT GENERATED HEALTH DATA ====================
-  
+
   async addPatientData(pghd: {
     patientId: string;
     dataType: string;
@@ -263,7 +263,7 @@ class EHRService {
   }) {
     console.log('=== Frontend PGHD Debug ===');
     console.log('Sending PGHD data:', pghd);
-    
+
     try {
       const result = await this.makeRequest('/patient-data', {
         method: 'POST',

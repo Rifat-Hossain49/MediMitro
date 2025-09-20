@@ -44,7 +44,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ patientId, onUploadSuccess, onC
     e.preventDefault()
     e.stopPropagation()
     setDragActive(false)
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       handleFileSelect(e.dataTransfer.files[0])
     }
@@ -76,7 +76,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ patientId, onUploadSuccess, onC
 
     setFile(selectedFile)
     setError(null)
-    
+
     // Auto-set title if not already set
     if (!title) {
       setTitle(selectedFile.name.replace(/\.[^/.]+$/, ''))
@@ -85,7 +85,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ patientId, onUploadSuccess, onC
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!file || !title || !documentType) {
       setError('Please fill in all required fields')
       return
@@ -94,7 +94,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ patientId, onUploadSuccess, onC
     try {
       setUploading(true)
       setError(null)
-      
+
       await ehrService.uploadDocument({
         file,
         patientId,
@@ -102,7 +102,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ patientId, onUploadSuccess, onC
         title,
         description
       })
-      
+
       onUploadSuccess()
       onClose()
     } catch (err) {
@@ -125,7 +125,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ patientId, onUploadSuccess, onC
       <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6 border-b border-gray-200 flex justify-between items-center">
           <h3 className="text-xl font-semibold text-gray-900">Upload Medical Document</h3>
-          <button 
+          <button
             onClick={onClose}
             className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
           >
@@ -140,13 +140,12 @@ const FileUpload: React.FC<FileUploadProps> = ({ patientId, onUploadSuccess, onC
               Select File *
             </label>
             <div
-              className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-                dragActive 
-                  ? 'border-blue-400 bg-blue-50' 
-                  : file 
-                    ? 'border-green-400 bg-green-50' 
+              className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors ${dragActive
+                  ? 'border-blue-400 bg-blue-50'
+                  : file
+                    ? 'border-green-400 bg-green-50'
                     : 'border-gray-300 hover:border-gray-400'
-              }`}
+                }`}
               onDragEnter={handleDrag}
               onDragLeave={handleDrag}
               onDragOver={handleDrag}
@@ -158,7 +157,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ patientId, onUploadSuccess, onC
                 onChange={(e) => e.target.files && handleFileSelect(e.target.files[0])}
                 accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.txt"
               />
-              
+
               {file ? (
                 <div className="flex items-center justify-center space-x-3">
                   <Check className="w-8 h-8 text-green-600" />

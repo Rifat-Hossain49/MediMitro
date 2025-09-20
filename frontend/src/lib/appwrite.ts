@@ -15,7 +15,7 @@ export const storage = new Storage(client);
 export const uploadFile = async (file: File, onProgress?: (progress: number) => void) => {
     try {
         const fileId = ID.unique();
-        
+
         // Perform actual Appwrite upload
         const response = await storage.createFile(
             APPWRITE_BUCKET_ID,
@@ -24,7 +24,7 @@ export const uploadFile = async (file: File, onProgress?: (progress: number) => 
             undefined, // permissions
             onProgress
         );
-        
+
         return {
             fileId: response.$id,
             fileName: response.name,
@@ -35,7 +35,7 @@ export const uploadFile = async (file: File, onProgress?: (progress: number) => 
         };
     } catch (error: any) {
         console.error('File upload failed:', error);
-        
+
         // Provide specific error messages for common issues
         if (error.code === 401) {
             throw new Error('Authorization failed. Please check Appwrite bucket permissions.');
@@ -46,7 +46,7 @@ export const uploadFile = async (file: File, onProgress?: (progress: number) => 
         } else if (error.message?.includes('project')) {
             throw new Error('Project ID incorrect. Please verify NEXT_PUBLIC_APPWRITE_PROJECT_ID in .env.local');
         }
-        
+
         throw new Error(`Upload failed: ${error.message || error}`);
     }
 };

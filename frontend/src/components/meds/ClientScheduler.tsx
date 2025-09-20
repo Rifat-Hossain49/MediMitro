@@ -70,12 +70,12 @@ export default function ClientScheduler() {
   // Convert backend medication to frontend format
   const convertBackendToFrontend = (backendMed: any): Medication => {
     console.log('🔄 Converting backend medication:', backendMed)
-    
+
     // Parse frequency to determine times per day and times
     const frequency = (backendMed.frequency || '').toLowerCase()
     let timesPerDay = 1
     let times = ['08:00']
-    
+
     if (frequency.includes('twice') || frequency.includes('2x')) {
       timesPerDay = 2
       times = ['08:00', '20:00']
@@ -107,7 +107,7 @@ export default function ClientScheduler() {
       endDate: backendMed.end_date || backendMed.endDate,
       doctorName: backendMed.prescribed_by_name || backendMed.prescribedByName
     }
-    
+
     console.log('✅ Converted to frontend format:', converted)
     return converted
   }
@@ -115,7 +115,7 @@ export default function ClientScheduler() {
   // Convert frontend medication to backend format
   const convertFrontendToBackend = (frontendMed: Medication): MedicationRequest => {
     const frequency = `${frontendMed.timesPerDay} times daily (${frontendMed.times.join(', ')})`
-    
+
     return {
       patientId: userProfile.id,
       medicationName: frontendMed.name,
@@ -133,7 +133,7 @@ export default function ClientScheduler() {
   // Load medications from backend
   const loadMedications = async () => {
     if (!userProfile.id) return
-    
+
     try {
       setLoading(true)
       console.log('🔄 Loading medications for user:', userProfile.id)
@@ -145,7 +145,7 @@ export default function ClientScheduler() {
     } catch (error) {
       console.error('Failed to load medications:', error)
       // Fallback to localStorage
-      try { 
+      try {
         const raw = localStorage.getItem(MEDS_KEY)
         if (raw) setMeds(JSON.parse(raw))
       } catch { }
@@ -380,7 +380,7 @@ export default function ClientScheduler() {
 
     try {
       setLoading(true)
-      
+
       const frontendMed: Medication = {
         id: `m_${Date.now()}`,
         name: form.name,
@@ -401,7 +401,7 @@ export default function ClientScheduler() {
         // Update the frontend medication with the backend ID
         frontendMed.id = result.id || frontendMed.id
         setMeds((prev) => [...prev, frontendMed])
-        
+
         setForm({
           name: '',
           dose: '',
@@ -436,7 +436,7 @@ export default function ClientScheduler() {
     try {
       setLoading(true)
       const result = await medicationService.deleteMedication(id)
-      
+
       if (result.success) {
         setMeds((prev) => prev.filter(m => m.id !== id))
         alert('Medication deleted successfully!')
@@ -569,8 +569,8 @@ export default function ClientScheduler() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center space-x-3 px-8 py-4 rounded-xl font-semibold transition-all duration-200 ${activeTab === tab.id
-                  ? `bg-gradient-to-r from-${tab.color}-500 to-${tab.color}-600 text-white shadow-lg transform scale-105`
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                ? `bg-gradient-to-r from-${tab.color}-500 to-${tab.color}-600 text-white shadow-lg transform scale-105`
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 }`}
             >
               <tab.icon className="w-5 h-5" />
@@ -631,7 +631,7 @@ export default function ClientScheduler() {
                           <p className="text-gray-500">Please wait while we fetch your medication data</p>
                         </div>
                       )}
-                      
+
                       {!loading && meds.length === 0 && (
                         <div className="text-center py-12">
                           <div className="p-4 bg-gray-100 rounded-full w-fit mx-auto mb-4">
@@ -710,12 +710,12 @@ export default function ClientScheduler() {
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                     className={`relative px-6 py-3 rounded-xl font-semibold transition-all ${taken
-                                        ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg'
-                                        : isUpcoming
-                                          ? 'bg-gradient-to-r from-orange-400 to-orange-500 text-white shadow-lg animate-pulse'
-                                          : isPast && !taken
-                                            ? 'bg-red-100 text-red-700 border-2 border-red-300'
-                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                      ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg'
+                                      : isUpcoming
+                                        ? 'bg-gradient-to-r from-orange-400 to-orange-500 text-white shadow-lg animate-pulse'
+                                        : isPast && !taken
+                                          ? 'bg-red-100 text-red-700 border-2 border-red-300'
+                                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                       }`}
                                   >
                                     <div className="flex items-center space-x-2">
@@ -1107,8 +1107,8 @@ export default function ClientScheduler() {
                 <button
                   onClick={stopAlarm}
                   className={`w-full py-3 px-4 rounded-xl font-semibold transition-all flex items-center justify-center space-x-2 ${isAlarmPlaying
-                      ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse'
-                      : 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                    ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse'
+                    : 'bg-gray-300 text-gray-600 cursor-not-allowed'
                     }`}
                   disabled={!isAlarmPlaying}
                 >

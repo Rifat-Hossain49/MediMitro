@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useSession } from 'next-auth/react'
-import { MessageCircle, Send, User, Clock, CheckCircle, CheckCircle2, ArrowLeft, Phone, Video, MoreVertical, Smile, Paperclip } from 'lucide-react'
+import { MessageCircle, Send, User, Clock, CheckCircle, CheckCircle2, ArrowLeft, Smile, Paperclip } from 'lucide-react'
 
 interface Message {
   id: string
@@ -72,7 +72,7 @@ export default function DoctorMessagingPage() {
 
   useEffect(() => {
     fetchConversations()
-    
+
     // Set up polling for real-time updates
     const interval = setInterval(async () => {
       setIsUpdating(true)
@@ -83,14 +83,16 @@ export default function DoctorMessagingPage() {
       setLastUpdate(new Date())
       setIsUpdating(false)
     }, 3000) // Poll every 3 seconds
-    
+
     return () => clearInterval(interval)
   }, [selectedConversation])
 
-  // Auto-scroll to bottom when new messages arrive
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+  // Manual scroll function - no automatic scrolling
+  const scrollToBottom = () => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
 
   const fetchConversations = async () => {
     try {
@@ -102,9 +104,9 @@ export default function DoctorMessagingPage() {
         },
         credentials: 'include'
       })
-      
+
       console.log('Response status:', response.status)
-      
+
       if (!response.ok) {
         console.error('API Error:', response.status, response.statusText)
         // Try to get error details
@@ -117,17 +119,17 @@ export default function DoctorMessagingPage() {
         setConversations([])
         return
       }
-      
+
       const contentType = response.headers.get('content-type')
       if (!contentType || !contentType.includes('application/json')) {
         console.error('Response is not JSON:', contentType)
         setConversations([])
         return
       }
-      
+
       const data = await response.json()
       console.log('Conversations data:', data)
-      
+
       if (data.success) {
         setConversations(data.conversations || [])
       } else {
@@ -153,7 +155,7 @@ export default function DoctorMessagingPage() {
           'Content-Type': 'application/json',
         },
       })
-      
+
       if (response.ok) {
         const data = await response.json()
         if (data.success) {
@@ -169,22 +171,22 @@ export default function DoctorMessagingPage() {
   const fetchMessages = async (doctorId: string, patientId: string) => {
     try {
       const response = await fetch(`/api/doctor-portal/messaging/conversation/${patientId}`)
-      
+
       if (!response.ok) {
         console.error('API Error:', response.status, response.statusText)
         setMessages([])
         return
       }
-      
+
       const contentType = response.headers.get('content-type')
       if (!contentType || !contentType.includes('application/json')) {
         console.error('Response is not JSON:', contentType)
         setMessages([])
         return
       }
-      
+
       const data = await response.json()
-      
+
       if (data.success) {
         setMessages(data.messages)
       } else {
@@ -211,11 +213,11 @@ export default function DoctorMessagingPage() {
 
   const uploadFile = async (file: File) => {
     const { uploadFile: appwriteUpload } = await import('@/lib/appwrite')
-    
+
     const result = await appwriteUpload(file, (progress) => {
       console.log(`Upload progress: ${progress}%`)
     })
-    
+
     return {
       fileUrl: result.fileUrl,
       messageType: getMessageType(file.name)
@@ -224,9 +226,9 @@ export default function DoctorMessagingPage() {
 
   const getMessageType = (fileName: string) => {
     const extension = fileName.toLowerCase()
-    if (extension.endsWith('.jpg') || extension.endsWith('.jpeg') || 
-        extension.endsWith('.png') || extension.endsWith('.gif') || 
-        extension.endsWith('.webp')) {
+    if (extension.endsWith('.jpg') || extension.endsWith('.jpeg') ||
+      extension.endsWith('.png') || extension.endsWith('.gif') ||
+      extension.endsWith('.webp')) {
       return 'image'
     } else if (extension.endsWith('.pdf')) {
       return 'prescription'
@@ -273,7 +275,7 @@ export default function DoctorMessagingPage() {
         alert('Failed to send message: ' + response.statusText)
         return
       }
-      
+
       const contentType = response.headers.get('content-type')
       if (!contentType || !contentType.includes('application/json')) {
         console.error('Response is not JSON:', contentType)
@@ -282,7 +284,7 @@ export default function DoctorMessagingPage() {
       }
 
       const data = await response.json()
-      
+
       if (data.success) {
         setNewMessage('')
         setSelectedFile(null)
@@ -396,11 +398,10 @@ export default function DoctorMessagingPage() {
                   <div
                     key={`${conversation.doctor_id}-${conversation.patient_id}`}
                     onClick={() => selectConversation(conversation)}
-                    className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-200 group ${
-                      selectedConversation?.patient_id === conversation.patient_id 
-                        ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-l-blue-500' 
-                        : ''
-                    }`}
+                    className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-200 group ${selectedConversation?.patient_id === conversation.patient_id
+                      ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-l-blue-500'
+                      : ''
+                      }`}
                   >
                     <div className="flex items-start space-x-3">
                       <div className="relative">
@@ -460,17 +461,6 @@ export default function DoctorMessagingPage() {
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <button className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-100 rounded-full transition-all duration-200">
-                        <Phone className="w-5 h-5" />
-                      </button>
-                      <button className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-100 rounded-full transition-all duration-200">
-                        <Video className="w-5 h-5" />
-                      </button>
-                      <button className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-100 rounded-full transition-all duration-200">
-                        <MoreVertical className="w-5 h-5" />
-                      </button>
-                    </div>
                   </div>
                 </div>
 
@@ -491,30 +481,28 @@ export default function DoctorMessagingPage() {
                         className={`flex ${message.senderType === 'doctor' ? 'justify-end' : 'justify-start'} animate-fadeIn`}
                       >
                         <div
-                          className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl shadow-sm ${
-                            message.senderType === 'doctor'
-                              ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
-                              : 'bg-white text-gray-900 border border-gray-200'
-                          }`}
+                          className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl shadow-sm ${message.senderType === 'doctor'
+                            ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
+                            : 'bg-white text-gray-900 border border-gray-200'
+                            }`}
                         >
                           {message.attachmentUrl && (
                             <div className="mb-2">
                               {message.messageType === 'image' ? (
-                                <img 
+                                <img
                                   src={message.attachmentUrl}
                                   alt="Attachment"
                                   className="max-w-full h-auto rounded-lg shadow-sm"
                                   style={{ maxHeight: '200px' }}
                                 />
                               ) : (
-                                <div className={`p-3 rounded-lg border ${
-                                  message.senderType === 'doctor' 
-                                    ? 'bg-blue-400 border-blue-300' 
-                                    : 'bg-gray-100 border-gray-300'
-                                }`}>
+                                <div className={`p-3 rounded-lg border ${message.senderType === 'doctor'
+                                  ? 'bg-blue-400 border-blue-300'
+                                  : 'bg-gray-100 border-gray-300'
+                                  }`}>
                                   <div className="flex items-center space-x-2">
                                     <Paperclip className="w-4 h-4" />
-                                    <a 
+                                    <a
                                       href={message.attachmentUrl}
                                       target="_blank"
                                       rel="noopener noreferrer"
@@ -580,7 +568,7 @@ export default function DoctorMessagingPage() {
                       </div>
                     </div>
                   )}
-                  
+
                   <div className="flex items-end space-x-3">
                     <div className="relative">
                       <input
@@ -590,7 +578,7 @@ export default function DoctorMessagingPage() {
                         className="hidden"
                         accept="image/*,.pdf,.doc,.docx,.txt"
                       />
-                      <button 
+                      <button
                         onClick={() => fileInputRef.current?.click()}
                         className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-100 rounded-full transition-all duration-200"
                         disabled={uploading}

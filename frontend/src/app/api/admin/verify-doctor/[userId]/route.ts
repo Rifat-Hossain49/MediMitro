@@ -9,7 +9,7 @@ export async function POST(
 ) {
   try {
     const session = await auth()
-    
+
     if (!session?.user?.email) {
       return NextResponse.json(
         { success: false, message: 'User not authenticated' },

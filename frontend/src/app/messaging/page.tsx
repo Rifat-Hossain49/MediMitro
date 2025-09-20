@@ -71,7 +71,7 @@ export default function MessagingPage() {
 
   useEffect(() => {
     fetchConversations()
-    
+
     // Set up polling for real-time updates
     const interval = setInterval(async () => {
       setIsUpdating(true)
@@ -82,20 +82,22 @@ export default function MessagingPage() {
       setLastUpdate(new Date())
       setIsUpdating(false)
     }, 3000) // Poll every 3 seconds
-    
+
     return () => clearInterval(interval)
   }, [selectedConversation])
 
-  // Auto-scroll to bottom when new messages arrive
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+  // Manual scroll to bottom function (only called when user clicks the button)
+  const scrollToBottom = () => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
 
   const fetchConversations = async () => {
     try {
       const response = await fetch('/api/messaging/conversations')
       const data = await response.json()
-      
+
       if (data.success) {
         setConversations(data.conversations)
       }
@@ -110,7 +112,7 @@ export default function MessagingPage() {
     try {
       const response = await fetch(`/api/messaging/conversation/${doctorId}/${patientId}`)
       const data = await response.json()
-      
+
       if (data.success) {
         setMessages(data.messages)
       }
@@ -133,11 +135,11 @@ export default function MessagingPage() {
 
   const uploadFile = async (file: File) => {
     const { uploadFile: appwriteUpload } = await import('@/lib/appwrite')
-    
+
     const result = await appwriteUpload(file, (progress) => {
       console.log(`Upload progress: ${progress}%`)
     })
-    
+
     return {
       fileUrl: result.fileUrl,
       messageType: getMessageType(file.name)
@@ -146,9 +148,9 @@ export default function MessagingPage() {
 
   const getMessageType = (fileName: string) => {
     const extension = fileName.toLowerCase()
-    if (extension.endsWith('.jpg') || extension.endsWith('.jpeg') || 
-        extension.endsWith('.png') || extension.endsWith('.gif') || 
-        extension.endsWith('.webp')) {
+    if (extension.endsWith('.jpg') || extension.endsWith('.jpeg') ||
+      extension.endsWith('.png') || extension.endsWith('.gif') ||
+      extension.endsWith('.webp')) {
       return 'image'
     } else if (extension.endsWith('.pdf')) {
       return 'prescription'
@@ -191,7 +193,7 @@ export default function MessagingPage() {
       })
 
       const data = await response.json()
-      
+
       if (data.success) {
         setNewMessage('')
         setSelectedFile(null)
@@ -305,12 +307,11 @@ export default function MessagingPage() {
                   <div
                     key={`${conversation.doctor_id}-${conversation.patient_id}-${conversation.appointment_id || index}`}
                     onClick={() => selectConversation(conversation)}
-                    className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 transition-all duration-200 group ${
-                      selectedConversation?.doctor_id === conversation.doctor_id && 
-                      selectedConversation?.patient_id === conversation.patient_id 
-                        ? 'bg-gradient-to-r from-purple-50 to-pink-50 border-l-4 border-l-purple-500' 
-                        : ''
-                    }`}
+                    className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 transition-all duration-200 group ${selectedConversation?.doctor_id === conversation.doctor_id &&
+                      selectedConversation?.patient_id === conversation.patient_id
+                      ? 'bg-gradient-to-r from-purple-50 to-pink-50 border-l-4 border-l-purple-500'
+                      : ''
+                      }`}
                   >
                     <div className="flex items-start space-x-3">
                       <div className="relative">
@@ -370,22 +371,11 @@ export default function MessagingPage() {
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <button className="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-100 rounded-full transition-all duration-200">
-                        <Phone className="w-5 h-5" />
-                      </button>
-                      <button className="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-100 rounded-full transition-all duration-200">
-                        <Video className="w-5 h-5" />
-                      </button>
-                      <button className="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-100 rounded-full transition-all duration-200">
-                        <MoreVertical className="w-5 h-5" />
-                      </button>
-                    </div>
                   </div>
                 </div>
 
                 {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
+                <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50 relative">
                   {messages.length === 0 ? (
                     <div className="text-center text-gray-500 py-12">
                       <div className="bg-gray-200 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -401,30 +391,36 @@ export default function MessagingPage() {
                         className={`flex ${message.senderType === 'patient' ? 'justify-end' : 'justify-start'} animate-fadeIn`}
                       >
                         <div
-                          className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl shadow-sm ${
-                            message.senderType === 'patient'
-                              ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white'
-                              : 'bg-white text-gray-900 border border-gray-200'
-                          }`}
+                          className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl shadow-sm ${message.senderType === 'patient'
+                            ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white'
+                            : 'bg-white text-gray-900 border border-gray-200'
+                            }`}
                         >
                           {message.attachmentUrl && (
                             <div className="mb-2">
                               {message.messageType === 'image' ? (
-                                <img 
-                                  src={message.attachmentUrl}
-                                  alt="Attachment"
-                                  className="max-w-full h-auto rounded-lg shadow-sm"
-                                  style={{ maxHeight: '200px' }}
-                                />
+                                <div className="relative">
+                                  <img
+                                    src={message.attachmentUrl}
+                                    alt="Attachment"
+                                    className="max-w-full h-auto rounded-lg shadow-sm border border-gray-200"
+                                    style={{ maxHeight: '200px', maxWidth: '300px' }}
+                                    onError={(e) => {
+                                      e.currentTarget.src = '/placeholder-image.png'
+                                    }}
+                                  />
+                                  <div className="absolute bottom-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                                    Image
+                                  </div>
+                                </div>
                               ) : (
-                                <div className={`p-3 rounded-lg border ${
-                                  message.senderType === 'patient' 
-                                    ? 'bg-purple-400 border-purple-300' 
-                                    : 'bg-gray-100 border-gray-300'
-                                }`}>
+                                <div className={`p-3 rounded-lg border ${message.senderType === 'patient'
+                                  ? 'bg-purple-400 border-purple-300'
+                                  : 'bg-gray-100 border-gray-300'
+                                  }`}>
                                   <div className="flex items-center space-x-2">
                                     <Paperclip className="w-4 h-4" />
-                                    <a 
+                                    <a
                                       href={message.attachmentUrl}
                                       target="_blank"
                                       rel="noopener noreferrer"
@@ -490,7 +486,7 @@ export default function MessagingPage() {
                       </div>
                     </div>
                   )}
-                  
+
                   <div className="flex items-end space-x-3">
                     <div className="relative">
                       <input
@@ -500,7 +496,7 @@ export default function MessagingPage() {
                         className="hidden"
                         accept="image/*,.pdf,.doc,.docx,.txt"
                       />
-                      <button 
+                      <button
                         onClick={() => fileInputRef.current?.click()}
                         className="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-100 rounded-full transition-all duration-200"
                         disabled={uploading}

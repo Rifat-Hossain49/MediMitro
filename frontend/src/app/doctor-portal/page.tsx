@@ -87,22 +87,22 @@ export default function DoctorPortal() {
       // Load appointments
       const appointmentsResponse = await fetch('/api/doctor-portal/appointments')
       const appointmentsData = await appointmentsResponse.json()
-      
+
       // Load patients
       const patientsResponse = await fetch('/api/doctor-portal/patients')
       const patientsData = await patientsResponse.json()
-      
+
       // Load unread messages
       const messagesResponse = await fetch('/api/doctor-portal/messaging/unread-count')
       const messagesData = await messagesResponse.json()
-      
+
       // Load meetings
       const meetingsResponse = await fetch('/api/doctor-portal/meetings?status=scheduled')
       const meetingsData = await meetingsResponse.json()
 
       setStats({
         totalAppointments: appointmentsData.appointments?.length || 0,
-        todayAppointments: appointmentsData.appointments?.filter((apt: any) => 
+        todayAppointments: appointmentsData.appointments?.filter((apt: any) =>
           new Date(apt.date_time).toDateString() === new Date().toDateString()
         ).length || 0,
         totalPatients: patientsData.patients?.length || 0,
@@ -118,14 +118,8 @@ export default function DoctorPortal() {
 
   const navigationItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Activity },
-    { id: 'profile', label: 'Profile', icon: User },
     { id: 'appointments', label: 'Appointments', icon: Calendar },
-    { id: 'availability', label: 'Availability', icon: Clock },
-    { id: 'patients', label: 'Patients', icon: Users },
-    { id: 'messages', label: 'Messages', icon: MessageSquare },
-    { id: 'meetings', label: 'Meetings', icon: Video },
-    { id: 'reports', label: 'Reports', icon: FileText },
-    { id: 'settings', label: 'Settings', icon: Settings }
+    { id: 'messages', label: 'Messages', icon: MessageSquare }
   ]
 
   const renderDashboard = () => (
@@ -208,11 +202,11 @@ export default function DoctorPortal() {
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
           <div className="space-y-3">
             <button
-              onClick={() => setActiveTab('availability')}
+              onClick={() => setActiveTab('appointments')}
               className="w-full flex items-center justify-between p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
             >
-              <span className="text-blue-700 font-medium">Manage Availability</span>
-              <Clock className="w-5 h-5 text-blue-600" />
+              <span className="text-blue-700 font-medium">View Appointments</span>
+              <Calendar className="w-5 h-5 text-blue-600" />
             </button>
             <button
               onClick={() => setActiveTab('messages')}
@@ -220,13 +214,6 @@ export default function DoctorPortal() {
             >
               <span className="text-green-700 font-medium">View Messages</span>
               <MessageSquare className="w-5 h-5 text-green-600" />
-            </button>
-            <button
-              onClick={() => setActiveTab('meetings')}
-              className="w-full flex items-center justify-between p-3 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
-            >
-              <span className="text-purple-700 font-medium">Schedule Meeting</span>
-              <Video className="w-5 h-5 text-purple-600" />
             </button>
           </div>
         </div>
@@ -241,18 +228,18 @@ export default function DoctorPortal() {
               Refresh
             </button>
           </div>
-          
+
           {/* Debug information - remove in production */}
           {process.env.NODE_ENV === 'development' && (
             <div className="mb-4 p-3 bg-gray-100 rounded-lg text-xs">
-              <strong>Debug Info:</strong><br/>
-              Medical Degree: {doctorProfile?.medical_degree || 'undefined'}<br/>
-              Verification Status: {doctorProfile?.verification_status || 'undefined'}<br/>
-              Is Verified: {doctorProfile?.is_verified ? 'true' : 'false'}<br/>
+              <strong>Debug Info:</strong><br />
+              Medical Degree: {doctorProfile?.medical_degree || 'undefined'}<br />
+              Verification Status: {doctorProfile?.verification_status || 'undefined'}<br />
+              Is Verified: {doctorProfile?.is_verified ? 'true' : 'false'}<br />
               University: {doctorProfile?.university || 'undefined'}
             </div>
           )}
-          
+
           {/* Check if doctor has submitted credentials by looking at medical_degree field */}
           {(() => {
             console.log('Doctor profile data:', doctorProfile);
@@ -260,11 +247,11 @@ export default function DoctorPortal() {
             console.log('Verification status:', doctorProfile?.verification_status);
             console.log('Has credentials:', doctorProfile?.medical_degree && doctorProfile.medical_degree !== 'Not Specified' && doctorProfile.medical_degree !== '');
             // Check if doctor has submitted credentials by looking at medical_degree or verification_status
-            const hasCredentials = (doctorProfile?.medical_degree && 
-                                   doctorProfile.medical_degree !== 'Not Specified' && 
-                                   doctorProfile.medical_degree !== '') ||
-                                  (doctorProfile?.verification_status === 'pending' && 
-                                   doctorProfile?.medical_degree);
+            const hasCredentials = (doctorProfile?.medical_degree &&
+              doctorProfile.medical_degree !== 'Not Specified' &&
+              doctorProfile.medical_degree !== '') ||
+              (doctorProfile?.verification_status === 'pending' &&
+                doctorProfile?.medical_degree);
             console.log('Final has credentials check:', hasCredentials);
             return hasCredentials;
           })() ? (
@@ -288,26 +275,24 @@ export default function DoctorPortal() {
                   </>
                 )}
               </div>
-              
-              <div className={`p-4 rounded-lg border-l-4 ${
-                doctorProfile?.is_verified 
+
+              <div className={`p-4 rounded-lg border-l-4 ${doctorProfile?.is_verified
                   ? 'border-green-500 bg-green-50'
                   : doctorProfile?.verification_status === 'rejected'
-                  ? 'border-red-500 bg-red-50'
-                  : 'border-yellow-500 bg-yellow-50'
-              }`}>
-                <p className={`text-sm ${
-                  doctorProfile?.is_verified 
+                    ? 'border-red-500 bg-red-50'
+                    : 'border-yellow-500 bg-yellow-50'
+                }`}>
+                <p className={`text-sm ${doctorProfile?.is_verified
                     ? 'text-green-800'
                     : doctorProfile?.verification_status === 'rejected'
-                    ? 'text-red-800'
-                    : 'text-yellow-800'
-                }`}>
-                  {doctorProfile?.is_verified 
+                      ? 'text-red-800'
+                      : 'text-yellow-800'
+                  }`}>
+                  {doctorProfile?.is_verified
                     ? '🎉 Congratulations! Your account is fully verified and you have access to all features.'
                     : doctorProfile?.verification_status === 'rejected'
-                    ? '❌ Your application was rejected. Please contact support for more information or resubmit your credentials.'
-                    : '⏳ Your credentials have been submitted and are under review by our admin team. You will be notified once the verification process is complete.'
+                      ? '❌ Your application was rejected. Please contact support for more information or resubmit your credentials.'
+                      : '⏳ Your credentials have been submitted and are under review by our admin team. You will be notified once the verification process is complete.'
                   }
                 </p>
               </div>
@@ -318,17 +303,16 @@ export default function DoctorPortal() {
                   <div className="flex items-center justify-between text-xs text-gray-600 mb-2">
                     <span>Verification Progress</span>
                     <span>
-                      {doctorProfile?.verification_status === 'rejected' ? '0/3' : 
-                       doctorProfile?.verification_status === 'pending' ? '2/3' : '1/3'}
+                      {doctorProfile?.verification_status === 'rejected' ? '0/3' :
+                        doctorProfile?.verification_status === 'pending' ? '2/3' : '1/3'}
                     </span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full transition-all duration-300 ${
-                        doctorProfile?.verification_status === 'rejected' ? 'bg-red-500 w-0' :
-                        doctorProfile?.verification_status === 'pending' ? 'bg-yellow-500 w-2/3' :
-                        'bg-blue-500 w-1/3'
-                      }`}
+                    <div
+                      className={`h-2 rounded-full transition-all duration-300 ${doctorProfile?.verification_status === 'rejected' ? 'bg-red-500 w-0' :
+                          doctorProfile?.verification_status === 'pending' ? 'bg-yellow-500 w-2/3' :
+                            'bg-blue-500 w-1/3'
+                        }`}
                     ></div>
                   </div>
                   <div className="flex justify-between text-xs text-gray-500 mt-1">
@@ -355,13 +339,13 @@ export default function DoctorPortal() {
                 <AlertCircle className="w-6 h-6 text-orange-600" />
                 <span className="text-orange-700 font-medium">Pending Verification</span>
               </div>
-              
+
               <div className="p-4 rounded-lg border-l-4 border-orange-500 bg-orange-50">
                 <p className="text-sm text-orange-800">
                   <strong>Action Required:</strong> You need to submit your credentials for verification to be listed as a doctor and receive patient appointments.
                 </p>
               </div>
-              
+
               <button
                 onClick={() => window.location.href = '/doctor-portal/credentials'}
                 className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
@@ -395,7 +379,7 @@ export default function DoctorPortal() {
             <h2 className="text-xl font-bold text-gray-900">Doctor Portal</h2>
             <p className="text-sm text-gray-600">MediMitra Healthcare</p>
           </div>
-          
+
           <nav className="mt-6">
             {navigationItems.map((item) => {
               const Icon = item.icon
@@ -403,9 +387,8 @@ export default function DoctorPortal() {
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center space-x-3 px-6 py-3 text-left hover:bg-gray-50 transition-colors ${
-                    activeTab === item.id ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-600' : 'text-gray-700'
-                  }`}
+                  className={`w-full flex items-center space-x-3 px-6 py-3 text-left hover:bg-gray-50 transition-colors ${activeTab === item.id ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-600' : 'text-gray-700'
+                    }`}
                 >
                   <Icon className="w-5 h-5" />
                   <span className="font-medium">{item.label}</span>
@@ -418,7 +401,7 @@ export default function DoctorPortal() {
               )
             })}
           </nav>
-          
+
           {/* Logout Button */}
           <div className="mt-auto p-6 border-t border-gray-200">
             <button
@@ -437,7 +420,6 @@ export default function DoctorPortal() {
         <div className="flex-1 p-8">
           <div className="max-w-7xl mx-auto">
             {activeTab === 'dashboard' && renderDashboard()}
-            {activeTab === 'profile' && <div>Profile Management - Coming Soon</div>}
             {activeTab === 'appointments' && (
               <div className="text-center py-8">
                 <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -451,61 +433,56 @@ export default function DoctorPortal() {
                 </a>
               </div>
             )}
-            {activeTab === 'availability' && <div>Availability Management - Coming Soon</div>}
-            {activeTab === 'patients' && <div>Patient Management - Coming Soon</div>}
-        {activeTab === 'messages' && (
-          <div className="h-full -m-6">
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-full">
-              {/* Header */}
-              <div className="bg-white shadow-lg border-b border-gray-200">
-                <div className="px-6 py-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-2 rounded-lg mr-3 shadow-lg">
-                        <MessageCircle className="w-6 h-6 text-white" />
+            {activeTab === 'messages' && (
+              <div className="h-full -m-6">
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-full">
+                  {/* Header */}
+                  <div className="bg-white shadow-lg border-b border-gray-200">
+                    <div className="px-6 py-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-2 rounded-lg mr-3 shadow-lg">
+                            <MessageCircle className="w-6 h-6 text-white" />
+                          </div>
+                          <div>
+                            <h3 className="text-xl font-bold text-gray-900">Patient Messages</h3>
+                            <p className="text-sm text-gray-500">Communicate with your patients</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={() => window.open('/doctor-portal/messaging', '_blank')}
+                            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                          >
+                            Open in New Tab
+                          </button>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="text-xl font-bold text-gray-900">Patient Messages</h3>
-                        <p className="text-sm text-gray-500">Communicate with your patients</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <button 
-                        onClick={() => window.open('/doctor-portal/messaging', '_blank')}
-                        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
-                      >
-                        Open in New Tab
-                      </button>
                     </div>
                   </div>
-                </div>
-              </div>
 
-              {/* Messages Content */}
-              <div className="p-6">
-                <div className="bg-white rounded-2xl shadow-xl border border-gray-200 h-[500px] flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="bg-gradient-to-br from-blue-100 to-blue-200 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-                      <MessageCircle className="w-8 h-8 text-blue-600" />
+                  {/* Messages Content */}
+                  <div className="p-6">
+                    <div className="bg-white rounded-2xl shadow-xl border border-gray-200 h-[500px] flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="bg-gradient-to-br from-blue-100 to-blue-200 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                          <MessageCircle className="w-8 h-8 text-blue-600" />
+                        </div>
+                        <h3 className="text-lg font-semibold text-gray-700 mb-2">Patient Messages</h3>
+                        <p className="text-gray-500 mb-4">Access your patient conversations</p>
+                        <button
+                          onClick={() => window.location.href = '/doctor-portal/messaging'}
+                          className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 transform hover:scale-105 shadow-lg"
+                        >
+                          <MessageCircle className="w-5 h-5 mr-2" />
+                          Open Messages
+                        </button>
+                      </div>
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-700 mb-2">Patient Messages</h3>
-                    <p className="text-gray-500 mb-4">Access your patient conversations</p>
-                    <button 
-                      onClick={() => window.location.href = '/doctor-portal/messaging'}
-                      className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 transform hover:scale-105 shadow-lg"
-                    >
-                      <MessageCircle className="w-5 h-5 mr-2" />
-                      Open Messages
-                    </button>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        )}
-            {activeTab === 'meetings' && <div>Video Meetings - Coming Soon</div>}
-            {activeTab === 'reports' && <div>Reports - Coming Soon</div>}
-            {activeTab === 'settings' && <div>Settings - Coming Soon</div>}
+            )}
           </div>
         </div>
       </div>

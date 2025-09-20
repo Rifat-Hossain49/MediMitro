@@ -28,7 +28,7 @@ export default async function Dashboard() {
   if (!session?.user) {
     redirect('/')
   }
-  
+
   // Redirect admin users to admin dashboard
   if (session?.user?.role === 'admin') {
     redirect('/admin/dashboard')
@@ -145,16 +145,6 @@ export default async function Dashboard() {
                 </div>
               </div>
 
-              {/* User Avatar Section */}
-              <div className="hidden lg:block">
-                <div className="bg-white bg-opacity-15 backdrop-blur-sm rounded-2xl p-6 text-center border border-white border-opacity-20 shadow-lg">
-                  <div className="w-20 h-20 bg-blue-600 rounded-full mx-auto mb-3 flex items-center justify-center shadow-lg border-2 border-white border-opacity-30">
-                    <Users className="w-10 h-10 text-white filter drop-shadow-lg" strokeWidth={2} fill="currentColor" />
-                  </div>
-                  <p className="text-white font-bold" style={{ textShadow: '1px 1px 3px rgba(0,0,0,0.8)' }}>{session.user.name}</p>
-                  <p className="text-white text-sm font-medium" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.8)' }}>Welcome to MediMitra</p>
-                </div>
-              </div>
             </div>
           </div>
         </div>

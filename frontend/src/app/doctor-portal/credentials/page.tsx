@@ -171,7 +171,7 @@ export default function DoctorCredentialsPage() {
             <ArrowLeft className="w-5 h-5 mr-2" />
             Back to Dashboard
           </button>
-          
+
           <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
             <div className="flex items-center space-x-3 mb-4">
               <div className="p-3 bg-blue-100 rounded-lg">
@@ -182,7 +182,7 @@ export default function DoctorCredentialsPage() {
                 <p className="text-gray-600">Complete your professional profile for verification</p>
               </div>
             </div>
-            
+
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
               <div className="flex items-start space-x-3">
                 <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5" />
@@ -202,11 +202,10 @@ export default function DoctorCredentialsPage() {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`mb-6 p-4 rounded-lg ${
-              messageType === 'success' 
-                ? 'bg-green-50 border border-green-200 text-green-800' 
+            className={`mb-6 p-4 rounded-lg ${messageType === 'success'
+                ? 'bg-green-50 border border-green-200 text-green-800'
                 : 'bg-red-50 border border-red-200 text-red-800'
-            }`}
+              }`}
           >
             <div className="flex items-center space-x-2">
               {messageType === 'success' ? (
@@ -227,7 +226,7 @@ export default function DoctorCredentialsPage() {
               <User className="w-6 h-6 mr-3 text-blue-600" />
               Personal Information
             </h2>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -314,7 +313,7 @@ export default function DoctorCredentialsPage() {
               <Award className="w-6 h-6 mr-3 text-green-600" />
               Professional Information
             </h2>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -404,7 +403,7 @@ export default function DoctorCredentialsPage() {
               <Upload className="w-6 h-6 mr-3 text-purple-600" />
               Documents & Photos
             </h2>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">

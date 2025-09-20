@@ -2,15 +2,15 @@
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
-import { 
-  Calendar, 
-  Clock, 
-  User, 
-  Phone, 
-  Mail, 
-  MapPin, 
-  CheckCircle, 
-  XCircle, 
+import {
+  Calendar,
+  Clock,
+  User,
+  Phone,
+  Mail,
+  MapPin,
+  CheckCircle,
+  XCircle,
   AlertCircle,
   RefreshCw,
   Filter,
@@ -52,21 +52,21 @@ export default function DoctorAppointmentsPage() {
 
   useEffect(() => {
     loadAppointments()
-    
+
     // Auto-refresh every 30 seconds
     const interval = setInterval(loadAppointments, 30000)
-    
+
     return () => clearInterval(interval)
   }, [])
 
   const loadAppointments = async () => {
     try {
       setLoading(true)
-      
+
       // Load all appointments
       const allResponse = await fetch('/api/doctor-portal/appointments')
       const allData = await allResponse.json()
-      
+
       if (allData.success) {
         setAppointments(allData.appointments || [])
       }
@@ -74,11 +74,11 @@ export default function DoctorAppointmentsPage() {
       // Load today's appointments
       const todayResponse = await fetch('/api/doctor-portal/appointments/today')
       const todayData = await todayResponse.json()
-      
+
       if (todayData.success) {
         setTodayAppointments(todayData.appointments || [])
       }
-      
+
       setLastUpdated(new Date())
     } catch (error) {
       console.error('Error loading appointments:', error)
@@ -98,7 +98,7 @@ export default function DoctorAppointmentsPage() {
       })
 
       const data = await response.json()
-      
+
       if (data.success) {
         // Refresh appointments
         loadAppointments()
@@ -144,15 +144,15 @@ export default function DoctorAppointmentsPage() {
   const formatDateTime = (dateTime: string) => {
     const date = new Date(dateTime)
     return {
-      date: date.toLocaleDateString('en-US', { 
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
+      date: date.toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
       }),
-      time: date.toLocaleTimeString('en-US', { 
-        hour: '2-digit', 
-        minute: '2-digit' 
+      time: date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit'
       })
     }
   }
@@ -214,21 +214,19 @@ export default function DoctorAppointmentsPage() {
             <nav className="-mb-px flex space-x-8">
               <button
                 onClick={() => setActiveTab('today')}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'today'
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === 'today'
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
+                  }`}
               >
                 Today's Appointments ({todayAppointments.length})
               </button>
               <button
                 onClick={() => setActiveTab('all')}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'all'
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === 'all'
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
+                  }`}
               >
                 All Appointments ({appointments.length})
               </button>
@@ -272,7 +270,7 @@ export default function DoctorAppointmentsPage() {
               <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">No appointments found</h3>
               <p className="text-gray-500">
-                {activeTab === 'today' 
+                {activeTab === 'today'
                   ? "You don't have any appointments scheduled for today."
                   : "You don't have any appointments yet."
                 }
@@ -281,7 +279,7 @@ export default function DoctorAppointmentsPage() {
           ) : (
             filteredAppointments.map((appointment) => {
               const { date, time } = formatDateTime(appointment.dateTime)
-              
+
               return (
                 <div key={appointment.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                   <div className="flex items-start justify-between">

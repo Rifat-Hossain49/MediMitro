@@ -211,7 +211,6 @@ export default function SignUpPage() {
               >
                 <option value="patient">Patient</option>
                 <option value="doctor">Doctor</option>
-                <option value="pharmacist">Pharmacist</option>
               </select>
               {formData.role === 'doctor' && (
                 <p className="text-sm text-blue-600 mt-2 font-medium">

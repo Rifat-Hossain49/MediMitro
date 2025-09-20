@@ -3,16 +3,16 @@ import { auth } from '@/auth'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { patientId: string } }
+  { params }: { params: Promise<{ patientId: string }> }
 ) {
   try {
     const session = await auth()
-    
+
     if (!session?.user?.email) {
       return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
     }
 
-    const { patientId } = params
+    const { patientId } = await params
 
     // Get doctor ID from session
     const doctorResponse = await fetch('http://localhost:8080/api/doctor-portal/profile', {

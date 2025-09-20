@@ -249,7 +249,7 @@ export default function AppointmentsPage() {
       try {
         const response = await fetch('/api/profile')
         const data = await response.json()
-        
+
         if (data.success && data.user?.id) {
           userId = data.user.id
         }
@@ -265,7 +265,7 @@ export default function AppointmentsPage() {
         try {
           const appointmentsResponse = await fetch(`http://localhost:8080/api/appointments/patient/${userId}`)
           const appointmentsData = await appointmentsResponse.json()
-          
+
           if (appointmentsData.success) {
             setUserAppointments(appointmentsData.appointments || [])
           } else {
@@ -287,8 +287,8 @@ export default function AppointmentsPage() {
   }
 
   const isDoctorBooked = (doctorId: string) => {
-    return userAppointments.some(appointment => 
-      appointment.doctorId === doctorId && 
+    return userAppointments.some(appointment =>
+      appointment.doctorId === doctorId &&
       appointment.status === 'scheduled'
     )
   }
@@ -483,10 +483,10 @@ export default function AppointmentsPage() {
   const handleCancelAppointment = async (doctorId: string) => {
     try {
       // Find the appointment to cancel
-      const appointment = userAppointments.find(apt => 
+      const appointment = userAppointments.find(apt =>
         apt.doctorId === doctorId && apt.status === 'scheduled'
       )
-      
+
       if (!appointment) {
         alert('No appointment found to cancel')
         return
@@ -500,7 +500,7 @@ export default function AppointmentsPage() {
       })
 
       const result = await response.json()
-      
+
       if (result.success) {
         alert('Appointment cancelled successfully!')
         // Refresh appointments
@@ -526,7 +526,7 @@ export default function AppointmentsPage() {
       // Get the actual user ID from the profile
       const profileResponse = await fetch('/api/profile')
       const profileData = await profileResponse.json()
-      
+
       if (!profileData.success || !profileData.user?.id) {
         alert('Unable to get user information. Please try logging in again.')
         return
@@ -655,13 +655,12 @@ export default function AppointmentsPage() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                        appointment.status === 'scheduled' 
+                      <span className={`px-3 py-1 rounded-full text-sm font-semibold ${appointment.status === 'scheduled'
                           ? 'bg-blue-100 text-blue-800'
                           : appointment.status === 'confirmed'
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-gray-100 text-gray-800'
+                        }`}>
                         {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
                       </span>
                       <p className="text-sm text-gray-600 mt-1">${appointment.fee}</p>
@@ -692,8 +691,8 @@ export default function AppointmentsPage() {
                     setPatientAdvice(null)
                   }}
                   className={`flex items-center px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${searchType === 'ai'
-                      ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg transform scale-105'
-                      : 'bg-white text-gray-700 hover:bg-gray-50 shadow-md hover:shadow-lg border border-gray-200'
+                    ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg transform scale-105'
+                    : 'bg-white text-gray-700 hover:bg-gray-50 shadow-md hover:shadow-lg border border-gray-200'
                     }`}
                 >
                   <Sparkles className="w-5 h-5 mr-2" />
@@ -707,8 +706,8 @@ export default function AppointmentsPage() {
                     fetchDoctors() // Reset to show all doctors
                   }}
                   className={`flex items-center px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${searchType === 'manual'
-                      ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg transform scale-105'
-                      : 'bg-white text-gray-700 hover:bg-gray-50 shadow-md hover:shadow-lg border border-gray-200'
+                    ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg transform scale-105'
+                    : 'bg-white text-gray-700 hover:bg-gray-50 shadow-md hover:shadow-lg border border-gray-200'
                     }`}
                 >
                   <Search className="w-5 h-5 mr-2" />
@@ -765,8 +764,8 @@ export default function AppointmentsPage() {
                     <button
                       onClick={toggleVoiceInput}
                       className={`absolute right-3 top-3 p-2 rounded-full transition-colors ${isListening
-                          ? 'bg-red-100 text-red-600'
-                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        ? 'bg-red-100 text-red-600'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         }`}
                     >
                       {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
@@ -845,21 +844,20 @@ export default function AppointmentsPage() {
                   <div className="flex-1">
                     <div className="flex items-center space-x-2 mb-3">
                       <h3 className="text-xl font-bold text-gray-900">AI Health Advice</h3>
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        patientAdvice.urgency === 'high' 
-                          ? 'bg-red-100 text-red-700' 
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${patientAdvice.urgency === 'high'
+                          ? 'bg-red-100 text-red-700'
                           : patientAdvice.urgency === 'medium'
-                          ? 'bg-yellow-100 text-yellow-700'
-                          : 'bg-green-100 text-green-700'
-                      }`}>
+                            ? 'bg-yellow-100 text-yellow-700'
+                            : 'bg-green-100 text-green-700'
+                        }`}>
                         {patientAdvice.urgency?.toUpperCase() || 'LOW'} PRIORITY
                       </span>
                     </div>
-                    
+
                     <div className="bg-white rounded-lg p-4 mb-4 border border-green-200">
                       <p className="text-gray-800 leading-relaxed">{patientAdvice.briefAdvice}</p>
                     </div>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {patientAdvice.monitoring && (
                         <div className="bg-white rounded-lg p-4 border border-blue-200">
@@ -870,7 +868,7 @@ export default function AppointmentsPage() {
                           <p className="text-sm text-gray-700">{patientAdvice.monitoring}</p>
                         </div>
                       )}
-                      
+
                       {patientAdvice.immediateSteps && (
                         <div className="bg-white rounded-lg p-4 border border-orange-200">
                           <h4 className="font-semibold text-orange-900 mb-2 flex items-center">
@@ -1118,8 +1116,8 @@ export default function AppointmentsPage() {
                       <button
                         onClick={() => setAppointmentType('in-person')}
                         className={`p-4 border rounded-lg text-left transition-colors ${appointmentType === 'in-person'
-                            ? 'border-blue-500 bg-blue-50 text-blue-700'
-                            : 'border-gray-300 hover:border-gray-400'
+                          ? 'border-blue-500 bg-blue-50 text-blue-700'
+                          : 'border-gray-300 hover:border-gray-400'
                           }`}
                       >
                         <div className="flex items-center space-x-3">
@@ -1133,8 +1131,8 @@ export default function AppointmentsPage() {
                       <button
                         onClick={() => setAppointmentType('online')}
                         className={`p-4 border rounded-lg text-left transition-colors ${appointmentType === 'online'
-                            ? 'border-blue-500 bg-blue-50 text-blue-700'
-                            : 'border-gray-300 hover:border-gray-400'
+                          ? 'border-blue-500 bg-blue-50 text-blue-700'
+                          : 'border-gray-300 hover:border-gray-400'
                           }`}
                       >
                         <div className="flex items-center space-x-3">

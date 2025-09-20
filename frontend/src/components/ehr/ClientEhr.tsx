@@ -68,14 +68,14 @@ export default function ClientEhr() {
     notes: '',
     source: 'patient'
   })
-  
+
   // Data states
   const [ehrSummary, setEhrSummary] = useState<EHRSummary | null>(null)
   const [amendmentRequests, setAmendmentRequests] = useState<AmendmentRequest[]>([])
   const [sectionData, setSectionData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  
+
   // Hardcoded patient ID for demo - in real app, get from auth/session
   const patientId = 'user-4'
 
@@ -88,13 +88,13 @@ export default function ClientEhr() {
     try {
       setLoading(true)
       setError(null)
-      
+
       // Load summary and amendment requests
       const [summary, amendments] = await Promise.all([
         ehrService.getEHRSummary(patientId),
         ehrService.getAmendmentRequests(patientId)
       ])
-      
+
       setEhrSummary(summary)
       setAmendmentRequests(amendments)
     } catch (err) {
@@ -108,7 +108,7 @@ export default function ClientEhr() {
     try {
       setLoading(true)
       let data
-      
+
       switch (sectionId) {
         case 'demographics':
           data = await ehrService.getDemographics(patientId)
@@ -161,7 +161,7 @@ export default function ClientEhr() {
         default:
           data = []
       }
-      
+
       setSectionData(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load section data')
@@ -220,7 +220,7 @@ export default function ClientEhr() {
         title,
         description
       })
-      
+
       setShowUploadModal(false)
       // Refresh summary
       loadEHRData()
@@ -237,16 +237,16 @@ export default function ClientEhr() {
       setLoading(true)
       console.log('=== ClientEhr PGHD Debug ===');
       console.log('Original data:', data);
-      
+
       // Ensure patientId is included
       const pghd = {
         ...data,
         patientId: patientId
       };
       console.log('PGHD with patientId:', pghd);
-      
+
       await ehrService.addPatientData(pghd)
-      
+
       setShowPGHDModal(false)
       // Refresh summary
       loadEHRData()
@@ -264,7 +264,7 @@ export default function ClientEhr() {
     try {
       setLoading(true)
       await ehrService.submitAmendmentRequest(request)
-      
+
       setShowAmendmentModal(false)
       // Refresh amendment requests
       const amendments = await ehrService.getAmendmentRequests(patientId)
@@ -320,7 +320,7 @@ export default function ClientEhr() {
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Quick Actions</h2>
         <p className="text-gray-600">Manage your health records easily</p>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
         {/* Upload Documents */}
         <button
@@ -364,11 +364,10 @@ export default function ClientEhr() {
                 <h4 className="font-medium text-gray-900">{request.field}</h4>
                 <p className="text-sm text-gray-600">Type: {request.type}</p>
               </div>
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                request.status === 'approved' ? 'bg-green-100 text-green-800' :
-                'bg-red-100 text-red-800'
-              }`}>
+              <span className={`px-2 py-1 rounded-full text-xs font-medium ${request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                  request.status === 'approved' ? 'bg-green-100 text-green-800' :
+                    'bg-red-100 text-red-800'
+                }`}>
                 {request.status}
               </span>
             </div>
@@ -426,7 +425,7 @@ export default function ClientEhr() {
             <div className="text-center py-8">
               <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
               <p className="text-red-600 mb-4">{error}</p>
-              <button 
+              <button
                 onClick={() => loadSectionData(sectionId)}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
@@ -445,7 +444,7 @@ export default function ClientEhr() {
                       <div className="flex gap-2 ml-4">
                         {/* Only show preview button for documents that have files */}
                         {sectionId === 'documents' && (
-                          <button 
+                          <button
                             onClick={() => {
                               setSelectedFile(item)
                               setShowPreviewModal(true)
@@ -456,12 +455,12 @@ export default function ClientEhr() {
                             <Eye className="w-4 h-4" />
                           </button>
                         )}
-                        
+
                         {/* Only show download button for documents with files */}
                         {sectionId === 'documents' && (item.file_url || item.appwrite_file_id) && (
-                          <button 
+                          <button
                             onClick={() => {
-                              const downloadUrl = item.appwrite_file_id 
+                              const downloadUrl = item.appwrite_file_id
                                 ? `https://sfo.cloud.appwrite.io/v1/storage/buckets/medimitra-files/files/${item.appwrite_file_id}/download?project=68c307fe002f136b2920`
                                 : item.file_url;
                               window.open(downloadUrl, '_blank');
@@ -472,9 +471,9 @@ export default function ClientEhr() {
                             <Download className="w-4 h-4" />
                           </button>
                         )}
-                        
+
                         {/* Show amendment button for all record types */}
-                        <button 
+                        <button
                           onClick={() => {
                             setSelectedAmendment({
                               id: item.id || index.toString(),
@@ -530,7 +529,7 @@ export default function ClientEhr() {
             </div>
           </div>
         )
-      
+
       case 'allergies':
         return (
           <div>
@@ -543,7 +542,7 @@ export default function ClientEhr() {
             </div>
           </div>
         )
-      
+
       case 'medications':
         return (
           <div>
@@ -557,7 +556,7 @@ export default function ClientEhr() {
             </div>
           </div>
         )
-      
+
       case 'lab-results':
         return (
           <div>
@@ -571,7 +570,7 @@ export default function ClientEhr() {
             </div>
           </div>
         )
-      
+
       case 'imaging':
         return (
           <div>
@@ -585,7 +584,7 @@ export default function ClientEhr() {
             </div>
           </div>
         )
-      
+
       case 'visits':
         return (
           <div>
@@ -599,7 +598,7 @@ export default function ClientEhr() {
             </div>
           </div>
         )
-      
+
       case 'immunizations':
         return (
           <div>
@@ -614,7 +613,7 @@ export default function ClientEhr() {
             </div>
           </div>
         )
-      
+
       case 'specialist-reports':
         return (
           <div>
@@ -628,7 +627,7 @@ export default function ClientEhr() {
             </div>
           </div>
         )
-      
+
       case 'medical-history':
         return (
           <div>
@@ -643,7 +642,7 @@ export default function ClientEhr() {
             </div>
           </div>
         )
-      
+
       case 'documents':
         return (
           <div>
@@ -657,7 +656,7 @@ export default function ClientEhr() {
             </div>
           </div>
         )
-      
+
       case 'patient-data':
         return (
           <div>
@@ -671,14 +670,13 @@ export default function ClientEhr() {
             </div>
           </div>
         )
-      
+
       case 'test-reports':
         return (
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                item.reportType === 'Lab Result' ? 'bg-purple-100 text-purple-800' : 'bg-indigo-100 text-indigo-800'
-              }`}>
+              <span className={`px-2 py-1 rounded-full text-xs font-medium ${item.reportType === 'Lab Result' ? 'bg-purple-100 text-purple-800' : 'bg-indigo-100 text-indigo-800'
+                }`}>
                 {item.reportType}
               </span>
               <h4 className="font-medium text-gray-900">{item.test_name || `${item.study_type} - ${item.body_part}`}</h4>
@@ -704,7 +702,7 @@ export default function ClientEhr() {
             </div>
           </div>
         )
-      
+
       case 'health-summary':
         return (
           <div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-lg p-4">
@@ -741,7 +739,7 @@ export default function ClientEhr() {
             </div>
           </div>
         )
-      
+
       default:
         return (
           <div>
@@ -771,7 +769,7 @@ export default function ClientEhr() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-8">
-          
+
           {/* Quick Actions */}
           {renderQuickActions()}
 
@@ -799,7 +797,7 @@ export default function ClientEhr() {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <form 
+            <form
               className="space-y-4"
               onSubmit={async (e) => {
                 e.preventDefault();
@@ -810,7 +808,7 @@ export default function ClientEhr() {
             >
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
-                <select 
+                <select
                   value={selectedAmendment?.amendmentType || 'correction'}
                   onChange={(e) => selectedAmendment && setSelectedAmendment({
                     ...selectedAmendment,
@@ -824,62 +822,62 @@ export default function ClientEhr() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Field/Record</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={selectedAmendment?.fieldName || ''}
                   onChange={(e) => selectedAmendment && setSelectedAmendment({
                     ...selectedAmendment,
                     fieldName: e.target.value
                   })}
-                  className="w-full border border-gray-300 rounded-lg p-2" 
-                  placeholder="e.g., Allergy - Penicillin severity" 
+                  className="w-full border border-gray-300 rounded-lg p-2"
+                  placeholder="e.g., Allergy - Penicillin severity"
                   required
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Current Value</label>
-                <textarea 
+                <textarea
                   value={selectedAmendment?.currentValue || ''}
                   onChange={(e) => selectedAmendment && setSelectedAmendment({
                     ...selectedAmendment,
                     currentValue: e.target.value
                   })}
-                  className="w-full border border-gray-300 rounded-lg p-2" 
-                  rows={2} 
+                  className="w-full border border-gray-300 rounded-lg p-2"
+                  rows={2}
                   placeholder="Current information in your record"
                   required
                 ></textarea>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Proposed Change</label>
-                <textarea 
+                <textarea
                   value={selectedAmendment?.proposedValue || ''}
                   onChange={(e) => selectedAmendment && setSelectedAmendment({
                     ...selectedAmendment,
                     proposedValue: e.target.value
                   })}
-                  className="w-full border border-gray-300 rounded-lg p-2" 
-                  rows={2} 
+                  className="w-full border border-gray-300 rounded-lg p-2"
+                  rows={2}
                   placeholder="Your proposed correction"
                   required
                 ></textarea>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Reason</label>
-                <textarea 
+                <textarea
                   value={selectedAmendment?.reason || ''}
                   onChange={(e) => selectedAmendment && setSelectedAmendment({
                     ...selectedAmendment,
                     reason: e.target.value
                   })}
-                  className="w-full border border-gray-300 rounded-lg p-2" 
-                  rows={3} 
+                  className="w-full border border-gray-300 rounded-lg p-2"
+                  rows={3}
                   placeholder="Explain why this change is needed"
                   required
                 ></textarea>
               </div>
               <div className="flex gap-2">
-                <button 
+                <button
                   type="button"
                   onClick={() => {
                     setShowAmendmentModal(false);
@@ -889,7 +887,7 @@ export default function ClientEhr() {
                 >
                   Cancel
                 </button>
-                <button 
+                <button
                   type="submit"
                   disabled={loading}
                   className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
@@ -912,13 +910,13 @@ export default function ClientEhr() {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <form 
+            <form
               className="space-y-4"
               onSubmit={async (e) => {
                 e.preventDefault();
                 console.log('=== Form PGHD Debug ===');
                 console.log('Form PGHD data:', pghd);
-                
+
                 const pghDataToSubmit = {
                   patientId: patientId,
                   dataType: pghd.dataType,
@@ -928,16 +926,16 @@ export default function ClientEhr() {
                   source: pghd.source
                 };
                 console.log('Final PGHD to submit:', pghDataToSubmit);
-                
+
                 await handlePGHDSubmit(pghDataToSubmit);
                 setPGHD({ dataType: '', value: '', unit: '', notes: '', source: 'patient' });
               }}
             >
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Data Type</label>
-                <select 
+                <select
                   value={pghd.dataType}
-                  onChange={(e) => setPGHD({...pghd, dataType: e.target.value})}
+                  onChange={(e) => setPGHD({ ...pghd, dataType: e.target.value })}
                   className="w-full border border-gray-300 rounded-lg p-2"
                   required
                 >
@@ -955,37 +953,37 @@ export default function ClientEhr() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Value/Description</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={pghd.value}
-                  onChange={(e) => setPGHD({...pghd, value: e.target.value})}
-                  className="w-full border border-gray-300 rounded-lg p-2" 
-                  placeholder="e.g., 120/80, 150 lbs, feeling dizzy" 
+                  onChange={(e) => setPGHD({ ...pghd, value: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg p-2"
+                  placeholder="e.g., 120/80, 150 lbs, feeling dizzy"
                   required
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Unit (Optional)</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={pghd.unit}
-                  onChange={(e) => setPGHD({...pghd, unit: e.target.value})}
-                  className="w-full border border-gray-300 rounded-lg p-2" 
-                  placeholder="e.g., mmHg, lbs, mg/dL" 
+                  onChange={(e) => setPGHD({ ...pghd, unit: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg p-2"
+                  placeholder="e.g., mmHg, lbs, mg/dL"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Notes (Optional)</label>
-                <textarea 
+                <textarea
                   value={pghd.notes}
-                  onChange={(e) => setPGHD({...pghd, notes: e.target.value})}
-                  className="w-full border border-gray-300 rounded-lg p-2" 
-                  rows={3} 
+                  onChange={(e) => setPGHD({ ...pghd, notes: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg p-2"
+                  rows={3}
                   placeholder="Additional context, symptoms, or notes"
                 ></textarea>
               </div>
               <div className="flex gap-2">
-                <button 
+                <button
                   type="button"
                   onClick={() => {
                     setShowPGHDModal(false);
@@ -995,7 +993,7 @@ export default function ClientEhr() {
                 >
                   Cancel
                 </button>
-                <button 
+                <button
                   type="submit"
                   disabled={loading}
                   className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
@@ -1017,7 +1015,7 @@ export default function ClientEhr() {
                 <h3 className="text-xl font-semibold text-gray-900">{selectedFile.title}</h3>
                 <p className="text-sm text-gray-600">{selectedFile.document_type} • {selectedFile.file_name}</p>
               </div>
-              <button 
+              <button
                 onClick={() => {
                   setShowPreviewModal(false)
                   setSelectedFile(null)
@@ -1027,23 +1025,23 @@ export default function ClientEhr() {
                 <X className="w-6 h-6" />
               </button>
             </div>
-            
+
             <div className="p-6 max-h-[calc(90vh-120px)] overflow-auto">
               {selectedFile.file_url ? (
                 <div className="space-y-4">
                   {/* File Preview Based on Type */}
                   {selectedFile.mime_type?.startsWith('image/') ? (
-                    <img 
-                      src={selectedFile.appwrite_file_id 
+                    <img
+                      src={selectedFile.appwrite_file_id
                         ? `https://sfo.cloud.appwrite.io/v1/storage/buckets/medimitra-files/files/${selectedFile.appwrite_file_id}/view?project=68c307fe002f136b2920`
                         : selectedFile.file_url
-                      } 
+                      }
                       alt={selectedFile.title}
                       className="max-w-full h-auto rounded-lg shadow-lg"
                     />
                   ) : selectedFile.mime_type === 'application/pdf' ? (
                     <iframe
-                      src={selectedFile.appwrite_file_id 
+                      src={selectedFile.appwrite_file_id
                         ? `https://sfo.cloud.appwrite.io/v1/storage/buckets/medimitra-files/files/${selectedFile.appwrite_file_id}/view?project=68c307fe002f136b2920`
                         : selectedFile.file_url
                       }
@@ -1056,7 +1054,7 @@ export default function ClientEhr() {
                       <p className="text-gray-600 mb-4">Preview not available for this file type</p>
                       <button
                         onClick={() => {
-                          const downloadUrl = selectedFile.appwrite_file_id 
+                          const downloadUrl = selectedFile.appwrite_file_id
                             ? `https://sfo.cloud.appwrite.io/v1/storage/buckets/medimitra-files/files/${selectedFile.appwrite_file_id}/download?project=68c307fe002f136b2920`
                             : selectedFile.file_url;
                           window.open(downloadUrl, '_blank');
@@ -1067,7 +1065,7 @@ export default function ClientEhr() {
                       </button>
                     </div>
                   )}
-                  
+
                   {/* File Details */}
                   <div className="bg-gray-50 rounded-lg p-4">
                     <h4 className="font-medium text-gray-900 mb-2">File Details</h4>

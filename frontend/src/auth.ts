@@ -160,22 +160,22 @@ export async function registerUser(email: string, password: string, name: string
     const data = await response.json()
 
     if (response.ok && data.success) {
-      return { 
-        success: true, 
+      return {
+        success: true,
         message: data.message || 'User registered successfully',
-        user: data.user 
+        user: data.user
       }
     } else {
-      return { 
-        success: false, 
-        error: data.message || data.error || 'Registration failed' 
+      return {
+        success: false,
+        error: data.message || data.error || 'Registration failed'
       }
     }
   } catch (error) {
     console.error("Registration error:", error)
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : "Registration failed" 
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Registration failed"
     }
   }
 }

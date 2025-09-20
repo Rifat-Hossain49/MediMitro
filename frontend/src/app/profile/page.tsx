@@ -4,10 +4,10 @@ import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useUser } from '@/contexts/UserContext'
 import { profileService, ProfileStats } from '@/lib/profileService'
-import {
-  User,
-  Calendar,
-  Edit,
+import { 
+  User, 
+  Calendar, 
+  Edit, 
   X,
   Shield,
   Heart,
@@ -95,7 +95,7 @@ export default function ProfilePage() {
       const nameParts = user.name?.split(' ') || ['', '']
       const firstName = nameParts[0] || ''
       const lastName = nameParts.slice(1).join(' ') || ''
-
+      
       // Parse address
       const addressParts = user.address?.split(', ') || ['', '', '']
       const address = addressParts[0] || ''
@@ -134,7 +134,7 @@ export default function ProfilePage() {
         console.error('Failed to load profile stats:', error)
       }
     }
-
+    
     if (user) {
       loadStats()
     }
@@ -150,7 +150,7 @@ export default function ProfilePage() {
   // Auto-save function with debouncing
   const autoSave = useCallback(async (updates: any) => {
     if (!autoSaveEnabled || !user) return
-
+    
     try {
       setSaveStatus('saving')
       await profileService.autoSaveProfile(updates, 1500)
@@ -164,12 +164,12 @@ export default function ProfilePage() {
 
   const handleSave = async (section: string) => {
     if (!user) return
-
+    
     try {
       setSaveStatus('saving')
-
+      
       let updates: any = {}
-
+      
       if (section === 'personal') {
         updates = {
           name: `${personalInfo.firstName} ${personalInfo.lastName}`.trim(),
@@ -198,11 +198,11 @@ export default function ProfilePage() {
       setSaveStatus('saved')
       setEditingSection(null)
       setTimeout(() => setSaveStatus('idle'), 2000)
-
+      
       // Refresh stats after update
       const stats = await profileService.getProfileStats()
       setProfileStats(stats)
-
+      
     } catch (error) {
       console.error('Save failed:', error)
       setSaveStatus('idle')
@@ -291,13 +291,13 @@ export default function ProfilePage() {
         >
           {/* Background Gradient */}
           <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-3xl blur-3xl opacity-20"></div>
-
+          
           {/* Header Content */}
           <div className="relative bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-3xl p-8 text-white shadow-2xl">
             <div className="flex flex-col lg:flex-row items-center justify-between">
               <div className="text-center lg:text-left mb-6 lg:mb-0">
                 <div className="flex items-center justify-center lg:justify-start mb-4">
-                  <motion.div
+                  <motion.div 
                     whileHover={{ rotate: 360, scale: 1.1 }}
                     transition={{ duration: 0.5 }}
                     className="p-4 bg-white/20 backdrop-blur-sm rounded-2xl mr-4"
@@ -314,29 +314,24 @@ export default function ProfilePage() {
                   </div>
                 </div>
               </div>
-
+              
               {/* Quick Stats */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 {[
-                  {
-                    label: 'Profile Complete',
-                    value: profileStats ? `${profileStats.profileCompletion}%` : '...',
-                    icon: UserCheck
+                  { 
+                    label: 'Profile Complete', 
+                    value: profileStats ? `${profileStats.profileCompletion}%` : '...', 
+                    icon: UserCheck 
                   },
-                  {
-                    label: 'Active Since',
-                    value: user ? new Date(user.createdAt).getFullYear().toString() : '...',
-                    icon: Calendar
+                  { 
+                    label: 'Active Since', 
+                    value: user ? new Date(user.createdAt).getFullYear().toString() : '...', 
+                    icon: Calendar 
                   },
-                  {
-                    label: 'Last Update',
-                    value: user ? profileService.formatDate(user.updatedAt) : '...',
-                    icon: Settings
-                  },
-                  {
-                    label: 'Security',
-                    value: user?.emailVerified ? 'High' : 'Medium',
-                    icon: Shield
+                  { 
+                    label: 'Last Update', 
+                    value: user ? profileService.formatDate(user.updatedAt) : '...', 
+                    icon: Settings 
                   }
                 ].map((stat, index) => (
                   <motion.div
@@ -361,26 +356,26 @@ export default function ProfilePage() {
           {/* Enhanced Sidebar Navigation */}
           <div className="lg:col-span-1 space-y-6">
             {/* Profile Card */}
-            <motion.div
+            <motion.div 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               className="relative"
             >
               {/* Background Gradient */}
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-2xl blur-2xl opacity-20"></div>
-
+              
               <div className={`relative rounded-2xl shadow-xl border backdrop-blur-sm ${isDarkMode ? 'bg-gray-800/80 border-gray-700' : 'bg-white/80 border-gray-100'}`}>
                 <div className="p-6">
                   <div className="text-center mb-6">
                     <div className="relative inline-block mb-4">
-                      <motion.div
+                      <motion.div 
                         whileHover={{ scale: 1.05, rotate: 5 }}
                         transition={{ duration: 0.3 }}
                         className="w-28 h-28 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg"
                       >
                         <User className="w-14 h-14 text-white" />
                       </motion.div>
-                      <motion.button
+                      <motion.button 
                         whileHover={{ scale: 1.2 }}
                         whileTap={{ scale: 0.9 }}
                         onClick={() => document.getElementById('profile-photo-upload')?.click()}
@@ -402,8 +397,8 @@ export default function ProfilePage() {
                     <p className={`text-sm mb-4 font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                       Patient ID: #{user?.id || '...'}
                     </p>
-
-                    <motion.div
+                    
+                    <motion.div 
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       transition={{ delay: 0.3 }}
@@ -420,7 +415,7 @@ export default function ProfilePage() {
             </motion.div>
 
             {/* Navigation Menu */}
-            <motion.div
+            <motion.div 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 }}
@@ -443,9 +438,9 @@ export default function ProfilePage() {
                       className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left font-medium transition-all duration-200 ${activeSection === section.id
                           ? `bg-gradient-to-r from-${section.color}-100 to-${section.color}-50 text-${section.color}-700 border-2 border-${section.color}-200 shadow-lg`
                           : isDarkMode
-                            ? 'text-gray-300 hover:bg-gray-700/50 hover:text-white'
-                            : 'text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 hover:text-blue-600'
-                        }`}
+                          ? 'text-gray-300 hover:bg-gray-700/50 hover:text-white'
+                          : 'text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 hover:text-blue-600'
+                      }`}
                     >
                       <motion.div
                         whileHover={{ rotate: 10 }}
@@ -455,7 +450,7 @@ export default function ProfilePage() {
                       </motion.div>
                       <span>{section.name}</span>
                       {editingSection === section.id && (
-                        <motion.div
+                        <motion.div 
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
                           className="ml-auto"
@@ -497,7 +492,7 @@ export default function ProfilePage() {
                           </p>
                         </div>
                         <div className="text-center">
-                          <motion.div
+                          <motion.div 
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
                             transition={{ delay: 0.3, type: "spring" }}
@@ -529,10 +524,10 @@ export default function ProfilePage() {
                           </motion.div>
                         </div>
                       </div>
-
+                      
                       <div className="space-y-3">
                         <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-                          <motion.div
+                          <motion.div 
                             initial={{ width: 0 }}
                             animate={{ width: profileStats ? `${profileStats.profileCompletion}%` : '0%' }}
                             transition={{ delay: 0.5, duration: 1 }}
@@ -554,27 +549,27 @@ export default function ProfilePage() {
                   {/* Enhanced Quick Stats */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {[
-                      {
-                        icon: Calendar,
-                        value: profileStats ? profileStats.totalAppointments.toString() : '...',
+                      { 
+                        icon: Calendar, 
+                        value: profileStats ? profileStats.totalAppointments.toString() : '...', 
                         label: 'Total Appointments',
                         gradient: 'from-blue-500 to-cyan-500',
                         bgGradient: 'from-blue-100 to-cyan-100',
                         change: '+2 this month',
                         trend: 'up'
                       },
-                      {
-                        icon: Pill,
-                        value: profileStats ? profileStats.activeMedications.toString() : '...',
+                      { 
+                        icon: Pill, 
+                        value: profileStats ? profileStats.activeMedications.toString() : '...', 
                         label: 'Active Medications',
                         gradient: 'from-green-500 to-emerald-500',
                         bgGradient: 'from-green-100 to-emerald-100',
                         change: '1 updated',
                         trend: 'neutral'
                       },
-                      {
-                        icon: FileText,
-                        value: profileStats ? profileStats.healthRecords.toString() : '...',
+                      { 
+                        icon: FileText, 
+                        value: profileStats ? profileStats.healthRecords.toString() : '...', 
                         label: 'Health Records',
                         gradient: 'from-purple-500 to-pink-500',
                         bgGradient: 'from-purple-100 to-pink-100',
@@ -592,14 +587,14 @@ export default function ProfilePage() {
                       >
                         <div className={`absolute inset-0 bg-gradient-to-br ${stat.gradient} rounded-2xl blur-xl opacity-20 group-hover:opacity-30 transition-opacity`}></div>
                         <div className={`relative rounded-2xl shadow-xl border backdrop-blur-sm p-6 text-center ${isDarkMode ? 'bg-gray-800/80 border-gray-700' : 'bg-white/80 border-gray-100'}`}>
-                          <motion.div
+                          <motion.div 
                             whileHover={{ rotate: 360, scale: 1.1 }}
                             transition={{ duration: 0.5 }}
                             className={`p-4 bg-gradient-to-br ${stat.bgGradient} rounded-2xl w-fit mx-auto mb-4 shadow-lg`}
                           >
                             <stat.icon className={`w-8 h-8 bg-gradient-to-r ${stat.gradient} bg-clip-text text-transparent`} style={{ WebkitTextFillColor: 'transparent', backgroundImage: `linear-gradient(to right, var(--tw-gradient-stops))` }} />
                           </motion.div>
-                          <motion.div
+                          <motion.div 
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
                             transition={{ delay: 0.3 + index * 0.1, type: "spring" }}
@@ -611,8 +606,8 @@ export default function ProfilePage() {
                             {stat.label}
                           </div>
                           <div className={`text-xs flex items-center justify-center space-x-1 ${stat.trend === 'up' ? 'text-green-600' :
-                              stat.trend === 'down' ? 'text-red-600' : 'text-gray-500'
-                            }`}>
+                            stat.trend === 'down' ? 'text-red-600' : 'text-gray-500'
+                          }`}>
                             {stat.trend === 'up' && <motion.div initial={{ y: 5 }} animate={{ y: 0 }} transition={{ repeat: Infinity, repeatType: "reverse", duration: 1 }}>↗</motion.div>}
                             {stat.trend === 'down' && <motion.div initial={{ y: -5 }} animate={{ y: 0 }} transition={{ repeat: Infinity, repeatType: "reverse", duration: 1 }}>↘</motion.div>}
                             <span>{stat.change}</span>
@@ -624,7 +619,7 @@ export default function ProfilePage() {
 
                   {/* Health Insights */}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <motion.div
+                    <motion.div 
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.4 }}
@@ -646,7 +641,7 @@ export default function ProfilePage() {
                       </div>
                     </motion.div>
 
-                    <motion.div
+                    <motion.div 
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.5 }}
@@ -656,7 +651,7 @@ export default function ProfilePage() {
                       <div className={`relative rounded-2xl shadow-xl border backdrop-blur-sm p-6 ${isDarkMode ? 'bg-gray-800/80 border-gray-700' : 'bg-white/80 border-gray-100'}`}>
                         <h4 className={`text-lg font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Quick Actions</h4>
                         <div className="space-y-3">
-                          <motion.button
+                          <motion.button 
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                             className="w-full flex items-center space-x-3 p-3 bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700 rounded-xl hover:from-purple-200 hover:to-indigo-200 transition-all"
@@ -664,7 +659,7 @@ export default function ProfilePage() {
                             <Plus className="w-5 h-5" />
                             <span className="font-medium">Add Health Data</span>
                           </motion.button>
-                          <motion.button
+                          <motion.button 
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                             className="w-full flex items-center space-x-3 p-3 bg-gradient-to-r from-orange-100 to-yellow-100 text-orange-700 rounded-xl hover:from-orange-200 hover:to-yellow-200 transition-all"
@@ -717,7 +712,7 @@ export default function ProfilePage() {
                           className={`flex items-center space-x-2 px-6 py-3 rounded-xl font-semibold transition-all shadow-lg ${editingSection === 'personal'
                               ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white hover:from-red-600 hover:to-pink-600'
                               : 'bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600'
-                            }`}
+                          }`}
                         >
                           {editingSection === 'personal' ? (
                             <>
@@ -734,180 +729,180 @@ export default function ProfilePage() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                          First Name
-                        </label>
-                        <input
-                          type="text"
-                          value={personalInfo.firstName}
-                          onChange={(e) => {
-                            const newValue = e.target.value
-                            setPersonalInfo(prev => ({ ...prev, firstName: newValue }))
-                            if (editingSection === 'personal') {
-                              autoSave({ name: `${newValue} ${personalInfo.lastName}`.trim() })
-                            }
-                          }}
-                          disabled={editingSection !== 'personal'}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                        First Name
+                      </label>
+                      <input
+                        type="text"
+                        value={personalInfo.firstName}
+                        onChange={(e) => {
+                          const newValue = e.target.value
+                          setPersonalInfo(prev => ({ ...prev, firstName: newValue }))
+                          if (editingSection === 'personal') {
+                            autoSave({ name: `${newValue} ${personalInfo.lastName}`.trim() })
+                          }
+                        }}
+                        disabled={editingSection !== 'personal'}
                           className={`w-full px-3 py-2 border rounded-lg transition-colors ${editingSection === 'personal'
-                              ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500'
-                              : isDarkMode
-                                ? 'border-gray-600 bg-gray-700 text-gray-300'
-                                : 'border-gray-300 bg-gray-50 text-gray-700'
-                            }`}
-                        />
-                      </div>
+                            ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500'
+                            : isDarkMode
+                            ? 'border-gray-600 bg-gray-700 text-gray-300'
+                            : 'border-gray-300 bg-gray-50 text-gray-700'
+                        }`}
+                      />
+                    </div>
 
-                      <div>
-                        <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                          Last Name
-                        </label>
-                        <input
-                          type="text"
-                          value={personalInfo.lastName}
-                          onChange={(e) => setPersonalInfo(prev => ({ ...prev, lastName: e.target.value }))}
-                          disabled={editingSection !== 'personal'}
+                    <div>
+                      <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                        Last Name
+                      </label>
+                      <input
+                        type="text"
+                        value={personalInfo.lastName}
+                        onChange={(e) => setPersonalInfo(prev => ({ ...prev, lastName: e.target.value }))}
+                        disabled={editingSection !== 'personal'}
                           className={`w-full px-3 py-2 border rounded-lg transition-colors ${editingSection === 'personal'
-                              ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500'
-                              : isDarkMode
-                                ? 'border-gray-600 bg-gray-700 text-gray-300'
-                                : 'border-gray-300 bg-gray-50 text-gray-700'
-                            }`}
-                        />
-                      </div>
+                            ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500'
+                            : isDarkMode
+                            ? 'border-gray-600 bg-gray-700 text-gray-300'
+                            : 'border-gray-300 bg-gray-50 text-gray-700'
+                        }`}
+                      />
+                    </div>
 
-                      <div>
-                        <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                          Email
-                        </label>
-                        <div className="relative">
-                          <Mail className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`} />
-                          <input
-                            type="email"
-                            value={personalInfo.email}
-                            onChange={(e) => setPersonalInfo(prev => ({ ...prev, email: e.target.value }))}
-                            disabled={editingSection !== 'personal'}
+                    <div>
+                      <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                        Email
+                      </label>
+                      <div className="relative">
+                        <Mail className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`} />
+                        <input
+                          type="email"
+                          value={personalInfo.email}
+                          onChange={(e) => setPersonalInfo(prev => ({ ...prev, email: e.target.value }))}
+                          disabled={editingSection !== 'personal'}
                             className={`w-full pl-10 pr-3 py-2 border rounded-lg transition-colors ${editingSection === 'personal'
-                                ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500'
-                                : isDarkMode
-                                  ? 'border-gray-600 bg-gray-700 text-gray-300'
-                                  : 'border-gray-300 bg-gray-50 text-gray-700'
-                              }`}
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                          Phone
-                        </label>
-                        <div className="relative">
-                          <Phone className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`} />
-                          <input
-                            type="tel"
-                            value={personalInfo.phone}
-                            onChange={(e) => setPersonalInfo(prev => ({ ...prev, phone: e.target.value }))}
-                            disabled={editingSection !== 'personal'}
-                            className={`w-full pl-10 pr-3 py-2 border rounded-lg transition-colors ${editingSection === 'personal'
-                                ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500'
-                                : isDarkMode
-                                  ? 'border-gray-600 bg-gray-700 text-gray-300'
-                                  : 'border-gray-300 bg-gray-50 text-gray-700'
-                              }`}
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                          Date of Birth
-                        </label>
-                        <input
-                          type="date"
-                          value={personalInfo.dateOfBirth}
-                          onChange={(e) => setPersonalInfo(prev => ({ ...prev, dateOfBirth: e.target.value }))}
-                          disabled={editingSection !== 'personal'}
-                          className={`w-full px-3 py-2 border rounded-lg transition-colors ${editingSection === 'personal'
                               ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500'
                               : isDarkMode
-                                ? 'border-gray-600 bg-gray-700 text-gray-300'
-                                : 'border-gray-300 bg-gray-50 text-gray-700'
-                            }`}
-                        />
-                      </div>
-
-                      <div>
-                        <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                          Gender
-                        </label>
-                        <select
-                          value={personalInfo.gender}
-                          onChange={(e) => setPersonalInfo(prev => ({ ...prev, gender: e.target.value }))}
-                          disabled={editingSection !== 'personal'}
-                          className={`w-full px-3 py-2 border rounded-lg transition-colors ${editingSection === 'personal'
-                              ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500'
-                              : isDarkMode
-                                ? 'border-gray-600 bg-gray-700 text-gray-300'
-                                : 'border-gray-300 bg-gray-50 text-gray-700'
-                            }`}
-                        >
-                          <option value="Male">Male</option>
-                          <option value="Female">Female</option>
-                          <option value="Other">Other</option>
-                        </select>
-                      </div>
-
-                      <div className="md:col-span-2">
-                        <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                          Address
-                        </label>
-                        <input
-                          type="text"
-                          value={personalInfo.address}
-                          onChange={(e) => setPersonalInfo(prev => ({ ...prev, address: e.target.value }))}
-                          disabled={editingSection !== 'personal'}
-                          className={`w-full px-3 py-2 border rounded-lg transition-colors ${editingSection === 'personal'
-                              ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500'
-                              : isDarkMode
-                                ? 'border-gray-600 bg-gray-700 text-gray-300'
-                                : 'border-gray-300 bg-gray-50 text-gray-700'
-                            }`}
+                              ? 'border-gray-600 bg-gray-700 text-gray-300'
+                              : 'border-gray-300 bg-gray-50 text-gray-700'
+                          }`}
                         />
                       </div>
                     </div>
 
-                    {editingSection === 'personal' && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="flex justify-end space-x-3 pt-6 border-t border-gray-200 mt-6"
+                    <div>
+                      <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                        Phone
+                      </label>
+                      <div className="relative">
+                        <Phone className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`} />
+                        <input
+                          type="tel"
+                          value={personalInfo.phone}
+                          onChange={(e) => setPersonalInfo(prev => ({ ...prev, phone: e.target.value }))}
+                          disabled={editingSection !== 'personal'}
+                            className={`w-full pl-10 pr-3 py-2 border rounded-lg transition-colors ${editingSection === 'personal'
+                              ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500'
+                              : isDarkMode
+                              ? 'border-gray-600 bg-gray-700 text-gray-300'
+                              : 'border-gray-300 bg-gray-50 text-gray-700'
+                          }`}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                        Date of Birth
+                      </label>
+                      <input
+                        type="date"
+                        value={personalInfo.dateOfBirth}
+                        onChange={(e) => setPersonalInfo(prev => ({ ...prev, dateOfBirth: e.target.value }))}
+                        disabled={editingSection !== 'personal'}
+                          className={`w-full px-3 py-2 border rounded-lg transition-colors ${editingSection === 'personal'
+                            ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500'
+                            : isDarkMode
+                            ? 'border-gray-600 bg-gray-700 text-gray-300'
+                            : 'border-gray-300 bg-gray-50 text-gray-700'
+                        }`}
+                      />
+                    </div>
+
+                    <div>
+                      <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                        Gender
+                      </label>
+                      <select
+                        value={personalInfo.gender}
+                        onChange={(e) => setPersonalInfo(prev => ({ ...prev, gender: e.target.value }))}
+                        disabled={editingSection !== 'personal'}
+                          className={`w-full px-3 py-2 border rounded-lg transition-colors ${editingSection === 'personal'
+                            ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500'
+                            : isDarkMode
+                            ? 'border-gray-600 bg-gray-700 text-gray-300'
+                            : 'border-gray-300 bg-gray-50 text-gray-700'
+                        }`}
                       >
-                        <button
-                          onClick={() => setEditingSection(null)}
-                          className="px-6 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          onClick={() => handleSave('personal')}
-                          disabled={saveStatus === 'saving'}
-                          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center space-x-2"
-                        >
-                          {saveStatus === 'saving' ? (
-                            <>
-                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                              <span>Saving...</span>
-                            </>
-                          ) : (
-                            <>
-                              <Save className="w-4 h-4" />
-                              <span>Save Changes</span>
-                            </>
-                          )}
-                        </button>
-                      </motion.div>
-                    )}
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                        Address
+                      </label>
+                      <input
+                        type="text"
+                        value={personalInfo.address}
+                        onChange={(e) => setPersonalInfo(prev => ({ ...prev, address: e.target.value }))}
+                        disabled={editingSection !== 'personal'}
+                          className={`w-full px-3 py-2 border rounded-lg transition-colors ${editingSection === 'personal'
+                            ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500'
+                            : isDarkMode
+                            ? 'border-gray-600 bg-gray-700 text-gray-300'
+                            : 'border-gray-300 bg-gray-50 text-gray-700'
+                        }`}
+                      />
+                    </div>
+                  </div>
+
+                  {editingSection === 'personal' && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex justify-end space-x-3 pt-6 border-t border-gray-200 mt-6"
+                    >
+                      <button
+                        onClick={() => setEditingSection(null)}
+                        className="px-6 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={() => handleSave('personal')}
+                        disabled={saveStatus === 'saving'}
+                        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center space-x-2"
+                      >
+                        {saveStatus === 'saving' ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            <span>Saving...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Save className="w-4 h-4" />
+                            <span>Save Changes</span>
+                          </>
+                        )}
+                      </button>
+                    </motion.div>
+                  )}
                   </div>
                 </motion.div>
               )}
@@ -932,7 +927,7 @@ export default function ProfilePage() {
                         className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${editingSection === 'medical'
                             ? 'bg-red-100 text-red-700 hover:bg-red-200'
                             : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                          }`}
+                        }`}
                       >
                         {editingSection === 'medical' ? <X className="w-4 h-4" /> : <Edit className="w-4 h-4" />}
                         <span>{editingSection === 'medical' ? 'Cancel' : 'Edit'}</span>
@@ -952,9 +947,9 @@ export default function ProfilePage() {
                           className={`w-full px-3 py-2 border rounded-lg transition-colors ${editingSection === 'medical'
                               ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500'
                               : isDarkMode
-                                ? 'border-gray-600 bg-gray-700 text-gray-300'
-                                : 'border-gray-300 bg-gray-50 text-gray-700'
-                            }`}
+                              ? 'border-gray-600 bg-gray-700 text-gray-300'
+                              : 'border-gray-300 bg-gray-50 text-gray-700'
+                          }`}
                         />
                       </div>
 
@@ -970,9 +965,9 @@ export default function ProfilePage() {
                           className={`w-full px-3 py-2 border rounded-lg transition-colors ${editingSection === 'medical'
                               ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500'
                               : isDarkMode
-                                ? 'border-gray-600 bg-gray-700 text-gray-300'
-                                : 'border-gray-300 bg-gray-50 text-gray-700'
-                            }`}
+                              ? 'border-gray-600 bg-gray-700 text-gray-300'
+                              : 'border-gray-300 bg-gray-50 text-gray-700'
+                          }`}
                         />
                       </div>
 
@@ -987,9 +982,9 @@ export default function ProfilePage() {
                           className={`w-full px-3 py-2 border rounded-lg transition-colors ${editingSection === 'medical'
                               ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500'
                               : isDarkMode
-                                ? 'border-gray-600 bg-gray-700 text-gray-300'
-                                : 'border-gray-300 bg-gray-50 text-gray-700'
-                            }`}
+                              ? 'border-gray-600 bg-gray-700 text-gray-300'
+                              : 'border-gray-300 bg-gray-50 text-gray-700'
+                          }`}
                         >
                           <option value="O+">O+</option>
                           <option value="O-">O-</option>
@@ -1037,7 +1032,7 @@ export default function ProfilePage() {
                         className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${editingSection === 'allergies'
                             ? 'bg-red-100 text-red-700 hover:bg-red-200'
                             : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                          }`}
+                        }`}
                       >
                         {editingSection === 'allergies' ? <X className="w-4 h-4" /> : <Edit className="w-4 h-4" />}
                         <span>{editingSection === 'allergies' ? 'Cancel' : 'Edit'}</span>
@@ -1127,7 +1122,7 @@ export default function ProfilePage() {
                         className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${editingSection === 'emergency'
                             ? 'bg-red-100 text-red-700 hover:bg-red-200'
                             : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                          }`}
+                        }`}
                       >
                         {editingSection === 'emergency' ? <X className="w-4 h-4" /> : <Edit className="w-4 h-4" />}
                         <span>{editingSection === 'emergency' ? 'Cancel' : 'Edit'}</span>
@@ -1159,9 +1154,9 @@ export default function ProfilePage() {
                                 className={`w-full px-3 py-2 border rounded-lg transition-colors ${editingSection === 'emergency'
                                     ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500'
                                     : isDarkMode
-                                      ? 'border-gray-600 bg-gray-600 text-gray-300'
-                                      : 'border-gray-300 bg-white text-gray-700'
-                                  }`}
+                                    ? 'border-gray-600 bg-gray-600 text-gray-300'
+                                    : 'border-gray-300 bg-white text-gray-700'
+                                }`}
                               />
                             </div>
                             <div>
@@ -1180,9 +1175,9 @@ export default function ProfilePage() {
                                 className={`w-full px-3 py-2 border rounded-lg transition-colors ${editingSection === 'emergency'
                                     ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500'
                                     : isDarkMode
-                                      ? 'border-gray-600 bg-gray-600 text-gray-300'
-                                      : 'border-gray-300 bg-white text-gray-700'
-                                  }`}
+                                    ? 'border-gray-600 bg-gray-600 text-gray-300'
+                                    : 'border-gray-300 bg-white text-gray-700'
+                                }`}
                               />
                             </div>
                             <div className="flex space-x-2">
@@ -1202,9 +1197,9 @@ export default function ProfilePage() {
                                   className={`w-full px-3 py-2 border rounded-lg transition-colors ${editingSection === 'emergency'
                                       ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-500'
                                       : isDarkMode
-                                        ? 'border-gray-600 bg-gray-600 text-gray-300'
-                                        : 'border-gray-300 bg-white text-gray-700'
-                                    }`}
+                                      ? 'border-gray-600 bg-gray-600 text-gray-300'
+                                      : 'border-gray-300 bg-white text-gray-700'
+                                  }`}
                                 />
                               </div>
                               {editingSection === 'emergency' && (
@@ -1268,7 +1263,7 @@ export default function ProfilePage() {
                   <h3 className={`text-lg font-semibold mb-6 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                     Security Settings
                   </h3>
-
+                  
                   <div className="space-y-4">
                     <div>
                       <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>

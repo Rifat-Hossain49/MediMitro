@@ -64,7 +64,7 @@ export default function AdminPanel() {
   const loadData = async () => {
     try {
       setLoading(true)
-      
+
       // Load pending doctors
       const pendingResponse = await fetch('/api/admin/pending-doctors')
       const pendingData = await pendingResponse.json()
@@ -133,15 +133,15 @@ export default function AdminPanel() {
   }
 
   if (loading) {
-  return (
+    return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading admin panel...</p>
         </div>
-    </div>
-  )
-}
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -220,21 +220,19 @@ export default function AdminPanel() {
             <nav className="flex space-x-8 px-6">
               <button
                 onClick={() => setActiveTab('pending')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'pending'
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'pending'
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700'
-                }`}
+                  }`}
               >
                 Pending Verification ({stats.pending})
               </button>
               <button
                 onClick={() => setActiveTab('verified')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'verified'
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'verified'
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700'
-                }`}
+                  }`}
               >
                 Verified Doctors ({stats.approved})
               </button>
@@ -363,7 +361,7 @@ export default function AdminPanel() {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Review Doctor Application</h2>
-              
+
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -399,7 +397,7 @@ export default function AdminPanel() {
                     <p className="text-sm text-gray-900">{selectedDoctor.hospital || 'Not specified'}</p>
                   </div>
                 </div>
-                
+
                 {selectedDoctor.bio && (
                   <div>
                     <p className="text-sm font-medium text-gray-700">Bio</p>
