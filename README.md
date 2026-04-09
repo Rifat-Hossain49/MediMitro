@@ -257,38 +257,11 @@ MediMitro/
 - **AI Integration**: Intelligent symptom checker and doctor recommendation
 - **Document Management**: Secure EHR storage with Appwrite integration
 
-### Best Practices Implemented
-- Clean architecture with separation of concerns
-- RESTful API design with proper HTTP methods
-- TypeScript type safety throughout frontend
-- Comprehensive error handling and logging
-- Responsive design for all device sizes
-
----
-
-## Future Enhancements
-
-- [ ] Telemedicine video consultation integration
-- [ ] Payment gateway integration
-- [ ] Mobile application (React Native)
-- [ ] Laboratory information system integration
-- [ ] Pharmacy inventory management
-- [ ] Advanced analytics and health insights
-
----
-
-## License
-
-This project is licensed under the MIT License.
-
 ---
 
 ## Author
-
+**Musa Tur Farazi**
 **Rifat Hossain**
-
-[![GitHub](https://img.shields.io/badge/GitHub-Rifat--Hossain49-181717?style=flat-square&logo=github)](https://github.com/Rifat-Hossain49)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Profile-0077B5?style=flat-square&logo=linkedin)](https://linkedin.com/in/rifathossain)
 
 ---
 
