@@ -259,11 +259,6 @@ MediMitro/
 
 ---
 
-## Author
-**Musa Tur Farazi**
-**Rifat Hossain**
-
----
 
 <div align="center">
 
